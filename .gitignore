@@ -1,0 +1,8 @@
+# Project exclude paths
+/.gradle/
+/aeronic-processor/build/
+/aeronic-processor/out/
+/aeronic-processor/out/production/classes/
+/aeronic-tests/build/
+/aeronic-tests/out/
+/aeronic-tests/out/test/classes/
