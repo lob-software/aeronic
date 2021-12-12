@@ -2,7 +2,7 @@
 
 🚧🚧🚧 **Work In Progress** 🚧🚧🚧
 
-Aeronic allows for a flexible usage of [Aeron](https://github.com/real-logic/simple-binary-encoding):
+Aeronic allows for flexible usage of [Aeron](https://github.com/real-logic/simple-binary-encoding):
 
 ```java
 @Aeronic
