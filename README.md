@@ -1,10 +1,10 @@
 # aeronic
 
-Aeronic allows for a flexible usage of [Aeron](https://github.com/real-logic/simple-binary-encoding):
-
 🚧🚧🚧 **Work In Progress** 🚧🚧🚧
 
-```
+Aeronic allows for a flexible usage of [Aeron](https://github.com/real-logic/simple-binary-encoding):
+
+```java
 @Aeronic
 public interface Events
 {
