@@ -62,7 +62,7 @@ public class AeronicWizardTest
     private static class SampleEventsImpl implements SampleEvents
     {
 
-        private long value;
+        private volatile long value;
 
         @Override
         public void onEvent(final long value)
