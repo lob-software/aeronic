@@ -6,3 +6,5 @@
 /aeronic-tests/build/
 /aeronic-tests/out/
 /aeronic-tests/out/test/classes/
+**/generated
+**/generated_tests
