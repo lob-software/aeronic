@@ -1,7 +1,5 @@
 # aeronic
 
-🚧🚧🚧 **Work In Progress** 🚧🚧🚧
-
 Aeronic allows for flexible usage of [Aeron](https://github.com/real-logic/simple-binary-encoding):
 
 ```java
@@ -38,3 +36,12 @@ aeronic.registerSubscriber(Events.class, subscriberImpl);
 publisher.onEvent(123L);
 subscriberImpl.getValue(); // 123L
 ```
+
+
+🚧🚧🚧 **Work In Progress** 🚧🚧🚧
+
+Features in the pipeline:
+* multiple event method parameters
+* all primitives
+* custom type parameters
+* aeron cluster abstractions
