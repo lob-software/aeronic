@@ -8,12 +8,12 @@ public class AeronicAnnotationProcessorTest
     @Test
     public void shouldGenerateSubscriber() throws Exception
     {
-        Class.forName("io.aeronic.gen.SampleEventsSubscriber");
+        Class.forName("io.aeronic.SampleEventsSubscriber");
     }
 
     @Test
     public void shouldGeneratePublisher() throws Exception
     {
-        Class.forName("io.aeronic.gen.SampleEventsPublisher");
+        Class.forName("io.aeronic.SampleEventsPublisher");
     }
 }

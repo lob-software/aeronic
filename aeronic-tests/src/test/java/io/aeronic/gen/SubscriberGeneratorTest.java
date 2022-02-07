@@ -10,9 +10,9 @@ public class SubscriberGeneratorTest
 {
     private static final String SAMPLE_SUBSCRIBER =
         """
-        package io.aeronic.gen;
+        package io.aeronic;
                 
-        import io.aeronic.gen.SampleEvents;
+        import io.aeronic.SampleEvents;
         import io.aeron.Subscription;
         import io.aeronic.net.AbstractSubscriber;
         import org.agrona.BitUtil;
@@ -52,7 +52,7 @@ public class SubscriberGeneratorTest
     {
         final SubscriberGenerator subscriberGenerator = new SubscriberGenerator();
         final String actualSource = subscriberGenerator.generate(
-            "io.aeronic.gen",
+            "io.aeronic",
             "SampleEvents",
             List.of(
                 new MethodInfo(0, "onEvent", List.of(

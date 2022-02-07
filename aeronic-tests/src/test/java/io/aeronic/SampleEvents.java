@@ -1,4 +1,6 @@
-package io.aeronic.gen;
+package io.aeronic;
+
+import io.aeronic.gen.Aeronic;
 
 @Aeronic
 public interface SampleEvents

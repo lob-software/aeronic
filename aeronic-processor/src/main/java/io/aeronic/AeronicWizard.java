@@ -3,6 +3,7 @@ package io.aeronic;
 import io.aeron.Aeron;
 import io.aeron.Publication;
 import io.aeron.Subscription;
+import io.aeronic.gen.Aeronic;
 import org.agrona.concurrent.Agent;
 import org.agrona.concurrent.AgentRunner;
 import org.agrona.concurrent.BusySpinIdleStrategy;
@@ -14,8 +15,6 @@ public class AeronicWizard
 {
     private final Aeron aeron;
 
-    private final String channel = "aeron:ipc";
-    private final int stream = 10;
     private final List<AgentRunner> runners = new ArrayList<>();
 
     public AeronicWizard(final Aeron aeron)
@@ -23,11 +22,12 @@ public class AeronicWizard
         this.aeron = aeron;
     }
 
-    public <T> T createPublisher(final Class<T> clazz)
+    public <T> T createPublisher(final Class<T> clazz, final String channel, final int streamId)
     {
         try
         {
-            final Publication publication = aeron.addPublication(channel, stream);
+            final Publication publication = aeron.addPublication(channel, streamId);
+
             return (T) Class.forName(clazz.getName() + "Publisher").getConstructor(Publication.class).newInstance(publication);
         }
         catch (final Exception e)
@@ -36,11 +36,11 @@ public class AeronicWizard
         }
     }
 
-    public <T> void registerSubscriber(final Class<T> aeronicInterfaceClass, final T subscriberImplementation)
+    public <T> void registerSubscriber(final Class<T> aeronicInterfaceClass, final T subscriberImplementation, final String channel, final int streamId)
     {
         try
         {
-            final Subscription subscription = aeron.addSubscription(channel, stream);
+            final Subscription subscription = aeron.addSubscription(channel, streamId);
             final Agent subscriberAgent = (Agent) Class.forName(aeronicInterfaceClass.getName() + "Subscriber")
                 .getConstructor(Subscription.class, aeronicInterfaceClass)
                 .newInstance(subscription, subscriberImplementation);
