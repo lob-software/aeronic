@@ -55,13 +55,13 @@ public class AeronicAnnotationProcessor extends AbstractProcessor
                 methods.add(method);
             }
 
-            final String receiverSource = subscriberGenerator.generate(packageName, elementName, methods);
+            final String subscriberSource = subscriberGenerator.generate(packageName, elementName, methods);
             try
             {
                 final String subscriberPath = "%s.%sSubscriber".formatted(packageName, elementName);
                 final JavaFileObject subscriberSourceFile = processingEnv.getFiler().createSourceFile(subscriberPath, aeronicElement);
                 final Writer writer = subscriberSourceFile.openWriter();
-                writer.append(receiverSource);
+                writer.append(subscriberSource);
                 writer.close();
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Written file for %s".formatted(subscriberPath));
             }
