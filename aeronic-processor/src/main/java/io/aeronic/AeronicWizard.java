@@ -22,12 +22,12 @@ public class AeronicWizard
         this.aeron = aeron;
     }
 
+    @SuppressWarnings("unchecked")
     public <T> T createPublisher(final Class<T> clazz, final String channel, final int streamId)
     {
         try
         {
             final Publication publication = aeron.addPublication(channel, streamId);
-
             return (T) Class.forName(clazz.getName() + "Publisher").getConstructor(Publication.class).newInstance(publication);
         }
         catch (final Exception e)
