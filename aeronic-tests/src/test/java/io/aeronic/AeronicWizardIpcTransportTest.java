@@ -12,7 +12,7 @@ import java.time.Duration;
 
 import static org.awaitility.Awaitility.await;
 
-public class IpcAeronicWizardTest
+public class AeronicWizardIpcTransportTest
 {
     private AeronicWizard aeronic;
     private Aeron aeron;
