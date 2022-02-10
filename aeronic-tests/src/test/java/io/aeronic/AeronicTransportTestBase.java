@@ -12,18 +12,18 @@ import java.time.Duration;
 
 import static org.awaitility.Awaitility.await;
 
-public class AeronicWizardIpcTransportTest
+public abstract class AeronicTransportTestBase
 {
     private AeronicWizard aeronic;
     private Aeron aeron;
     private MediaDriver mediaDriver;
-    private static final String IPC = "aeron:ipc";
 
     @BeforeEach
     void setUp()
     {
         final MediaDriver.Context mediaDriverCtx = new MediaDriver.Context()
             .dirDeleteOnStart(true)
+            .spiesSimulateConnection(true)
             .threadingMode(ThreadingMode.SHARED)
             .sharedIdleStrategy(new BusySpinIdleStrategy())
             .dirDeleteOnShutdown(true);
@@ -37,12 +37,17 @@ public class AeronicWizardIpcTransportTest
         aeronic = new AeronicWizard(aeron);
     }
 
+    public abstract String getPublicationChannel();
+
+    public abstract String getSubscriptionChannel();
+
     @Test
-    public void shouldSendAndReceive()
+    public void oneToOne()
     {
-        final SampleEvents publisher = aeronic.createPublisher(SampleEvents.class, IPC, 10);
+        final SampleEvents publisher = aeronic.createPublisher(SampleEvents.class, getPublicationChannel(), 10);
         final SampleEventsImpl subscriberImpl = new SampleEventsImpl();
-        aeronic.registerSubscriber(SampleEvents.class, subscriberImpl, IPC, 10);
+        aeronic.registerSubscriber(SampleEvents.class, subscriberImpl, getSubscriptionChannel(), 10);
+        aeronic.awaitUntilPubsAndSubsConnect();
 
         publisher.onEvent(123L);
 
@@ -52,13 +57,14 @@ public class AeronicWizardIpcTransportTest
     }
 
     @Test
-    public void shouldSendAndReceiveByMultipleSubscribers()
+    public void oneToMany()
     {
-        final SampleEvents publisher = aeronic.createPublisher(SampleEvents.class, IPC, 10);
+        final SampleEvents publisher = aeronic.createPublisher(SampleEvents.class, getPublicationChannel(), 10);
         final SampleEventsImpl subscriberImpl1 = new SampleEventsImpl();
         final SampleEventsImpl subscriberImpl2 = new SampleEventsImpl();
-        aeronic.registerSubscriber(SampleEvents.class, subscriberImpl1, IPC, 10);
-        aeronic.registerSubscriber(SampleEvents.class, subscriberImpl2, IPC, 10);
+        aeronic.registerSubscriber(SampleEvents.class, subscriberImpl1, getSubscriptionChannel(), 10);
+        aeronic.registerSubscriber(SampleEvents.class, subscriberImpl2, getSubscriptionChannel(), 10);
+        aeronic.awaitUntilPubsAndSubsConnect();
 
         publisher.onEvent(123L);
 
@@ -68,23 +74,25 @@ public class AeronicWizardIpcTransportTest
     }
 
     @Test
-    public void shouldSendAndReceiveByMultipleSubscribersOfMoreThanOneTopic()
+    public void oneToManyOfDifferentTopics()
     {
-        final SampleEvents sampleEventsPublisher = aeronic.createPublisher(SampleEvents.class, IPC, 10);
+        final SampleEvents sampleEventsPublisher = aeronic.createPublisher(SampleEvents.class, getPublicationChannel(), 10);
 
         final SampleEventsImpl sampleEventsSubscriber1 = new SampleEventsImpl();
         final SampleEventsImpl sampleEventsSubscriber2 = new SampleEventsImpl();
-        aeronic.registerSubscriber(SampleEvents.class, sampleEventsSubscriber1, IPC, 10);
-        aeronic.registerSubscriber(SampleEvents.class, sampleEventsSubscriber2, IPC, 10);
+        aeronic.registerSubscriber(SampleEvents.class, sampleEventsSubscriber1, getSubscriptionChannel(), 10);
+        aeronic.registerSubscriber(SampleEvents.class, sampleEventsSubscriber2, getSubscriptionChannel(), 10);
+        aeronic.awaitUntilPubsAndSubsConnect();
 
         sampleEventsPublisher.onEvent(123L);
 
-        final SimpleEvents simpleEventsPublisher = aeronic.createPublisher(SimpleEvents.class, IPC, 11);
+        final SimpleEvents simpleEventsPublisher = aeronic.createPublisher(SimpleEvents.class, getPublicationChannel(), 11);
 
         final SimpleEventsImpl simpleEventsSubscriber1 = new SimpleEventsImpl();
         final SimpleEventsImpl simpleEventsSubscriber2 = new SimpleEventsImpl();
-        aeronic.registerSubscriber(SimpleEvents.class, simpleEventsSubscriber1, IPC, 11);
-        aeronic.registerSubscriber(SimpleEvents.class, simpleEventsSubscriber2, IPC, 11);
+        aeronic.registerSubscriber(SimpleEvents.class, simpleEventsSubscriber1, getSubscriptionChannel(), 11);
+        aeronic.registerSubscriber(SimpleEvents.class, simpleEventsSubscriber2, getSubscriptionChannel(), 11);
+        aeronic.awaitUntilPubsAndSubsConnect();
 
         simpleEventsPublisher.onEvent(456L);
 
@@ -95,6 +103,31 @@ public class AeronicWizardIpcTransportTest
         await()
             .timeout(Duration.ofSeconds(1))
             .until(() -> simpleEventsSubscriber1.value == 456L && simpleEventsSubscriber2.value == 456L);
+    }
+
+    @Test
+    public void manyToMany()
+    {
+        final SampleEvents sampleEventsPublisher1 = aeronic.createPublisher(SampleEvents.class, getPublicationChannel(), 10);
+        final SampleEvents sampleEventsPublisher2 = aeronic.createPublisher(SampleEvents.class, getPublicationChannel(), 10);
+
+        final SampleEventsImpl sampleEventsSubscriber1 = new SampleEventsImpl();
+        final SampleEventsImpl sampleEventsSubscriber2 = new SampleEventsImpl();
+        aeronic.registerSubscriber(SampleEvents.class, sampleEventsSubscriber1, getSubscriptionChannel(), 10);
+        aeronic.registerSubscriber(SampleEvents.class, sampleEventsSubscriber2, getSubscriptionChannel(), 10);
+        aeronic.awaitUntilPubsAndSubsConnect();
+
+        sampleEventsPublisher1.onEvent(123L);
+
+        await()
+            .timeout(Duration.ofSeconds(1))
+            .until(() -> sampleEventsSubscriber1.value == 123L && sampleEventsSubscriber2.value == 123L);
+
+        sampleEventsPublisher2.onEvent(456L);
+
+        await()
+            .timeout(Duration.ofSeconds(1))
+            .until(() -> sampleEventsSubscriber1.value == 456L && sampleEventsSubscriber2.value == 456L);
     }
 
     @AfterEach
