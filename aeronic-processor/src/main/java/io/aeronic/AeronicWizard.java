@@ -15,6 +15,8 @@ public class AeronicWizard
     private final Aeron aeron;
 
     private final List<AgentRunner> runners = new ArrayList<>();
+    private final List<Publication> publications = new ArrayList<>();
+    private final List<Subscription> subscriptions = new ArrayList<>();
 
     public AeronicWizard(final Aeron aeron)
     {
@@ -27,6 +29,8 @@ public class AeronicWizard
         try
         {
             final Publication publication = aeron.addPublication(channel, streamId);
+            publications.add(publication);
+
             return (T) Class.forName(clazz.getName() + "Publisher").getConstructor(Publication.class).newInstance(publication);
         }
         catch (final Exception e)
@@ -40,6 +44,8 @@ public class AeronicWizard
         try
         {
             final Subscription subscription = aeron.addSubscription(channel, streamId);
+            subscriptions.add(subscription);
+
             final Agent subscriberAgent = (Agent) Class.forName(aeronicInterfaceClass.getName() + "Subscriber")
                 .getConstructor(Subscription.class, aeronicInterfaceClass)
                 .newInstance(subscription, subscriberImplementation);
@@ -57,5 +63,19 @@ public class AeronicWizard
     public void close()
     {
         runners.forEach(AgentRunner::close);
+    }
+
+    public boolean allConnected()
+    {
+        return publications.stream().allMatch(Publication::isConnected)
+            && subscriptions.stream().allMatch(Subscription::isConnected);
+    }
+
+    public void awaitUntilPubsAndSubsConnect()
+    {
+        while (!allConnected())
+        {
+            aeron.context().idleStrategy().idle();
+        }
     }
 }
