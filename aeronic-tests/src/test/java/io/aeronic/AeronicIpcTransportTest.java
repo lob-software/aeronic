@@ -5,7 +5,6 @@ public class AeronicIpcTransportTest extends AeronicTransportTestBase
 
     private static final String IPC = "aeron:ipc";
 
-
     @Override
     public String getPublicationChannel()
     {
