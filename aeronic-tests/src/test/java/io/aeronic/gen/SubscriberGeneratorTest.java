@@ -32,8 +32,8 @@ public class SubscriberGeneratorTest
                 switch (msgType)
                 {
                     case 0 -> {
-                        final long value = buffer.getLong(offset + BitUtil.SIZE_OF_INT);
-                        subscriber.onEvent(value);
+                        final long longValue = buffer.getLong(offset + BitUtil.SIZE_OF_INT);
+                        subscriber.onEvent(longValue);
                     }
                     default -> throw new RuntimeException("Unexpected message type: " + msgType);
                 }
@@ -56,7 +56,7 @@ public class SubscriberGeneratorTest
             "SampleEvents",
             List.of(
                 new MethodInfo(0, "onEvent", List.of(
-                    new ParameterInfo("value", "long")
+                    new ParameterInfo("longValue", "long")
                 ))
             )
         );

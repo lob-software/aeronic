@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PublisherGeneratorTest
 {
@@ -27,10 +27,10 @@ public class PublisherGeneratorTest
             }
                 
             @Override
-            public void onEvent(final long value)
+            public void onEvent(final long longValue)
             {
                 unsafeBuffer.putInt(METHOD_IDX_OFFSET, 0);
-                unsafeBuffer.putLong(METHOD_IDX_OFFSET + BitUtil.SIZE_OF_INT, value);
+                unsafeBuffer.putLong(METHOD_IDX_OFFSET + BitUtil.SIZE_OF_INT, longValue);
                 offer();
             }
         }
@@ -45,7 +45,7 @@ public class PublisherGeneratorTest
             "SampleEvents",
             List.of(
                 new MethodInfo(0, "onEvent", List.of(
-                    new ParameterInfo("value", "long")
+                    new ParameterInfo("longValue", "long")
                 ))
             )
         );
