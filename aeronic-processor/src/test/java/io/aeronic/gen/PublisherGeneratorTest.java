@@ -27,10 +27,10 @@ public class PublisherGeneratorTest
             }
                 
             @Override
-            public void onEvent(final long longValue, final int intValue, final float floatValue, final double doubleValue, final byte byteValue, final char charValue)
+            public void onEvent(final long aLong, final int intValue, final float floatValue, final double doubleValue, final byte byteValue, final char charValue)
             {
                 bufferEncoder.encodeInt(0);
-                bufferEncoder.encodeLong(longValue);
+                bufferEncoder.encodeLong(aLong);
                 bufferEncoder.encodeInt(intValue);
                 bufferEncoder.encodeFloat(floatValue);
                 bufferEncoder.encodeDouble(doubleValue);
@@ -50,7 +50,7 @@ public class PublisherGeneratorTest
             "TestEvents",
             List.of(
                 new MethodInfo(0, "onEvent", List.of(
-                    new ParameterInfo("longValue", "long"),
+                    new ParameterInfo("aLong", "long"),
                     new ParameterInfo("intValue", "int"),
                     new ParameterInfo("floatValue", "float"),
                     new ParameterInfo("doubleValue", "double"),
