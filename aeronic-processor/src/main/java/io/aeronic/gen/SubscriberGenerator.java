@@ -20,9 +20,9 @@ public class SubscriberGenerator
     private String generateHandleMethod(final List<MethodInfo> methods)
     {
         final StringBuilder handleMethodBuilder = new StringBuilder("""
-                public void handle(final DirectBuffer buffer, final int offset)
+                public void handle(final BufferDecoder bufferDecoder, final int offset)
                 {
-                    final int msgType = buffer.getInt(offset);
+                    final int msgType = bufferDecoder.decodeInt();
                     switch (msgType)
                     {
             """);
@@ -38,7 +38,7 @@ public class SubscriberGenerator
                 {
                     handleMethodBuilder.append("""
                                     case %s -> {
-                                        final long %s = buffer.getLong(offset + BitUtil.SIZE_OF_INT);
+                                        final long %s = bufferDecoder.decodeLong();
                                         subscriber.%s(%s);
                                     }
                         """.formatted(interfaceMethod.getIndex(), parameterName, methodName, parameterName));
@@ -92,6 +92,7 @@ public class SubscriberGenerator
             import %s.%s;
             import io.aeron.Subscription;
             import io.aeronic.net.AbstractSubscriber;
+            import io.aeronic.net.BufferDecoder;
             import org.agrona.BitUtil;
             import org.agrona.DirectBuffer;
                     

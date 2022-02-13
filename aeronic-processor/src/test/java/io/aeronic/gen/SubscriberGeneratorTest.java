@@ -12,27 +12,28 @@ public class SubscriberGeneratorTest
         """
         package io.aeronic;
                 
-        import io.aeronic.SampleEvents;
+        import io.aeronic.TestEvents;
         import io.aeron.Subscription;
         import io.aeronic.net.AbstractSubscriber;
+        import io.aeronic.net.BufferDecoder;
         import org.agrona.BitUtil;
         import org.agrona.DirectBuffer;
                 
-        public class SampleEventsSubscriber extends AbstractSubscriber<SampleEvents>
+        public class TestEventsSubscriber extends AbstractSubscriber<TestEvents>
         {
            
-            public SampleEventsSubscriber(final Subscription subscription, final SampleEvents subscriber)
+            public TestEventsSubscriber(final Subscription subscription, final TestEvents subscriber)
             {
                 super(subscription, subscriber);
             }
                 
-            public void handle(final DirectBuffer buffer, final int offset)
+            public void handle(final BufferDecoder bufferDecoder, final int offset)
             {
-                final int msgType = buffer.getInt(offset);
+                final int msgType = bufferDecoder.decodeInt();
                 switch (msgType)
                 {
                     case 0 -> {
-                        final long longValue = buffer.getLong(offset + BitUtil.SIZE_OF_INT);
+                        final long longValue = bufferDecoder.decodeLong();
                         subscriber.onEvent(longValue);
                     }
                     default -> throw new RuntimeException("Unexpected message type: " + msgType);
@@ -42,7 +43,7 @@ public class SubscriberGeneratorTest
             @Override
             public String roleName()
             {
-                return "SampleEvents";
+                return "TestEvents";
             }
         }     
         """;
@@ -53,10 +54,15 @@ public class SubscriberGeneratorTest
         final SubscriberGenerator subscriberGenerator = new SubscriberGenerator();
         final String actualSource = subscriberGenerator.generate(
             "io.aeronic",
-            "SampleEvents",
+            "TestEvents",
             List.of(
                 new MethodInfo(0, "onEvent", List.of(
-                    new ParameterInfo("longValue", "long")
+                    new ParameterInfo("longValue", "long"),
+                    new ParameterInfo("intValue", "int")
+//                    new ParameterInfo("floatValue", "float"),
+//                    new ParameterInfo("doubleValue", "double"),
+//                    new ParameterInfo("byteValue", "byte"),
+//                    new ParameterInfo("charValue", "char")
                 ))
             )
         );

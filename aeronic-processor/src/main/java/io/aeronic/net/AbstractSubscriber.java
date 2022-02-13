@@ -9,6 +9,7 @@ public abstract class AbstractSubscriber<T> implements Agent
 {
     private final Subscription subscription;
     protected final T subscriber;
+    protected final BufferDecoder bufferDecoder = new BufferDecoder();
 
     public AbstractSubscriber(final Subscription subscription, final T subscriber)
     {
@@ -22,10 +23,11 @@ public abstract class AbstractSubscriber<T> implements Agent
         return subscription.poll(this::handle, 1000);
     }
 
-    protected abstract void handle(final DirectBuffer buffer, final int offset);
+    protected abstract void handle(final BufferDecoder bufferDecoder, final int offset);
 
     private void handle(final DirectBuffer buffer, final int offset, final int length, final Header header)
     {
-        handle(buffer, offset);
+        bufferDecoder.wrap(buffer, offset);
+        handle(bufferDecoder, offset);
     }
 }
