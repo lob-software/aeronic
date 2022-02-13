@@ -1,4 +1,4 @@
-package io.aeronic;
+package io.aeronic.transport;
 
 import io.aeron.ChannelUriStringBuilder;
 

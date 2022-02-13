@@ -1,8 +1,11 @@
-package io.aeronic;
+package io.aeronic.transport;
 
 import io.aeron.Aeron;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
+import io.aeronic.AeronicWizard;
+import io.aeronic.SampleEvents;
+import io.aeronic.SimpleEvents;
 import org.agrona.concurrent.BusySpinIdleStrategy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
