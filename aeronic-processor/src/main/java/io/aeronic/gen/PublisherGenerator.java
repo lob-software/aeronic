@@ -31,15 +31,15 @@ public class PublisherGenerator
             methodBodyBuilder.append("""
                         bufferEncoder.encodeInt(0);
                 """);
-            for (final ParameterInfo parameter : parameters)
+
+            for (int i = 0; i < parameters.size(); i++)
             {
-                final String parameterName = parameter.getName();
-                if (parameter.getType().equals(long.class.getName()))
+                final ParameterInfo parameter = parameters.get(i);
+                writeParameter(methodsBuilder, methodBodyBuilder, parameter);
+
+                if (i < parameters.size() - 1)
                 {
-                    methodsBuilder.append("final long %s".formatted(parameterName));
-                    methodBodyBuilder.append("""
-                                bufferEncoder.encodeLong(%s);
-                        """.formatted(parameterName));
+                    methodsBuilder.append(", ");
                 }
             }
 
@@ -61,6 +61,19 @@ public class PublisherGenerator
             """);
 
         return methodsBuilder.toString();
+    }
+
+    private void writeParameter(final StringBuilder methodsBuilder, final StringBuilder methodBodyBuilder, final ParameterInfo parameter)
+    {
+        methodsBuilder.append("final %s %s".formatted(parameter.getType(), parameter.getName()));
+        methodBodyBuilder.append("""
+                bufferEncoder.encode%s(%s);
+        """.formatted(capitalize(parameter.getType()), parameter.getName()));
+    }
+
+    private static String capitalize(final String str)
+    {
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 
     private String generateConstructor(final String interfaceName)

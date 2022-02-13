@@ -18,19 +18,24 @@ public class PublisherGeneratorTest
                 
         import static io.aeronic.net.Constants.METHOD_IDX_OFFSET;
                 
-        public class SampleEventsPublisher extends AbstractPublisher implements SampleEvents
+        public class TestEventsPublisher extends AbstractPublisher implements TestEvents
         {
                 
-            public SampleEventsPublisher(final Publication publication)
+            public TestEventsPublisher(final Publication publication)
             {
                 super(publication);
             }
                 
             @Override
-            public void onEvent(final long longValue)
+            public void onEvent(final long longValue, final int intValue, final float floatValue, final double doubleValue, final byte byteValue, final char charValue)
             {
                 bufferEncoder.encodeInt(0);
                 bufferEncoder.encodeLong(longValue);
+                bufferEncoder.encodeInt(intValue);
+                bufferEncoder.encodeFloat(floatValue);
+                bufferEncoder.encodeDouble(doubleValue);
+                bufferEncoder.encodeByte(byteValue);
+                bufferEncoder.encodeChar(charValue);
                 offer();
             }
         }
@@ -42,10 +47,15 @@ public class PublisherGeneratorTest
         final PublisherGenerator publisherGenerator = new PublisherGenerator();
         final String actualSource = publisherGenerator.generate(
             "io.aeronic.gen",
-            "SampleEvents",
+            "TestEvents",
             List.of(
                 new MethodInfo(0, "onEvent", List.of(
-                    new ParameterInfo("longValue", "long")
+                    new ParameterInfo("longValue", "long"),
+                    new ParameterInfo("intValue", "int"),
+                    new ParameterInfo("floatValue", "float"),
+                    new ParameterInfo("doubleValue", "double"),
+                    new ParameterInfo("byteValue", "byte"),
+                    new ParameterInfo("charValue", "char")
                 ))
             )
         );
