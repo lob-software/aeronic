@@ -29,7 +29,7 @@ public class PublisherGenerator
 
             final StringBuilder methodBodyBuilder = new StringBuilder();
             methodBodyBuilder.append("""
-                        unsafeBuffer.putInt(METHOD_IDX_OFFSET, 0);
+                        bufferEncoder.encodeInt(0);
                 """);
             for (final ParameterInfo parameter : parameters)
             {
@@ -38,7 +38,7 @@ public class PublisherGenerator
                 {
                     methodsBuilder.append("final long %s".formatted(parameterName));
                     methodBodyBuilder.append("""
-                                unsafeBuffer.putLong(METHOD_IDX_OFFSET + BitUtil.SIZE_OF_INT, %s);
+                                bufferEncoder.encodeLong(%s);
                         """.formatted(parameterName));
                 }
             }

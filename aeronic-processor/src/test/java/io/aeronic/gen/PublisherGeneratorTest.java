@@ -29,8 +29,8 @@ public class PublisherGeneratorTest
             @Override
             public void onEvent(final long longValue)
             {
-                unsafeBuffer.putInt(METHOD_IDX_OFFSET, 0);
-                unsafeBuffer.putLong(METHOD_IDX_OFFSET + BitUtil.SIZE_OF_INT, longValue);
+                bufferEncoder.encodeInt(0);
+                bufferEncoder.encodeLong(longValue);
                 offer();
             }
         }
