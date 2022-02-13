@@ -34,7 +34,12 @@ public class SubscriberGeneratorTest
                 {
                     case 0 -> {
                         final long longValue = bufferDecoder.decodeLong();
-                        subscriber.onEvent(longValue);
+                        final int intValue = bufferDecoder.decodeInt();
+                        final float floatValue = bufferDecoder.decodeFloat();
+                        final double doubleValue = bufferDecoder.decodeDouble();
+                        final byte byteValue = bufferDecoder.decodeByte();
+                        final char charValue = bufferDecoder.decodeChar();
+                        subscriber.onEvent(longValue, intValue, floatValue, doubleValue, byteValue, charValue);
                     }
                     default -> throw new RuntimeException("Unexpected message type: " + msgType);
                 }
@@ -58,11 +63,11 @@ public class SubscriberGeneratorTest
             List.of(
                 new MethodInfo(0, "onEvent", List.of(
                     new ParameterInfo("longValue", "long"),
-                    new ParameterInfo("intValue", "int")
-//                    new ParameterInfo("floatValue", "float"),
-//                    new ParameterInfo("doubleValue", "double"),
-//                    new ParameterInfo("byteValue", "byte"),
-//                    new ParameterInfo("charValue", "char")
+                    new ParameterInfo("intValue", "int"),
+                    new ParameterInfo("floatValue", "float"),
+                    new ParameterInfo("doubleValue", "double"),
+                    new ParameterInfo("byteValue", "byte"),
+                    new ParameterInfo("charValue", "char")
                 ))
             )
         );

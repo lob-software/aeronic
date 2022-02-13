@@ -2,6 +2,8 @@ package io.aeronic.gen;
 
 import java.util.List;
 
+import static io.aeronic.gen.StringUtil.capitalize;
+
 public class SubscriberGenerator
 {
     public String generate(final String packageName, final String interfaceName, final List<MethodInfo> methods)
@@ -29,21 +31,7 @@ public class SubscriberGenerator
 
         for (final MethodInfo interfaceMethod : methods)
         {
-            final String methodName = interfaceMethod.getName();
-            final List<ParameterInfo> parameters = interfaceMethod.getParameters();
-            for (final ParameterInfo parameter : parameters)
-            {
-                final String parameterName = parameter.getName();
-                if (parameter.getType().equals(long.class.getName()))
-                {
-                    handleMethodBuilder.append("""
-                                    case %s -> {
-                                        final long %s = bufferDecoder.decodeLong();
-                                        subscriber.%s(%s);
-                                    }
-                        """.formatted(interfaceMethod.getIndex(), parameterName, methodName, parameterName));
-                }
-            }
+            writeMethodCase(handleMethodBuilder, interfaceMethod);
         }
 
         handleMethodBuilder.append("""
@@ -53,6 +41,45 @@ public class SubscriberGenerator
             """);
 
         return handleMethodBuilder.toString();
+    }
+
+    private void writeMethodCase(final StringBuilder handleMethodBuilder, final MethodInfo interfaceMethod)
+    {
+        final String methodName = interfaceMethod.getName();
+        final List<ParameterInfo> parameters = interfaceMethod.getParameters();
+        final StringBuilder subscriberInvocation =
+            new StringBuilder("                subscriber.%s(".formatted(methodName));
+
+        handleMethodBuilder.append("""
+                        case %s -> {
+            """.formatted(interfaceMethod.getIndex()));
+
+        for (int i = 0; i < parameters.size(); i++)
+        {
+            writeParameter(handleMethodBuilder, subscriberInvocation, parameters.get(i));
+
+            if (i < parameters.size() - 1)
+            {
+                subscriberInvocation.append(", ");
+            }
+        }
+
+        subscriberInvocation.append("""
+            );
+            """);
+
+        handleMethodBuilder.append(subscriberInvocation);
+        handleMethodBuilder.append("""
+                        }
+            """);
+    }
+
+    private void writeParameter(final StringBuilder handleMethodBuilder, final StringBuilder subscriberInvocation, final ParameterInfo parameter)
+    {
+        handleMethodBuilder.append("""
+                            final %s %s = bufferDecoder.decode%s();
+            """.formatted(parameter.getType(), parameter.getName(), capitalize(parameter.getType())));
+        subscriberInvocation.append(parameter.getName());
     }
 
     private String generateConstructor(final String interfaceName)

@@ -2,6 +2,8 @@ package io.aeronic.gen;
 
 import java.util.List;
 
+import static io.aeronic.gen.StringUtil.capitalize;
+
 public class PublisherGenerator
 {
     public String generate(final String packageName, final String interfaceName, final List<MethodInfo> methods)
@@ -34,8 +36,7 @@ public class PublisherGenerator
 
             for (int i = 0; i < parameters.size(); i++)
             {
-                final ParameterInfo parameter = parameters.get(i);
-                writeParameter(methodsBuilder, methodBodyBuilder, parameter);
+                writeParameter(methodsBuilder, methodBodyBuilder, parameters.get(i));
 
                 if (i < parameters.size() - 1)
                 {
@@ -69,11 +70,6 @@ public class PublisherGenerator
         methodBodyBuilder.append("""
                 bufferEncoder.encode%s(%s);
         """.formatted(capitalize(parameter.getType()), parameter.getName()));
-    }
-
-    private static String capitalize(final String str)
-    {
-        return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 
     private String generateConstructor(final String interfaceName)
