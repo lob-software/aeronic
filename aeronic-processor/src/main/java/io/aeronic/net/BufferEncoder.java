@@ -48,4 +48,16 @@ public class BufferEncoder
         buffer.putChar(currentOffset, charValue);
         currentOffset += BitUtil.SIZE_OF_CHAR;
     }
+
+    public void encodeBoolean(final boolean booleanValue)
+    {
+        buffer.putByte(currentOffset, (byte) (booleanValue ? 1 : 0));
+        currentOffset += BitUtil.SIZE_OF_BYTE;
+    }
+
+    public void encodeShort(final short shortValue)
+    {
+        buffer.putShort(currentOffset, shortValue);
+        currentOffset += BitUtil.SIZE_OF_SHORT;
+    }
 }

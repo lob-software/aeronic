@@ -67,12 +67,27 @@ public class BufferEncoderTest
         assertEquals(byteValue, buffer.getByte(0));
     }
 
-
     @Test
     public void shouldEncodeChar()
     {
         final char charValue = 'a';
         bufferEncoder.encodeChar(charValue);
         assertEquals(charValue, buffer.getChar(0));
+    }
+
+    @Test
+    public void shouldEncodeBoolean()
+    {
+        final boolean booleanValue = true;
+        bufferEncoder.encodeBoolean(booleanValue);
+        assertEquals(1, buffer.getByte(0));
+    }
+
+    @Test
+    public void shouldEncodeShort()
+    {
+        final short shortValue = 12312;
+        bufferEncoder.encodeShort(shortValue);
+        assertEquals(shortValue, buffer.getShort(0));
     }
 }
