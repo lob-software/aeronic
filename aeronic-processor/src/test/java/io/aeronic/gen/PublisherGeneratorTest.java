@@ -16,8 +16,6 @@ public class PublisherGeneratorTest
         import io.aeronic.net.AbstractPublisher;
         import org.agrona.BitUtil;
                 
-        import static io.aeronic.net.Constants.METHOD_IDX_OFFSET;
-                
         public class TestEventsPublisher extends AbstractPublisher implements TestEvents
         {
                 

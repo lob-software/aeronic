@@ -98,8 +98,6 @@ public class PublisherGenerator
             import io.aeronic.net.AbstractPublisher;
             import org.agrona.BitUtil;
                         
-            import static io.aeronic.net.Constants.METHOD_IDX_OFFSET;
-                        
             """.formatted(packageName);
     }
 }
