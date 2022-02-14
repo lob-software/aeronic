@@ -42,4 +42,37 @@ public class BufferEncoderTest
         bufferEncoder.encodeLong(longValue);
         assertEquals(longValue, buffer.getLong(0));
     }
+
+    @Test
+    public void shouldEncodeFloat()
+    {
+        final float floatValue = 123123.123123f;
+        bufferEncoder.encodeFloat(floatValue);
+        assertEquals(floatValue, buffer.getFloat(0));
+    }
+
+    @Test
+    public void shouldEncodeDouble()
+    {
+        final double doubleValue = 123123.123123;
+        bufferEncoder.encodeDouble(doubleValue);
+        assertEquals(doubleValue, buffer.getDouble(0));
+    }
+
+    @Test
+    public void shouldEncodeByte()
+    {
+        final byte byteValue = 123;
+        bufferEncoder.encodeByte(byteValue);
+        assertEquals(byteValue, buffer.getByte(0));
+    }
+
+
+    @Test
+    public void shouldEncodeChar()
+    {
+        final char charValue = 'a';
+        bufferEncoder.encodeChar(charValue);
+        assertEquals(charValue, buffer.getChar(0));
+    }
 }

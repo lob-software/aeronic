@@ -24,4 +24,28 @@ public class BufferEncoder
         buffer.putLong(currentOffset, longValue);
         currentOffset += BitUtil.SIZE_OF_LONG;
     }
+
+    public void encodeFloat(final float floatValue)
+    {
+        buffer.putFloat(currentOffset, floatValue);
+        currentOffset += BitUtil.SIZE_OF_FLOAT;
+    }
+
+    public void encodeDouble(final double doubleValue)
+    {
+        buffer.putDouble(currentOffset, doubleValue);
+        currentOffset += BitUtil.SIZE_OF_DOUBLE;
+    }
+
+    public void encodeByte(final byte byteValue)
+    {
+        buffer.putByte(currentOffset, byteValue);
+        currentOffset += BitUtil.SIZE_OF_BYTE;
+    }
+
+    public void encodeChar(final char charValue)
+    {
+        buffer.putChar(currentOffset, charValue);
+        currentOffset += BitUtil.SIZE_OF_CHAR;
+    }
 }
