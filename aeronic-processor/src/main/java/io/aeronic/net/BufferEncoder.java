@@ -60,4 +60,9 @@ public class BufferEncoder
         buffer.putShort(currentOffset, shortValue);
         currentOffset += BitUtil.SIZE_OF_SHORT;
     }
+
+    public void reset()
+    {
+        currentOffset = 0;
+    }
 }

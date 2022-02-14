@@ -1,10 +1,8 @@
 package io.aeronic.net;
 
 import io.aeron.Publication;
+import org.agrona.ExpandableDirectByteBuffer;
 import org.agrona.MutableDirectBuffer;
-import org.agrona.concurrent.UnsafeBuffer;
-
-import java.nio.ByteBuffer;
 
 public abstract class AbstractPublisher
 {
@@ -15,7 +13,7 @@ public abstract class AbstractPublisher
     public AbstractPublisher(final Publication publication)
     {
         this.publication = publication;
-        this.buffer = new UnsafeBuffer(ByteBuffer.allocate(64));
+        this.buffer = new ExpandableDirectByteBuffer(128);
         this.bufferEncoder = new BufferEncoder(buffer);
     }
 
@@ -25,6 +23,7 @@ public abstract class AbstractPublisher
         {
             publication.offer(buffer);
         }
-        // TODO: rest buffer writer
+
+        bufferEncoder.reset();
     }
 }
