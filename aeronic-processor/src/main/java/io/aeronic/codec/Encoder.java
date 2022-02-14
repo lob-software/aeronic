@@ -1,13 +1,10 @@
 package io.aeronic.codec;
 
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import io.aeronic.net.BufferEncoder;
 
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Encoder
+@FunctionalInterface
+public interface Encoder
 {
+    void encode(BufferEncoder bufferEncoder);
 }

@@ -90,4 +90,6 @@ public class BufferEncoderTest
         bufferEncoder.encodeShort(shortValue);
         assertEquals(shortValue, buffer.getShort(0));
     }
+
+    // TODO: all together now
 }
