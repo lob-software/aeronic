@@ -48,4 +48,44 @@ public class BufferDecoderTest
 
         assertEquals(longValue, bufferDecoder.decodeLong());
     }
+
+    @Test
+    public void shouldDecodeFloat()
+    {
+        final float floatValue = 1.2312234f;
+        buffer.putFloat(0, floatValue);
+        bufferDecoder.wrap(buffer, 0);
+
+        assertEquals(floatValue, bufferDecoder.decodeFloat());
+    }
+
+    @Test
+    public void shouldDecodeDouble()
+    {
+        final double doubleValue = 1.2323234234;
+        buffer.putDouble(0, doubleValue);
+        bufferDecoder.wrap(buffer, 0);
+
+        assertEquals(doubleValue, bufferDecoder.decodeDouble());
+    }
+
+    @Test
+    public void shouldDecodeByte()
+    {
+        final byte byteValue = 14;
+        buffer.putByte(0, byteValue);
+        bufferDecoder.wrap(buffer, 0);
+
+        assertEquals(byteValue, bufferDecoder.decodeByte());
+    }
+
+    @Test
+    public void shouldDecodeChar()
+    {
+        final char charValue = 'a';
+        buffer.putChar(0, charValue);
+        bufferDecoder.wrap(buffer, 0);
+
+        assertEquals(charValue, bufferDecoder.decodeChar());
+    }
 }
