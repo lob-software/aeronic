@@ -1,6 +1,7 @@
 package io.aeronic.net;
 
 import io.aeron.Publication;
+import io.aeronic.codec.BufferEncoder;
 import org.agrona.ExpandableDirectByteBuffer;
 import org.agrona.MutableDirectBuffer;
 

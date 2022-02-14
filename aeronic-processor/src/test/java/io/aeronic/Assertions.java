@@ -1,8 +1,8 @@
 package io.aeronic;
 
+import io.aeronic.codec.BufferDecoder;
+import io.aeronic.codec.BufferEncoder;
 import io.aeronic.codec.Encoder;
-import io.aeronic.net.BufferDecoder;
-import io.aeronic.net.BufferEncoder;
 import org.agrona.ExpandableDirectByteBuffer;
 
 import java.lang.reflect.Method;

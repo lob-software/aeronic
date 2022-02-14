@@ -1,7 +1,4 @@
-package io.aeronic.net;
-
-import io.aeronic.codec.Decoder;
-import io.aeronic.codec.Encoder;
+package io.aeronic.codec;
 
 public class SimpleImpl implements Encoder
 {

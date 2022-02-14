@@ -1,4 +1,4 @@
-package io.aeronic.net;
+package io.aeronic.codec;
 
 import org.agrona.BitUtil;
 import org.agrona.MutableDirectBuffer;

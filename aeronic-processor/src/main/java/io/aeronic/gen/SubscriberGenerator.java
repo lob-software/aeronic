@@ -119,7 +119,7 @@ public class SubscriberGenerator
             import %s.%s;
             import io.aeron.Subscription;
             import io.aeronic.net.AbstractSubscriber;
-            import io.aeronic.net.BufferDecoder;
+            import io.aeronic.codec.BufferDecoder;
             import org.agrona.BitUtil;
             import org.agrona.DirectBuffer;
                     

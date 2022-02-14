@@ -15,7 +15,7 @@ public class SubscriberGeneratorTest
         import io.aeronic.TestEvents;
         import io.aeron.Subscription;
         import io.aeronic.net.AbstractSubscriber;
-        import io.aeronic.net.BufferDecoder;
+        import io.aeronic.codec.BufferDecoder;
         import org.agrona.BitUtil;
         import org.agrona.DirectBuffer;
                 

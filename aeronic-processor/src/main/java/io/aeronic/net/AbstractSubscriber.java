@@ -2,6 +2,7 @@ package io.aeronic.net;
 
 import io.aeron.Subscription;
 import io.aeron.logbuffer.Header;
+import io.aeronic.codec.BufferDecoder;
 import org.agrona.DirectBuffer;
 import org.agrona.concurrent.Agent;
 

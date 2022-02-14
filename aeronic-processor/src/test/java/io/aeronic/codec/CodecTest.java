@@ -1,4 +1,4 @@
-package io.aeronic.net;
+package io.aeronic.codec;
 
 import org.junit.jupiter.api.Test;
 
