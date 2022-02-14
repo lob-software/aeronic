@@ -40,6 +40,14 @@ public abstract class AeronicTransportTestBase
         aeronic = new AeronicWizard(aeron);
     }
 
+    @AfterEach
+    void tearDown()
+    {
+        aeronic.close();
+        aeron.close();
+        mediaDriver.close();
+    }
+
     public abstract String getPublicationChannel();
 
     public abstract String getSubscriptionChannel();
@@ -131,14 +139,6 @@ public abstract class AeronicTransportTestBase
         await()
             .timeout(Duration.ofSeconds(1))
             .until(() -> sampleEventsSubscriber1.value == 456L && sampleEventsSubscriber2.value == 456L);
-    }
-
-    @AfterEach
-    void tearDown()
-    {
-        aeronic.close();
-        aeron.close();
-        mediaDriver.close();
     }
 
     private static class SampleEventsImpl implements SampleEvents
