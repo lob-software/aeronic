@@ -55,4 +55,18 @@ public class BufferDecoder
         currentOffset += BitUtil.SIZE_OF_BYTE;
         return charValue;
     }
+
+    public boolean decodeBoolean()
+    {
+        final byte booleanByte = buffer.getByte(currentOffset);
+        currentOffset += BitUtil.SIZE_OF_BYTE;
+        return booleanByte == 1;
+    }
+
+    public short decodeShort()
+    {
+        final short shortValue = buffer.getShort(currentOffset);
+        currentOffset += BitUtil.SIZE_OF_SHORT;
+        return shortValue;
+    }
 }

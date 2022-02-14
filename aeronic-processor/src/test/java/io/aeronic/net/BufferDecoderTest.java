@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BufferDecoderTest
 {
@@ -87,5 +88,25 @@ public class BufferDecoderTest
         bufferDecoder.wrap(buffer, 0);
 
         assertEquals(charValue, bufferDecoder.decodeChar());
+    }
+
+    @Test
+    public void shouldDecodeBoolean()
+    {
+        final byte trueByte = 1;
+        buffer.putByte(0, trueByte);
+        bufferDecoder.wrap(buffer, 0);
+
+        assertTrue(bufferDecoder.decodeBoolean());
+    }
+
+    @Test
+    public void shouldDecodeShort()
+    {
+        final short shortValue = 123;
+        buffer.putShort(0, shortValue);
+        bufferDecoder.wrap(buffer, 0);
+
+        assertEquals(shortValue, bufferDecoder.decodeShort());
     }
 }
