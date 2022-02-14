@@ -8,18 +8,21 @@ public class SubscriberGenerator
 {
     public String generate(final String packageName, final String interfaceName, final List<MethodInfo> methods)
     {
+        final StringBuilder classImports = new StringBuilder();
+        final String handleMethod = generateHandleMethod(methods, classImports);
+
         return new StringBuilder()
-            .append(generatePackageAndImports(packageName, interfaceName))
+            .append(generatePackageAndImports(packageName, interfaceName, classImports))
             .append(generateClassDeclaration(interfaceName))
             .append("\n").append("{").append("\n")
             .append(generateConstructor(interfaceName))
-            .append(generateHandleMethod(methods))
+            .append(handleMethod)
             .append(generateRoleNameMethod(interfaceName))
             .append("}").append("\n")
             .toString();
     }
 
-    private String generateHandleMethod(final List<MethodInfo> methods)
+    private String generateHandleMethod(final List<MethodInfo> methods, final StringBuilder classImports)
     {
         final StringBuilder handleMethodBuilder = new StringBuilder("""
                 public void handle(final BufferDecoder bufferDecoder, final int offset)
@@ -31,7 +34,7 @@ public class SubscriberGenerator
 
         for (final MethodInfo interfaceMethod : methods)
         {
-            writeMethodCase(handleMethodBuilder, interfaceMethod);
+            writeMethodCase(handleMethodBuilder, interfaceMethod, classImports);
         }
 
         handleMethodBuilder.append("""
@@ -43,7 +46,7 @@ public class SubscriberGenerator
         return handleMethodBuilder.toString();
     }
 
-    private void writeMethodCase(final StringBuilder handleMethodBuilder, final MethodInfo interfaceMethod)
+    private void writeMethodCase(final StringBuilder handleMethodBuilder, final MethodInfo interfaceMethod, final StringBuilder classImports)
     {
         final String methodName = interfaceMethod.getName();
         final List<ParameterInfo> parameters = interfaceMethod.getParameters();
@@ -56,7 +59,7 @@ public class SubscriberGenerator
 
         for (int i = 0; i < parameters.size(); i++)
         {
-            writeParameter(handleMethodBuilder, subscriberInvocation, parameters.get(i));
+            writeParameter(handleMethodBuilder, subscriberInvocation, parameters.get(i), classImports);
 
             if (i < parameters.size() - 1)
             {
@@ -74,12 +77,31 @@ public class SubscriberGenerator
             """);
     }
 
-    private void writeParameter(final StringBuilder handleMethodBuilder, final StringBuilder subscriberInvocation, final ParameterInfo parameter)
+    private void writeParameter(
+        final StringBuilder handleMethodBuilder,
+        final StringBuilder subscriberInvocation,
+        final ParameterInfo parameter,
+        final StringBuilder classImports
+    )
     {
-        handleMethodBuilder.append("""
+        if (parameter.isPrimitive())
+        {
+            handleMethodBuilder.append("""
                             final %s %s = bufferDecoder.decode%s();
             """.formatted(parameter.getType(), parameter.getName(), capitalize(parameter.getType())));
-        subscriberInvocation.append(parameter.getName());
+            subscriberInvocation.append(parameter.getName());
+        }
+        else
+        {
+            final String[] split = parameter.getType().split("\\.");
+            final String className = split[split.length - 1];
+
+            handleMethodBuilder.append("""
+                            final %s %s = %s.decode(bufferDecoder);
+            """.formatted(className, parameter.getName(), className));
+            subscriberInvocation.append(parameter.getName());
+            classImports.append("import %s;".formatted(parameter.getType()));
+        }
     }
 
     private String generateConstructor(final String interfaceName)
@@ -111,7 +133,7 @@ public class SubscriberGenerator
             """.formatted(interfaceName);
     }
 
-    private String generatePackageAndImports(final String packageName, final String interfaceName)
+    private String generatePackageAndImports(final String packageName, final String interfaceName, final StringBuilder classImports)
     {
         return """
             package %s;
@@ -122,7 +144,8 @@ public class SubscriberGenerator
             import io.aeronic.codec.BufferDecoder;
             import org.agrona.BitUtil;
             import org.agrona.DirectBuffer;
+            %s
                     
-            """.formatted(packageName, packageName, interfaceName);
+            """.formatted(packageName, packageName, interfaceName, classImports);
     }
 }

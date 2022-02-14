@@ -1,4 +1,4 @@
-package io.aeronic.transport;
+package io.aeronic.system.transport;
 
 public class AeronicIpcTransportTest extends AeronicTransportTestBase
 {

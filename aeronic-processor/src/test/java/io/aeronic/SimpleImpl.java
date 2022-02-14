@@ -1,4 +1,9 @@
-package io.aeronic.codec;
+package io.aeronic;
+
+import io.aeronic.codec.BufferDecoder;
+import io.aeronic.codec.BufferEncoder;
+import io.aeronic.codec.Decoder;
+import io.aeronic.codec.Encoder;
 
 public class SimpleImpl implements Encoder
 {
@@ -6,7 +11,7 @@ public class SimpleImpl implements Encoder
     private final byte aByte;
     private final long aLong;
 
-    SimpleImpl(final int anInt, final byte aByte, final long aLong)
+    public SimpleImpl(final int anInt, final byte aByte, final long aLong)
     {
         this.anInt = anInt;
         this.aByte = aByte;

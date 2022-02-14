@@ -48,7 +48,8 @@ public class AeronicAnnotationProcessor extends AbstractProcessor
                 final List<ParameterInfo> parameters = new ArrayList<>();
                 for (final VariableElement param : params)
                 {
-                    final ParameterInfo parameter = new ParameterInfo(param.getSimpleName().toString(), param.asType().toString());
+                    final boolean isPrimitive = param.asType().getKind().isPrimitive();
+                    final ParameterInfo parameter = new ParameterInfo(param.getSimpleName().toString(), param.asType().toString(), isPrimitive);
                     parameters.add(parameter);
                 }
 

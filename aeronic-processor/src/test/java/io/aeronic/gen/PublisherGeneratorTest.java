@@ -15,6 +15,7 @@ public class PublisherGeneratorTest
         import io.aeron.Publication;
         import io.aeronic.net.AbstractPublisher;
         import org.agrona.BitUtil;
+        import io.aeronic.SimpleImpl;
                 
         public class TestEventsPublisher extends AbstractPublisher implements TestEvents
         {
@@ -25,7 +26,15 @@ public class PublisherGeneratorTest
             }
                 
             @Override
-            public void onEvent(final long aLong, final int intValue, final float floatValue, final double doubleValue, final byte byteValue, final char charValue)
+            public void onEvent(
+                final long aLong,
+                final int intValue,
+                final float floatValue,
+                final double doubleValue,
+                final byte byteValue,
+                final char charValue,
+                final SimpleImpl simpleImpl
+            )
             {
                 bufferEncoder.encodeInt(0);
                 bufferEncoder.encodeLong(aLong);
@@ -34,6 +43,7 @@ public class PublisherGeneratorTest
                 bufferEncoder.encodeDouble(doubleValue);
                 bufferEncoder.encodeByte(byteValue);
                 bufferEncoder.encodeChar(charValue);
+                simpleImpl.encode(bufferEncoder);
                 offer();
             }
         }
@@ -48,12 +58,13 @@ public class PublisherGeneratorTest
             "TestEvents",
             List.of(
                 new MethodInfo(0, "onEvent", List.of(
-                    new ParameterInfo("aLong", "long"),
-                    new ParameterInfo("intValue", "int"),
-                    new ParameterInfo("floatValue", "float"),
-                    new ParameterInfo("doubleValue", "double"),
-                    new ParameterInfo("byteValue", "byte"),
-                    new ParameterInfo("charValue", "char")
+                    new ParameterInfo("aLong", "long", true),
+                    new ParameterInfo("intValue", "int", true),
+                    new ParameterInfo("floatValue", "float", true),
+                    new ParameterInfo("doubleValue", "double", true),
+                    new ParameterInfo("byteValue", "byte", true),
+                    new ParameterInfo("charValue", "char", true),
+                    new ParameterInfo("simpleImpl", "io.aeronic.SimpleImpl", false)
                 ))
             )
         );

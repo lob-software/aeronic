@@ -18,6 +18,7 @@ public class SubscriberGeneratorTest
         import io.aeronic.codec.BufferDecoder;
         import org.agrona.BitUtil;
         import org.agrona.DirectBuffer;
+        import io.aeronic.SimpleImpl;
                 
         public class TestEventsSubscriber extends AbstractSubscriber<TestEvents>
         {
@@ -39,7 +40,8 @@ public class SubscriberGeneratorTest
                         final double doubleValue = bufferDecoder.decodeDouble();
                         final byte byteValue = bufferDecoder.decodeByte();
                         final char charValue = bufferDecoder.decodeChar();
-                        subscriber.onEvent(longValue, intValue, floatValue, doubleValue, byteValue, charValue);
+                        final SimpleImpl simpleImpl = SimpleImpl.decode(bufferDecoder);
+                        subscriber.onEvent(longValue, intValue, floatValue, doubleValue, byteValue, charValue, simpleImpl);
                     }
                     default -> throw new RuntimeException("Unexpected message type: " + msgType);
                 }
@@ -62,12 +64,13 @@ public class SubscriberGeneratorTest
             "TestEvents",
             List.of(
                 new MethodInfo(0, "onEvent", List.of(
-                    new ParameterInfo("longValue", "long"),
-                    new ParameterInfo("intValue", "int"),
-                    new ParameterInfo("floatValue", "float"),
-                    new ParameterInfo("doubleValue", "double"),
-                    new ParameterInfo("byteValue", "byte"),
-                    new ParameterInfo("charValue", "char")
+                    new ParameterInfo("longValue", "long", true),
+                    new ParameterInfo("intValue", "int", true),
+                    new ParameterInfo("floatValue", "float", true),
+                    new ParameterInfo("doubleValue", "double", true),
+                    new ParameterInfo("byteValue", "byte", true),
+                    new ParameterInfo("charValue", "char", true),
+                    new ParameterInfo("simpleImpl", "io.aeronic.SimpleImpl", false)
                 ))
             )
         );

@@ -1,4 +1,4 @@
-package io.aeronic.multiparam;
+package io.aeronic.system.multiparam;
 
 import io.aeronic.Aeronic;
 
