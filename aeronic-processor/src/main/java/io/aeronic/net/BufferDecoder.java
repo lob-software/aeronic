@@ -52,7 +52,7 @@ public class BufferDecoder
     public char decodeChar()
     {
         final char charValue = buffer.getChar(currentOffset);
-        currentOffset += BitUtil.SIZE_OF_BYTE;
+        currentOffset += BitUtil.SIZE_OF_CHAR;
         return charValue;
     }
 
