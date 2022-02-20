@@ -61,6 +61,15 @@ public class BufferEncoder
         currentOffset += BitUtil.SIZE_OF_SHORT;
     }
 
+    public void encodeString(final String stringValue)
+    {
+        encodeInt(stringValue.length());
+        for (final byte b : stringValue.getBytes())
+        {
+            encodeByte(b);
+        }
+    }
+
     public void reset()
     {
         currentOffset = 0;

@@ -78,14 +78,24 @@ public class PublisherGenerator
         }
         else
         {
+            final String type = parameter.getType();
+            if (type.equals(String.class.getName()))
+            {
+                methodsBuilder.append("        final String %s".formatted(parameter.getName()));
+                methodBodyBuilder.append("""
+                        bufferEncoder.encodeString(%s);
+                """.formatted(parameter.getName()));
+                return;
+            }
+
             // TODO: is there a better way?
-            final String[] split = parameter.getType().split("\\.");
+            final String[] split = type.split("\\.");
             final String className = split[split.length - 1];
             methodsBuilder.append("        final %s %s".formatted(className, parameter.getName()));
             methodBodyBuilder.append("""
                 %s.encode(bufferEncoder);
         """.formatted(parameter.getName()));
-            packageAndImports.append("import %s;".formatted(parameter.getType()));
+            packageAndImports.append("import %s;".formatted(type));
         }
     }
 

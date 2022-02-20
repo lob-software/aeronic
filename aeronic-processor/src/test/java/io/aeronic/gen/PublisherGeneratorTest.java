@@ -33,7 +33,8 @@ public class PublisherGeneratorTest
                 final double doubleValue,
                 final byte byteValue,
                 final char charValue,
-                final SimpleImpl simpleImpl
+                final SimpleImpl simpleImpl,
+                final String stringValue
             )
             {
                 bufferEncoder.encodeInt(0);
@@ -44,6 +45,7 @@ public class PublisherGeneratorTest
                 bufferEncoder.encodeByte(byteValue);
                 bufferEncoder.encodeChar(charValue);
                 simpleImpl.encode(bufferEncoder);
+                bufferEncoder.encodeString(stringValue);
                 offer();
             }
         }
@@ -64,7 +66,8 @@ public class PublisherGeneratorTest
                     new ParameterInfo("doubleValue", "double", true),
                     new ParameterInfo("byteValue", "byte", true),
                     new ParameterInfo("charValue", "char", true),
-                    new ParameterInfo("simpleImpl", "io.aeronic.SimpleImpl", false)
+                    new ParameterInfo("simpleImpl", "io.aeronic.SimpleImpl", false),
+                    new ParameterInfo("stringValue", "java.lang.String", false)
                 ))
             )
         );

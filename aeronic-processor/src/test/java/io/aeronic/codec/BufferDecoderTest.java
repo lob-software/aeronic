@@ -110,5 +110,16 @@ public class BufferDecoderTest
         assertEquals(shortValue, bufferDecoder.decodeShort());
     }
 
+    @Test
+    public void shouldDecodeString()
+    {
+        final String stringValue = "stringValue";
+        buffer.putInt(0, stringValue.length());
+        buffer.putBytes(BitUtil.SIZE_OF_INT, stringValue.getBytes());
+        bufferDecoder.wrap(buffer, 0);
+
+        assertEquals(stringValue, bufferDecoder.decodeString());
+    }
+
     // TODO: all together now
 }

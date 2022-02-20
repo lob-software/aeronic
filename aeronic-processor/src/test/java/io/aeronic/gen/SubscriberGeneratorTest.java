@@ -41,7 +41,8 @@ public class SubscriberGeneratorTest
                         final byte byteValue = bufferDecoder.decodeByte();
                         final char charValue = bufferDecoder.decodeChar();
                         final SimpleImpl simpleImpl = SimpleImpl.decode(bufferDecoder);
-                        subscriber.onEvent(longValue, intValue, floatValue, doubleValue, byteValue, charValue, simpleImpl);
+                        final String stringValue = bufferDecoder.decodeString();
+                        subscriber.onEvent(longValue, intValue, floatValue, doubleValue, byteValue, charValue, simpleImpl, stringValue);
                     }
                     default -> throw new RuntimeException("Unexpected message type: " + msgType);
                 }
@@ -70,7 +71,8 @@ public class SubscriberGeneratorTest
                     new ParameterInfo("doubleValue", "double", true),
                     new ParameterInfo("byteValue", "byte", true),
                     new ParameterInfo("charValue", "char", true),
-                    new ParameterInfo("simpleImpl", "io.aeronic.SimpleImpl", false)
+                    new ParameterInfo("simpleImpl", "io.aeronic.SimpleImpl", false),
+                    new ParameterInfo("stringValue", "java.lang.String", false)
                 ))
             )
         );

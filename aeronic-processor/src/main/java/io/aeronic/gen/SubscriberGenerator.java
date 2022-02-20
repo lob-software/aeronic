@@ -93,6 +93,15 @@ public class SubscriberGenerator
         }
         else
         {
+            if (parameter.getType().equals(String.class.getName()))
+            {
+                handleMethodBuilder.append("""
+                                final String %s = bufferDecoder.decodeString();
+                """.formatted(parameter.getName()));
+                subscriberInvocation.append(parameter.getName());
+                return;
+            }
+
             final String[] split = parameter.getType().split("\\.");
             final String className = split[split.length - 1];
 

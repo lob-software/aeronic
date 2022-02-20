@@ -5,6 +5,7 @@ import org.agrona.ExpandableDirectByteBuffer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BufferEncoderTest
@@ -90,6 +91,20 @@ public class BufferEncoderTest
         bufferEncoder.encodeShort(shortValue);
         assertEquals(shortValue, buffer.getShort(0));
     }
+
+    @Test
+    public void shouldEncodeString()
+    {
+        final String stringValue = "stringValue";
+        bufferEncoder.encodeString(stringValue);
+        final int encodedLength = buffer.getInt(0);
+        final byte[] encodedBytes = new byte[encodedLength];
+        buffer.getBytes(BitUtil.SIZE_OF_INT, encodedBytes);
+
+        assertEquals(stringValue.length(), encodedLength);
+        assertArrayEquals(stringValue.getBytes(), encodedBytes);
+    }
+
 
     // TODO: all together now
 }

@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 public class AeronicMultiParamTest
 {
 
-    public static final String IPC = "aeron:ipc";
+    private static final String IPC = "aeron:ipc";
     private AeronicWizard aeronic;
     private Aeron aeron;
     private MediaDriver mediaDriver;
@@ -51,7 +51,7 @@ public class AeronicMultiParamTest
     }
 
     @Test
-    public void shouldSendAndReceiveOnTopicWithMultiplePrimitiveParams()
+    public void shouldSendAndReceiveOnTopicWithMultipleParams()
     {
         final MultiParamEvents publisher = aeronic.createPublisher(MultiParamEvents.class, IPC, 10);
         final MultiParamEventsImpl subscriberImpl = new MultiParamEventsImpl();
@@ -66,12 +66,13 @@ public class AeronicMultiParamTest
         final char charValue = 'a';
         final boolean booleanValue = true;
         final short shortValue = 123;
+        final String stringValue = "stringValue";
 
-        publisher.onEvent(longValue, intValue, floatValue, doubleValue, byteValue, charValue, booleanValue, shortValue);
+        publisher.onEvent(longValue, intValue, floatValue, doubleValue, byteValue, charValue, booleanValue, shortValue, stringValue);
 
         await()
             .timeout(Duration.ofSeconds(1))
-            .until(() -> subscriberImpl.shortValue == 123);
+            .until(() -> subscriberImpl.stringValue.equals(stringValue));
 
         assertEquals(longValue, subscriberImpl.longValue);
         assertEquals(intValue, subscriberImpl.intValue);
@@ -81,7 +82,17 @@ public class AeronicMultiParamTest
         assertEquals(charValue, subscriberImpl.charValue);
         assertEquals(booleanValue, subscriberImpl.booleanValue);
 
-        publisher.onEvent(123L, intValue, floatValue, doubleValue, byteValue, charValue, false, (short) (shortValue + 1));
+        publisher.onEvent(
+            123L,
+            intValue,
+            floatValue,
+            doubleValue,
+            byteValue,
+            charValue,
+            false,
+            (short) (shortValue + 1),
+            stringValue
+        );
 
         await()
             .timeout(Duration.ofSeconds(1))
@@ -106,6 +117,7 @@ public class AeronicMultiParamTest
         private volatile char charValue;
         private volatile boolean booleanValue;
         private volatile short shortValue;
+        private volatile String stringValue;
 
         @Override
         public void onEvent(
@@ -116,7 +128,8 @@ public class AeronicMultiParamTest
             final byte byteValue,
             final char charValue,
             final boolean booleanValue,
-            final short shortValue
+            final short shortValue,
+            final String stringValue
         )
         {
             this.longValue = longValue;
@@ -127,6 +140,7 @@ public class AeronicMultiParamTest
             this.charValue = charValue;
             this.booleanValue = booleanValue;
             this.shortValue = shortValue;
+            this.stringValue = stringValue;
         }
     }
 }
