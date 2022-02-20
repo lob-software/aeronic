@@ -75,6 +75,7 @@ public class BufferDecoder
         final int length = decodeInt();
         final byte[] bytes = new byte[length];
         buffer.getBytes(currentOffset, bytes);
+        currentOffset += BitUtil.SIZE_OF_BYTE * length;
         return new String(bytes);
     }
 }

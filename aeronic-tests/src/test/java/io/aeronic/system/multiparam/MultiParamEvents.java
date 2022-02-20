@@ -14,6 +14,7 @@ public interface MultiParamEvents
         char charValue,
         boolean booleanValue,
         short shortValue,
-        String stringValue
+        String stringValue,
+        Composite compositeValue
     );
 }

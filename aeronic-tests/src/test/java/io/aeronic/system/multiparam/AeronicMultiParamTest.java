@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 
+import static io.aeronic.Assertions.assertReflectiveEquals;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -67,12 +68,27 @@ public class AeronicMultiParamTest
         final boolean booleanValue = true;
         final short shortValue = 123;
         final String stringValue = "stringValue";
+        final Composite compositeValue = new Composite(12, Long.MAX_VALUE, true, Byte.MAX_VALUE, 123.123);
 
-        publisher.onEvent(longValue, intValue, floatValue, doubleValue, byteValue, charValue, booleanValue, shortValue, stringValue);
+        publisher.onEvent(
+            longValue,
+            intValue,
+            floatValue,
+            doubleValue,
+            byteValue,
+            charValue,
+            booleanValue,
+            shortValue,
+            stringValue,
+            compositeValue
+        );
 
         await()
             .timeout(Duration.ofSeconds(1))
-            .until(() -> subscriberImpl.stringValue.equals(stringValue));
+            .until(() -> {
+                assertReflectiveEquals(compositeValue, subscriberImpl.compositeValue);
+                return true;
+            });
 
         assertEquals(longValue, subscriberImpl.longValue);
         assertEquals(intValue, subscriberImpl.intValue);
@@ -81,6 +97,7 @@ public class AeronicMultiParamTest
         assertEquals(byteValue, subscriberImpl.byteValue);
         assertEquals(charValue, subscriberImpl.charValue);
         assertEquals(booleanValue, subscriberImpl.booleanValue);
+        assertEquals(stringValue, subscriberImpl.stringValue);
 
         publisher.onEvent(
             123L,
@@ -91,7 +108,8 @@ public class AeronicMultiParamTest
             charValue,
             false,
             (short) (shortValue + 1),
-            stringValue
+            stringValue,
+            compositeValue
         );
 
         await()
@@ -118,6 +136,7 @@ public class AeronicMultiParamTest
         private volatile boolean booleanValue;
         private volatile short shortValue;
         private volatile String stringValue;
+        private volatile Composite compositeValue;
 
         @Override
         public void onEvent(
@@ -129,7 +148,8 @@ public class AeronicMultiParamTest
             final char charValue,
             final boolean booleanValue,
             final short shortValue,
-            final String stringValue
+            final String stringValue,
+            final Composite compositeValue
         )
         {
             this.longValue = longValue;
@@ -141,6 +161,7 @@ public class AeronicMultiParamTest
             this.booleanValue = booleanValue;
             this.shortValue = shortValue;
             this.stringValue = stringValue;
+            this.compositeValue = compositeValue;
         }
     }
 }
