@@ -15,7 +15,7 @@ public class PublisherGeneratorTest
         import io.aeron.Publication;
         import io.aeronic.net.AbstractPublisher;
         import org.agrona.BitUtil;
-        import io.aeronic.SimpleImpl;
+        import io.aeronic.codec.SimpleImpl;
                 
         public class TestEventsPublisher extends AbstractPublisher implements TestEvents
         {
@@ -66,7 +66,7 @@ public class PublisherGeneratorTest
                     new ParameterInfo("doubleValue", "double", true),
                     new ParameterInfo("byteValue", "byte", true),
                     new ParameterInfo("charValue", "char", true),
-                    new ParameterInfo("simpleImpl", "io.aeronic.SimpleImpl", false),
+                    new ParameterInfo("simpleImpl", "io.aeronic.codec.SimpleImpl", false),
                     new ParameterInfo("stringValue", "java.lang.String", false)
                 ))
             )

@@ -18,7 +18,7 @@ public class SubscriberGeneratorTest
         import io.aeronic.codec.BufferDecoder;
         import org.agrona.BitUtil;
         import org.agrona.DirectBuffer;
-        import io.aeronic.SimpleImpl;
+        import io.aeronic.codec.SimpleImpl;
                 
         public class TestEventsSubscriber extends AbstractSubscriber<TestEvents>
         {
@@ -71,7 +71,7 @@ public class SubscriberGeneratorTest
                     new ParameterInfo("doubleValue", "double", true),
                     new ParameterInfo("byteValue", "byte", true),
                     new ParameterInfo("charValue", "char", true),
-                    new ParameterInfo("simpleImpl", "io.aeronic.SimpleImpl", false),
+                    new ParameterInfo("simpleImpl", "io.aeronic.codec.SimpleImpl", false),
                     new ParameterInfo("stringValue", "java.lang.String", false)
                 ))
             )
