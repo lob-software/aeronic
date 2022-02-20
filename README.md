@@ -1,3 +1,5 @@
+[![Build](https://github.com/eliquinox/aeronic/actions/workflows/ci.yaml/badge.svg)](https://github.com/eliquinox/aeronic/actions/workflows/ci.yaml)
+
 # aeronic
 
 Aeronic allows for flexible usage of [Aeron](https://github.com/real-logic/simple-binary-encoding):
