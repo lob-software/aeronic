@@ -1,4 +1,4 @@
-[![Build](https://github.com/eliquinox/aeronic/actions/workflows/ci.yaml/badge.svg)](https://github.com/eliquinox/aeronic/actions/workflows/ci.yaml)
+[![Build](https://github.com/eliquinox/aeronic/actions/workflows/gradle.yml/badge.svg)](https://github.com/eliquinox/aeronic/actions/workflows/gradle.yml)
 
 # aeronic
 
