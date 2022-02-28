@@ -5,7 +5,7 @@ import io.aeron.ChannelUriStringBuilder;
 public class AeronicUdpMulticastTransportTest extends AeronicTransportTestBase
 {
 
-    public static final String MULTICAST_CHANNEL = new ChannelUriStringBuilder()
+    private static final String MULTICAST_CHANNEL = new ChannelUriStringBuilder()
         .media("udp")
         .reliable(true)
         .endpoint("224.0.1.1:40457")
