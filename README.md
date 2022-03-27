@@ -2,7 +2,8 @@
 
 # aeronic
 
-Aeronic allows for flexible usage of [Aeron](https://github.com/real-logic/simple-binary-encoding):
+Aeronic allows for flexible usage of [Aeron](https://github.com/real-logic/simple-binary-encoding) by way of proxy generation for 
+subscriptions and publications:
 
 ```java
 @Aeronic
@@ -28,22 +29,13 @@ public class EventsImpl implements Events
     }
 }
 
-Aeron aeron = Aeron.connect(aeronCtx);
-AeronicWizard aeronic = new AeronicWizard(aeron);
+final Aeron aeron = Aeron.connect(aeronCtx);
+final AeronicWizard aeronic = new AeronicWizard(aeron);
 
-final Events eventsPublisher = aeronic.createPublisher(Events.class);
+final Events eventsPublisher = aeronic.createPublisher(Events.class, "aeron:ipc", 10);
 final EventsImpl subscriberImpl = new EventsImpl();
-aeronic.registerSubscriber(Events.class, subscriberImpl);
+aeronic.registerSubscriber(Events.class, subscriberImpl, "aeron:ipc", 10);
 
 publisher.onEvent(123L);
 subscriberImpl.getValue(); // 123L
 ```
-
-
-🚧🚧🚧 **Work In Progress** 🚧🚧🚧
-
-Features in the pipeline:
-* multiple event method parameters
-* all primitives
-* custom type parameters
-* aeron cluster abstractions
