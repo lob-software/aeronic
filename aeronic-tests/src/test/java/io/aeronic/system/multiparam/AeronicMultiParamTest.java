@@ -57,6 +57,7 @@ public class AeronicMultiParamTest
         final MultiParamEvents publisher = aeronic.createPublisher(MultiParamEvents.class, IPC, 10);
         final MultiParamEventsImpl subscriberImpl = new MultiParamEventsImpl();
         aeronic.registerSubscriber(MultiParamEvents.class, subscriberImpl, IPC, 10);
+        aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
 
         final long longValue = 2312312341324L;

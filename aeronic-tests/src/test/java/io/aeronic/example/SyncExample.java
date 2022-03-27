@@ -68,7 +68,7 @@ public class SyncExample
 
         aeronic.registerSubscriber(SyncEvents.class, syncEventsSubscriber, MULTICAST_CHANNEL, 15);
         aeronic.registerSubscriber(SyncEventsResponse.class, syncEventsController, MULTICAST_CHANNEL, 16);
-
+        aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
 
         final long expectedValue = 645;

@@ -5,7 +5,8 @@ import io.aeron.Publication;
 import io.aeron.Subscription;
 import org.agrona.concurrent.Agent;
 import org.agrona.concurrent.AgentRunner;
-import org.agrona.concurrent.BusySpinIdleStrategy;
+import org.agrona.concurrent.CompositeAgent;
+import org.agrona.concurrent.NoOpIdleStrategy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,10 +14,10 @@ import java.util.List;
 public class AeronicWizard
 {
     private final Aeron aeron;
-
-    private final List<AgentRunner> runners = new ArrayList<>();
     private final List<Publication> publications = new ArrayList<>();
     private final List<Subscription> subscriptions = new ArrayList<>();
+    private final List<Agent> subscriptionAgents = new ArrayList<>();
+    private AgentRunner compositeAgentRunner;
 
     public AeronicWizard(final Aeron aeron)
     {
@@ -46,13 +47,11 @@ public class AeronicWizard
             final Subscription subscription = aeron.addSubscription(channel, streamId);
             subscriptions.add(subscription);
 
-            final Agent subscriberAgent = (Agent) Class.forName(aeronicInterfaceClass.getName() + "Subscriber")
+            final Agent subscriptionAgent = (Agent) Class.forName(aeronicInterfaceClass.getName() + "Subscriber")
                 .getConstructor(Subscription.class, aeronicInterfaceClass)
                 .newInstance(subscription, subscriberImplementation);
 
-            final AgentRunner receiveAgentRunner = new AgentRunner(new BusySpinIdleStrategy(), Throwable::printStackTrace, null, subscriberAgent);
-            AgentRunner.startOnThread(receiveAgentRunner);
-            runners.add(receiveAgentRunner);
+            subscriptionAgents.add(subscriptionAgent);
         }
         catch (final Exception e)
         {
@@ -60,9 +59,21 @@ public class AeronicWizard
         }
     }
 
+    public void start()
+    {
+        compositeAgentRunner = new AgentRunner(
+            NoOpIdleStrategy.INSTANCE,
+            Throwable::printStackTrace,
+            null,
+            new CompositeAgent(subscriptionAgents)
+        );
+
+        AgentRunner.startOnThread(compositeAgentRunner);
+    }
+
     public void close()
     {
-        runners.forEach(AgentRunner::close);
+        compositeAgentRunner.close();
     }
 
     public boolean allConnected()

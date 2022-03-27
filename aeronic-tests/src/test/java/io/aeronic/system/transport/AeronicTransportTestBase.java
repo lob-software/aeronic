@@ -58,6 +58,7 @@ public abstract class AeronicTransportTestBase
         final SampleEvents publisher = aeronic.createPublisher(SampleEvents.class, getPublicationChannel(), 10);
         final SampleEventsImpl subscriberImpl = new SampleEventsImpl();
         aeronic.registerSubscriber(SampleEvents.class, subscriberImpl, getSubscriptionChannel(), 10);
+        aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
 
         publisher.onEvent(123L);
@@ -75,6 +76,7 @@ public abstract class AeronicTransportTestBase
         final SampleEventsImpl subscriberImpl2 = new SampleEventsImpl();
         aeronic.registerSubscriber(SampleEvents.class, subscriberImpl1, getSubscriptionChannel(), 10);
         aeronic.registerSubscriber(SampleEvents.class, subscriberImpl2, getSubscriptionChannel(), 10);
+        aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
 
         publisher.onEvent(123L);
@@ -93,6 +95,7 @@ public abstract class AeronicTransportTestBase
         final SampleEventsImpl sampleEventsSubscriber2 = new SampleEventsImpl();
         aeronic.registerSubscriber(SampleEvents.class, sampleEventsSubscriber1, getSubscriptionChannel(), 10);
         aeronic.registerSubscriber(SampleEvents.class, sampleEventsSubscriber2, getSubscriptionChannel(), 10);
+        aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
 
         sampleEventsPublisher.onEvent(123L);
@@ -103,6 +106,7 @@ public abstract class AeronicTransportTestBase
         final SimpleEventsImpl simpleEventsSubscriber2 = new SimpleEventsImpl();
         aeronic.registerSubscriber(SimpleEvents.class, simpleEventsSubscriber1, getSubscriptionChannel(), 11);
         aeronic.registerSubscriber(SimpleEvents.class, simpleEventsSubscriber2, getSubscriptionChannel(), 11);
+        aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
 
         simpleEventsPublisher.onEvent(456L);
@@ -126,6 +130,7 @@ public abstract class AeronicTransportTestBase
         final SampleEventsImpl sampleEventsSubscriber2 = new SampleEventsImpl();
         aeronic.registerSubscriber(SampleEvents.class, sampleEventsSubscriber1, getSubscriptionChannel(), 10);
         aeronic.registerSubscriber(SampleEvents.class, sampleEventsSubscriber2, getSubscriptionChannel(), 10);
+        aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
 
         sampleEventsPublisher1.onEvent(123L);
