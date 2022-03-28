@@ -24,14 +24,18 @@ public class AeronicWizard
         this.aeron = aeron;
     }
 
-    @SuppressWarnings("unchecked")
     public <T> T createPublisher(final Class<T> clazz, final String channel, final int streamId)
+    {
+        final Publication publication = aeron.addPublication(channel, streamId);
+        return createPublisher(clazz, publication);
+    }
+
+    @SuppressWarnings("unchecked")
+    public  <T> T createPublisher(final Class<T> clazz, final Publication publication)
     {
         try
         {
-            final Publication publication = aeron.addPublication(channel, streamId);
             publications.add(publication);
-
             return (T) Class.forName(clazz.getName() + "Publisher").getConstructor(Publication.class).newInstance(publication);
         }
         catch (final Exception e)
