@@ -1,17 +1,16 @@
 package io.aeronic.net;
 
-import io.aeron.Publication;
 import io.aeronic.codec.BufferEncoder;
 import org.agrona.ExpandableDirectByteBuffer;
 import org.agrona.MutableDirectBuffer;
 
 public abstract class AbstractPublisher
 {
-    private final Publication publication;
+    private final AeronicPublication publication;
     private final MutableDirectBuffer buffer;
     protected final BufferEncoder bufferEncoder;
 
-    public AbstractPublisher(final Publication publication)
+    public AbstractPublisher(final AeronicPublication publication)
     {
         this.publication = publication;
         this.buffer = new ExpandableDirectByteBuffer(128);

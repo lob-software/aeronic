@@ -4,7 +4,7 @@ import java.util.List;
 
 import static io.aeronic.gen.StringUtil.capitalize;
 
-public class SubscriberGenerator
+public class SubscriberInvokerGenerator
 {
     public String generate(final String packageName, final String interfaceName, final List<MethodInfo> methods)
     {
@@ -17,7 +17,6 @@ public class SubscriberGenerator
             .append("\n").append("{").append("\n")
             .append(generateConstructor(interfaceName))
             .append(handleMethod)
-            .append(generateRoleNameMethod(interfaceName))
             .append("}").append("\n")
             .toString();
     }
@@ -117,9 +116,9 @@ public class SubscriberGenerator
     {
         return """
                 
-                public %sSubscriber(final Subscription subscription, final %s subscriber)
+                public %sInvoker(final %s subscriber)
                 {
-                    super(subscription, subscriber);
+                    super(subscriber);
                 }
                         
             """.formatted(interfaceName, interfaceName);
@@ -127,19 +126,7 @@ public class SubscriberGenerator
 
     private String generateClassDeclaration(final String interfaceName)
     {
-        return "public class %sSubscriber extends AbstractSubscriber<%s>".formatted(interfaceName, interfaceName);
-    }
-
-    private String generateRoleNameMethod(final String interfaceName)
-    {
-        return """
-                            
-                @Override
-                public String roleName()
-                {
-                    return "%s";
-                }
-            """.formatted(interfaceName);
+        return "public class %sInvoker extends AbstractSubscriberInvoker<%s>".formatted(interfaceName, interfaceName);
     }
 
     private String generatePackageAndImports(final String packageName, final String interfaceName, final StringBuilder classImports)
@@ -149,7 +136,7 @@ public class SubscriberGenerator
                     
             import %s.%s;
             import io.aeron.Subscription;
-            import io.aeronic.net.AbstractSubscriber;
+            import io.aeronic.net.AbstractSubscriberInvoker;
             import io.aeronic.codec.BufferDecoder;
             import org.agrona.BitUtil;
             import org.agrona.DirectBuffer;

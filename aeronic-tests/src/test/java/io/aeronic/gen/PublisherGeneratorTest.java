@@ -14,13 +14,14 @@ public class PublisherGeneratorTest
                 
         import io.aeron.Publication;
         import io.aeronic.net.AbstractPublisher;
+        import io.aeronic.net.AeronicPublication;
         import org.agrona.BitUtil;
         import io.aeronic.codec.SimpleImpl;
                 
         public class TestEventsPublisher extends AbstractPublisher implements TestEvents
         {
                 
-            public TestEventsPublisher(final Publication publication)
+            public TestEventsPublisher(final AeronicPublication publication)
             {
                 super(publication);
             }

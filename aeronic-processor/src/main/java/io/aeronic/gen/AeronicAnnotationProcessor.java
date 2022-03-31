@@ -24,7 +24,7 @@ import java.util.Set;
 @AutoService(Processor.class)
 public class AeronicAnnotationProcessor extends AbstractProcessor
 {
-    private final SubscriberGenerator subscriberGenerator = new SubscriberGenerator();
+    private final SubscriberInvokerGenerator subscriberInvokerGenerator = new SubscriberInvokerGenerator();
     private final PublisherGenerator publisherGenerator = new PublisherGenerator();
 
     @Override
@@ -57,15 +57,15 @@ public class AeronicAnnotationProcessor extends AbstractProcessor
                 methods.add(method);
             }
 
-            final String subscriberSource = subscriberGenerator.generate(packageName, elementName, methods);
+            final String invokerSource = subscriberInvokerGenerator.generate(packageName, elementName, methods);
             try
             {
-                final String subscriberPath = "%s.%sSubscriber".formatted(packageName, elementName);
-                final JavaFileObject subscriberSourceFile = processingEnv.getFiler().createSourceFile(subscriberPath, aeronicElement);
-                final Writer writer = subscriberSourceFile.openWriter();
-                writer.append(subscriberSource);
+                final String invokerPath = "%s.%sInvoker".formatted(packageName, elementName);
+                final JavaFileObject invokerSourceFile = processingEnv.getFiler().createSourceFile(invokerPath, aeronicElement);
+                final Writer writer = invokerSourceFile.openWriter();
+                writer.append(invokerSource);
                 writer.close();
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Written file for %s".formatted(subscriberPath));
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Written file for %s".formatted(invokerPath));
             }
             catch (final IOException e)
             {

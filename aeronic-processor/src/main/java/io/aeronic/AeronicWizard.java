@@ -1,8 +1,9 @@
 package io.aeronic;
 
 import io.aeron.Aeron;
-import io.aeron.Publication;
 import io.aeron.Subscription;
+import io.aeron.cluster.client.AeronCluster;
+import io.aeronic.net.*;
 import org.agrona.concurrent.Agent;
 import org.agrona.concurrent.AgentRunner;
 import org.agrona.concurrent.CompositeAgent;
@@ -14,7 +15,7 @@ import java.util.List;
 public class AeronicWizard
 {
     private final Aeron aeron;
-    private final List<Publication> publications = new ArrayList<>();
+    private final List<AeronicPublication> publications = new ArrayList<>();
     private final List<Subscription> subscriptions = new ArrayList<>();
     private final List<Agent> subscriptionAgents = new ArrayList<>();
     private AgentRunner compositeAgentRunner;
@@ -26,17 +27,23 @@ public class AeronicWizard
 
     public <T> T createPublisher(final Class<T> clazz, final String channel, final int streamId)
     {
-        final Publication publication = aeron.addPublication(channel, streamId);
+        final AeronicPublication publication = new SimplePublication(aeron.addPublication(channel, streamId));
+        return createPublisher(clazz, publication);
+    }
+
+    public <T> T createClusterPublisher(final Class<T> clazz, final AeronCluster aeronCluster)
+    {
+        final AeronicPublication publication = new ClusterPublication(aeronCluster);
         return createPublisher(clazz, publication);
     }
 
     @SuppressWarnings("unchecked")
-    public  <T> T createPublisher(final Class<T> clazz, final Publication publication)
+    public <T> T createPublisher(final Class<T> clazz, final AeronicPublication publication)
     {
         try
         {
             publications.add(publication);
-            return (T) Class.forName(clazz.getName() + "Publisher").getConstructor(Publication.class).newInstance(publication);
+            return (T)Class.forName(clazz.getName() + "Publisher").getConstructor(AeronicPublication.class).newInstance(publication);
         }
         catch (final Exception e)
         {
@@ -44,18 +51,23 @@ public class AeronicWizard
         }
     }
 
-    public <T> void registerSubscriber(final Class<T> aeronicInterfaceClass, final T subscriberImplementation, final String channel, final int streamId)
+    public <T> void registerSubscriber(final Class<T> clazz, final T subscriberImplementation, final String channel, final int streamId)
+    {
+        final Subscription subscription = aeron.addSubscription(channel, streamId);
+        subscriptions.add(subscription);
+
+        final AbstractSubscriberInvoker<T> invoker = createSubscriberInvoker(clazz, subscriberImplementation);
+        subscriptionAgents.add(new AbstractSubscriberAgent<>(subscription, invoker));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> AbstractSubscriberInvoker<T> createSubscriberInvoker(final Class<T> clazz, final T subscriberImplementation)
     {
         try
         {
-            final Subscription subscription = aeron.addSubscription(channel, streamId);
-            subscriptions.add(subscription);
-
-            final Agent subscriptionAgent = (Agent) Class.forName(aeronicInterfaceClass.getName() + "Subscriber")
-                .getConstructor(Subscription.class, aeronicInterfaceClass)
-                .newInstance(subscription, subscriberImplementation);
-
-            subscriptionAgents.add(subscriptionAgent);
+            return (AbstractSubscriberInvoker<T>)Class.forName(clazz.getName() + "Invoker")
+                .getConstructor(clazz)
+                .newInstance(subscriberImplementation);
         }
         catch (final Exception e)
         {
@@ -77,12 +89,15 @@ public class AeronicWizard
 
     public void close()
     {
-        compositeAgentRunner.close();
+        if (compositeAgentRunner != null)
+        {
+            compositeAgentRunner.close();
+        }
     }
 
     public boolean allConnected()
     {
-        return publications.stream().allMatch(Publication::isConnected)
+        return publications.stream().allMatch(AeronicPublication::isConnected)
             && subscriptions.stream().allMatch(Subscription::isConnected);
     }
 

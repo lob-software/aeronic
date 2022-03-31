@@ -103,7 +103,7 @@ public class PublisherGenerator
     {
         return """
                 
-                public %sPublisher(final Publication publication)
+                public %sPublisher(final AeronicPublication publication)
                 {
                     super(publication);
                 }
@@ -123,6 +123,7 @@ public class PublisherGenerator
                     
             import io.aeron.Publication;
             import io.aeronic.net.AbstractPublisher;
+            import io.aeronic.net.AeronicPublication;
             import org.agrona.BitUtil;
             %s
                         
