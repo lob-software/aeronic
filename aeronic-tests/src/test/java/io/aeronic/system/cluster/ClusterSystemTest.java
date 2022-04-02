@@ -38,14 +38,12 @@ public class ClusterSystemTest
     @BeforeEach
     void setUp()
     {
-        final MediaDriver.Context mediaDriverCtx = new MediaDriver.Context()
+        mediaDriver = MediaDriver.launchEmbedded(new MediaDriver.Context()
             .dirDeleteOnStart(true)
             .dirDeleteOnShutdown(true)
             .spiesSimulateConnection(true)
             .threadingMode(ThreadingMode.SHARED)
-            .sharedIdleStrategy(new BusySpinIdleStrategy());
-
-        mediaDriver = MediaDriver.launchEmbedded(mediaDriverCtx);
+            .sharedIdleStrategy(new BusySpinIdleStrategy()));
 
         final Aeron.Context aeronCtx = new Aeron.Context()
             .aeronDirectoryName(mediaDriver.aeronDirectoryName());
@@ -73,8 +71,8 @@ public class ClusterSystemTest
         final AeronCluster simpleEventsClusterClient = TestClusterClient.connectClientToCluster(SimpleEvents.class.getName(), INGRESS_CHANNEL);
         final AeronCluster sampleEventsClusterClient = TestClusterClient.connectClientToCluster(SampleEvents.class.getName(), INGRESS_CHANNEL);
 
-        final SimpleEvents simpleEventsPublisher = aeronic.createClusterPublisher(SimpleEvents.class, simpleEventsClusterClient);
-        final SampleEvents sampleEventsPublisher = aeronic.createClusterPublisher(SampleEvents.class, sampleEventsClusterClient);
+        final SimpleEvents simpleEventsPublisher = aeronic.createClusterPublisher(SimpleEvents.class, INGRESS_CHANNEL);
+        final SampleEvents sampleEventsPublisher = aeronic.createClusterPublisher(SampleEvents.class, INGRESS_CHANNEL);
 
         simpleEventsPublisher.onEvent(101L);
         sampleEventsPublisher.onEvent(201L);

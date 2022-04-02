@@ -3,6 +3,7 @@ package io.aeronic;
 import io.aeron.Aeron;
 import io.aeron.Subscription;
 import io.aeron.cluster.client.AeronCluster;
+import io.aeronic.cluster.AeronicCredentialSupplier;
 import io.aeronic.net.*;
 import org.agrona.concurrent.Agent;
 import org.agrona.concurrent.AgentRunner;
@@ -31,8 +32,17 @@ public class AeronicWizard
         return createPublisher(clazz, publication);
     }
 
-    public <T> T createClusterPublisher(final Class<T> clazz, final AeronCluster aeronCluster)
+    public <T> T createClusterPublisher(final Class<T> clazz, final String ingressChannel)
     {
+        final String publisherName = clazz.getName();
+
+        final AeronCluster aeronCluster = AeronCluster.connect(
+            new AeronCluster.Context()
+                .credentialsSupplier(new AeronicCredentialSupplier(publisherName))
+                .ingressChannel(ingressChannel)
+                .errorHandler(Throwable::printStackTrace)
+                .aeronDirectoryName(aeron.context().aeronDirectoryName()));
+
         final AeronicPublication publication = new ClusterPublication(aeronCluster);
         return createPublisher(clazz, publication);
     }
