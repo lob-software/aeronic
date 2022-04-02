@@ -9,8 +9,6 @@ import io.aeron.archive.Archive;
 import io.aeron.archive.ArchiveThreadingMode;
 import io.aeron.cluster.ClusteredMediaDriver;
 import io.aeron.cluster.ConsensusModule;
-import io.aeron.cluster.client.AeronCluster;
-import io.aeron.cluster.client.EgressListener;
 import io.aeron.cluster.codecs.CloseReason;
 import io.aeron.cluster.service.ClientSession;
 import io.aeron.cluster.service.Cluster;
@@ -20,7 +18,6 @@ import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
 import io.aeron.logbuffer.Header;
 import io.aeron.security.Authenticator;
-import io.aeron.security.CredentialsSupplier;
 import io.aeron.security.SessionProxy;
 import io.aeronic.AeronicWizard;
 import io.aeronic.SampleEvents;
@@ -29,7 +26,6 @@ import io.aeronic.net.AbstractSubscriberInvoker;
 import org.agrona.CloseHelper;
 import org.agrona.DirectBuffer;
 import org.agrona.ErrorHandler;
-import org.agrona.collections.ArrayUtil;
 import org.agrona.concurrent.IdleStrategy;
 
 import java.nio.charset.StandardCharsets;
@@ -52,37 +48,8 @@ public final class TestClusterNode implements AutoCloseable
         .endpoint("localhost:40458")
         .build();
 
-    // cluster side
     private final ClusteredMediaDriver clusteredMediaDriver;
     private final ClusteredServiceContainer container;
-
-    // cluster client side
-    private MediaDriver clientMediaDriver;
-
-    private final EgressListener egressMessageListener = new EgressListener()
-    {
-        public void onMessage(
-            final long clusterSessionId,
-            final long timestamp,
-            final DirectBuffer buffer,
-            final int offset,
-            final int length,
-            final Header header
-        )
-        {
-            System.out.println("egress onMessage " + clusterSessionId);
-        }
-
-        public void onNewLeader(
-            final long clusterSessionId,
-            final long leadershipTermId,
-            final int leaderMemberId,
-            final String ingressEndpoints
-        )
-        {
-            System.out.println("TestClusterNode.onNewLeader");
-        }
-    };
 
     static class Service implements ClusteredService
     {
@@ -90,6 +57,7 @@ public final class TestClusterNode implements AutoCloseable
         protected IdleStrategy idleStrategy;
 
         private int messageCount = 0;
+
         private final Map<Long, AbstractSubscriberInvoker<?>> subscriberBySessionId = new HashMap<>();
         private final Map<String, AbstractSubscriberInvoker<?>> invokerByClassName = new HashMap<>();
 
@@ -97,6 +65,11 @@ public final class TestClusterNode implements AutoCloseable
         {
             invokerByClassName.put(SimpleEvents.class.getName(), AeronicWizard.createSubscriberInvoker(SimpleEvents.class, simpleEvents));
             invokerByClassName.put(SampleEvents.class.getName(), AeronicWizard.createSubscriberInvoker(SampleEvents.class, sampleEvents));
+        }
+
+        public int getMessageCount()
+        {
+            return messageCount;
         }
 
         public void onStart(final Cluster cluster, final Image snapshotImage)
@@ -221,53 +194,9 @@ public final class TestClusterNode implements AutoCloseable
     public void close()
     {
         final ErrorHandler errorHandler = clusteredMediaDriver.mediaDriver().context().errorHandler();
-        CloseHelper.close(errorHandler, clientMediaDriver);
         CloseHelper.close(errorHandler, clusteredMediaDriver.consensusModule());
         CloseHelper.close(errorHandler, container);
         CloseHelper.close(clusteredMediaDriver); // ErrorHandler will be closed during that call so can't use it
-    }
-
-    AeronCluster connectClientToCluster(final String clientName)
-    {
-        final String aeronDirectoryName = CommonContext.getAeronDirectoryName() + "-" + clientName;
-
-        clientMediaDriver = MediaDriver.launch(
-            new MediaDriver.Context()
-                .aeronDirectoryName(aeronDirectoryName)
-                .threadingMode(ThreadingMode.SHARED)
-                .dirDeleteOnStart(true)
-                .dirDeleteOnShutdown(true)
-                .errorHandler(Throwable::printStackTrace));
-
-        return AeronCluster.connect(
-            new AeronCluster.Context()
-                .credentialsSupplier(new SimpleCredentialsSupplier(clientName))
-                .ingressChannel(INGRESS_CHANNEL)
-                .errorHandler(Throwable::printStackTrace)
-                .egressListener(egressMessageListener)
-                .aeronDirectoryName(aeronDirectoryName));
-    }
-
-    private static class SimpleCredentialsSupplier implements CredentialsSupplier
-    {
-        private final String name;
-
-        public SimpleCredentialsSupplier(String name)
-        {
-            this.name = name;
-        }
-
-        @Override
-        public byte[] encodedCredentials()
-        {
-            return name.getBytes();
-        }
-
-        @Override
-        public byte[] onChallenge(byte[] encodedChallenge)
-        {
-            return ArrayUtil.EMPTY_BYTE_ARRAY;
-        }
     }
 
     private static class SimpleAuthenticator implements Authenticator

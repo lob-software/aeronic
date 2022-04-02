@@ -10,6 +10,7 @@ import io.aeronic.SimpleEvents;
 import org.agrona.concurrent.BusySpinIdleStrategy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -24,6 +25,7 @@ public class ClusterSystemTest
     private TestClusterNode clusterNode;
     private SimpleEventsImpl simpleEvents;
     private SampleEventsImpl sampleEvents;
+    private TestClusterNode.Service clusteredService;
 
     @BeforeEach
     void setUp()
@@ -44,7 +46,8 @@ public class ClusterSystemTest
         aeronic = new AeronicWizard(aeron);
         simpleEvents = new SimpleEventsImpl();
         sampleEvents = new SampleEventsImpl();
-        clusterNode = new TestClusterNode(new TestClusterNode.Service(simpleEvents, sampleEvents), true);
+        clusteredService = new TestClusterNode.Service(simpleEvents, sampleEvents);
+        clusterNode = new TestClusterNode(clusteredService, true);
     }
 
     @AfterEach
@@ -59,8 +62,8 @@ public class ClusterSystemTest
     @Test
     public void clientToCluster()
     {
-        final AeronCluster simpleEventsClusterClient = clusterNode.connectClientToCluster(SimpleEvents.class.getName());
-        final AeronCluster sampleEventsClusterClient = clusterNode.connectClientToCluster(SampleEvents.class.getName());
+        final AeronCluster simpleEventsClusterClient = new TestClusterClient(SimpleEvents.class.getName()).connectClientToCluster();
+        final AeronCluster sampleEventsClusterClient = new TestClusterClient(SampleEvents.class.getName()).connectClientToCluster();
 
         final SimpleEvents simpleEventsPublisher = aeronic.createClusterPublisher(SimpleEvents.class, simpleEventsClusterClient);
         final SampleEvents sampleEventsPublisher = aeronic.createClusterPublisher(SampleEvents.class, sampleEventsClusterClient);
@@ -70,10 +73,17 @@ public class ClusterSystemTest
 
         await()
             .timeout(Duration.ofSeconds(1))
-            .until(() -> simpleEvents.value == 101L && sampleEvents.value == 201L);
+            .until(() -> simpleEvents.value == 101L && sampleEvents.value == 201L && clusteredService.getMessageCount() == 2);
 
         simpleEventsClusterClient.close();
         sampleEventsClusterClient.close();
+    }
+
+    @Test
+    @Disabled
+    public void clusterToClient()
+    {
+
     }
 
     public static class SimpleEventsImpl implements SimpleEvents
