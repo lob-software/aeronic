@@ -57,7 +57,7 @@ public class ClusterSystemTest
     }
 
     @Test
-    public void cluster()
+    public void clientToCluster()
     {
         final AeronCluster simpleEventsClusterClient = clusterNode.connectClientToCluster(SimpleEvents.class.getName());
         final AeronCluster sampleEventsClusterClient = clusterNode.connectClientToCluster(SampleEvents.class.getName());
