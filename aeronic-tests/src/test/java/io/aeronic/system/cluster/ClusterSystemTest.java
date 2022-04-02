@@ -1,6 +1,7 @@
 package io.aeronic.system.cluster;
 
 import io.aeron.Aeron;
+import io.aeron.ChannelUriStringBuilder;
 import io.aeron.cluster.client.AeronCluster;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
@@ -19,6 +20,13 @@ import static org.awaitility.Awaitility.await;
 
 public class ClusterSystemTest
 {
+
+    private static final String INGRESS_CHANNEL = new ChannelUriStringBuilder()
+        .media("udp")
+        .reliable(true)
+        .endpoint("localhost:40457")
+        .build();
+
     private AeronicWizard aeronic;
     private Aeron aeron;
     private MediaDriver mediaDriver;
@@ -62,8 +70,8 @@ public class ClusterSystemTest
     @Test
     public void clientToCluster()
     {
-        final AeronCluster simpleEventsClusterClient = new TestClusterClient(SimpleEvents.class.getName()).connectClientToCluster();
-        final AeronCluster sampleEventsClusterClient = new TestClusterClient(SampleEvents.class.getName()).connectClientToCluster();
+        final AeronCluster simpleEventsClusterClient = TestClusterClient.connectClientToCluster(SimpleEvents.class.getName(), INGRESS_CHANNEL);
+        final AeronCluster sampleEventsClusterClient = TestClusterClient.connectClientToCluster(SampleEvents.class.getName(), INGRESS_CHANNEL);
 
         final SimpleEvents simpleEventsPublisher = aeronic.createClusterPublisher(SimpleEvents.class, simpleEventsClusterClient);
         final SampleEvents sampleEventsPublisher = aeronic.createClusterPublisher(SampleEvents.class, sampleEventsClusterClient);
