@@ -2,7 +2,6 @@ package io.aeronic.system.cluster;
 
 import io.aeron.Aeron;
 import io.aeron.ChannelUriStringBuilder;
-import io.aeron.cluster.client.AeronCluster;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
 import io.aeronic.AeronicWizard;
@@ -68,9 +67,6 @@ public class ClusterSystemTest
     @Test
     public void clientToCluster()
     {
-        final AeronCluster simpleEventsClusterClient = TestClusterClient.connectClientToCluster(SimpleEvents.class.getName(), INGRESS_CHANNEL);
-        final AeronCluster sampleEventsClusterClient = TestClusterClient.connectClientToCluster(SampleEvents.class.getName(), INGRESS_CHANNEL);
-
         final SimpleEvents simpleEventsPublisher = aeronic.createClusterPublisher(SimpleEvents.class, INGRESS_CHANNEL);
         final SampleEvents sampleEventsPublisher = aeronic.createClusterPublisher(SampleEvents.class, INGRESS_CHANNEL);
 
@@ -80,9 +76,6 @@ public class ClusterSystemTest
         await()
             .timeout(Duration.ofSeconds(1))
             .until(() -> simpleEvents.value == 101L && sampleEvents.value == 201L && clusteredService.getMessageCount() == 2);
-
-        simpleEventsClusterClient.close();
-        sampleEventsClusterClient.close();
     }
 
     @Test
