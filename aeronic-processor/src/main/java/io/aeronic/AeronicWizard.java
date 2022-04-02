@@ -4,7 +4,11 @@ import io.aeron.Aeron;
 import io.aeron.Subscription;
 import io.aeron.cluster.client.AeronCluster;
 import io.aeronic.cluster.AeronicCredentialSupplier;
-import io.aeronic.net.*;
+import io.aeronic.cluster.ClusterPublication;
+import io.aeronic.net.AbstractSubscriberAgent;
+import io.aeronic.net.AbstractSubscriberInvoker;
+import io.aeronic.net.AeronicPublication;
+import io.aeronic.net.SimplePublication;
 import org.agrona.concurrent.Agent;
 import org.agrona.concurrent.AgentRunner;
 import org.agrona.concurrent.CompositeAgent;
@@ -41,6 +45,7 @@ public class AeronicWizard
                 .credentialsSupplier(new AeronicCredentialSupplier(publisherName))
                 .ingressChannel(ingressChannel)
                 .errorHandler(Throwable::printStackTrace)
+                // TODO: will this work in presence of other pubs / subs on one physical machine?
                 .aeronDirectoryName(aeron.context().aeronDirectoryName()));
 
         final AeronicPublication publication = new ClusterPublication(aeronCluster);

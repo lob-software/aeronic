@@ -1,6 +1,7 @@
-package io.aeronic.net;
+package io.aeronic.cluster;
 
 import io.aeron.cluster.client.AeronCluster;
+import io.aeronic.net.AeronicPublication;
 import org.agrona.DirectBuffer;
 
 public class ClusterPublication implements AeronicPublication
