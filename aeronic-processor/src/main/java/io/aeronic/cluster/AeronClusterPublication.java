@@ -1,0 +1,34 @@
+package io.aeronic.cluster;
+
+import io.aeron.cluster.client.AeronCluster;
+import io.aeronic.net.AeronicPublication;
+import org.agrona.DirectBuffer;
+
+public class AeronClusterPublication implements AeronicPublication
+{
+
+    private final AeronCluster aeronCluster;
+
+    public AeronClusterPublication(final String publisherName, final String ingressChannel, final String aeronDirectoryName)
+    {
+        this.aeronCluster = AeronCluster.connect(
+            new AeronCluster.Context()
+                .credentialsSupplier(new AeronicCredentialSupplier(publisherName))
+                .ingressChannel(ingressChannel)
+                .errorHandler(Throwable::printStackTrace)
+                // TODO: will this work in presence of other pubs / subs on one physical machine?
+                .aeronDirectoryName(aeronDirectoryName));
+    }
+
+    @Override
+    public boolean isConnected()
+    {
+        return aeronCluster.ingressPublication().isConnected();
+    }
+
+    @Override
+    public void offer(final DirectBuffer buffer)
+    {
+        aeronCluster.offer(buffer, 0, buffer.capacity());
+    }
+}

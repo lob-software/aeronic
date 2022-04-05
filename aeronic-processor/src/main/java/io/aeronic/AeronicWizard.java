@@ -3,8 +3,9 @@ package io.aeronic;
 import io.aeron.Aeron;
 import io.aeron.Subscription;
 import io.aeron.cluster.client.AeronCluster;
+import io.aeronic.cluster.AeronClusterPublication;
 import io.aeronic.cluster.AeronicCredentialSupplier;
-import io.aeronic.cluster.ClusterPublication;
+import io.aeronic.cluster.ClientSessionPublication;
 import io.aeronic.net.AbstractSubscriberAgent;
 import io.aeronic.net.AbstractSubscriberInvoker;
 import io.aeronic.net.AeronicPublication;
@@ -33,37 +34,52 @@ public class AeronicWizard
     public <T> T createPublisher(final Class<T> clazz, final String channel, final int streamId)
     {
         final AeronicPublication publication = new SimplePublication(aeron.addPublication(channel, streamId));
+        publications.add(publication);
         return createPublisher(clazz, publication);
     }
 
-    public <T> T createClusterPublisher(final Class<T> clazz, final String ingressChannel)
+    public <T> T createClusterIngressPublisher(final Class<T> clazz, final String ingressChannel)
     {
-        final String publisherName = clazz.getName();
-
-        final AeronCluster aeronCluster = AeronCluster.connect(
-            new AeronCluster.Context()
-                .credentialsSupplier(new AeronicCredentialSupplier(publisherName))
-                .ingressChannel(ingressChannel)
-                .errorHandler(Throwable::printStackTrace)
-                // TODO: will this work in presence of other pubs / subs on one physical machine?
-                .aeronDirectoryName(aeron.context().aeronDirectoryName()));
-
-        final AeronicPublication publication = new ClusterPublication(aeronCluster);
+        final String publisherName = clazz.getName() + "__IngressPublisher";
+        final AeronicPublication publication = new AeronClusterPublication(publisherName, ingressChannel, aeron.context().aeronDirectoryName());
+        publications.add(publication);
         return createPublisher(clazz, publication);
+    }
+
+    public static <T> ClientSessionPublication<T> createClusterEgressPublisher(final Class<T> clazz)
+    {
+        final String publisherName = clazz.getName() + "__EgressPublisher";
+        final ClientSessionPublication<T> publication = new ClientSessionPublication<>(publisherName);
+        final T publisher = createPublisher(clazz, publication);
+        publication.bindPublisher(publisher);
+        return publication;
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T createPublisher(final Class<T> clazz, final AeronicPublication publication)
+    public static <T> T createPublisher(final Class<T> clazz, final AeronicPublication publication)
     {
         try
         {
-            publications.add(publication);
             return (T)Class.forName(clazz.getName() + "Publisher").getConstructor(AeronicPublication.class).newInstance(publication);
         }
         catch (final Exception e)
         {
             throw new RuntimeException(e);
         }
+    }
+
+    public <T> AeronCluster registerClusterEgressSubscriber(final Class<T> clazz, final T subscriberImplementation, final String ingressChannel)
+    {
+        final String subscriberName = clazz.getName() + "__EgressSubscriber";
+        final AbstractSubscriberInvoker<T> subscriberInvoker = createSubscriberInvoker(clazz, subscriberImplementation);
+
+        return AeronCluster.connect(
+            new AeronCluster.Context()
+                .credentialsSupplier(new AeronicCredentialSupplier(subscriberName))
+                .ingressChannel(ingressChannel)
+                .egressListener((clusterSessionId, timestamp, buffer, offset, length, header) -> subscriberInvoker.handle(buffer, offset))
+                .errorHandler(Throwable::printStackTrace)
+                .aeronDirectoryName(aeron.context().aeronDirectoryName()));
     }
 
     public <T> void registerSubscriber(final Class<T> clazz, final T subscriberImplementation, final String channel, final int streamId)

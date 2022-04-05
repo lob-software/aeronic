@@ -19,9 +19,9 @@ import io.aeron.driver.ThreadingMode;
 import io.aeron.logbuffer.Header;
 import io.aeron.security.Authenticator;
 import io.aeron.security.SessionProxy;
-import io.aeronic.AeronicWizard;
-import io.aeronic.SampleEvents;
-import io.aeronic.SimpleEvents;
+import io.aeronic.cluster.ClientSessionPublication;
+import io.aeronic.cluster.EgressPublishers;
+import io.aeronic.cluster.IngressSubscribers;
 import io.aeronic.net.AbstractSubscriberInvoker;
 import org.agrona.CloseHelper;
 import org.agrona.DirectBuffer;
@@ -29,6 +29,7 @@ import org.agrona.ErrorHandler;
 import org.agrona.concurrent.IdleStrategy;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -51,6 +52,54 @@ public final class TestClusterNode implements AutoCloseable
     private final ClusteredMediaDriver clusteredMediaDriver;
     private final ClusteredServiceContainer container;
 
+    public TestClusterNode(final ClusteredService clusteredService, final boolean isCleanStart)
+    {
+        final String aeronDirectoryName = CommonContext.getAeronDirectoryName() + "-node";
+
+        final MediaDriver.Context mediaDriverContext = new MediaDriver.Context();
+        final ConsensusModule.Context consensusModuleContext = new ConsensusModule.Context();
+        final Archive.Context archiveContext = new Archive.Context();
+        final ClusteredServiceContainer.Context serviceContainerContext = new ClusteredServiceContainer.Context();
+
+        mediaDriverContext
+            .aeronDirectoryName(aeronDirectoryName)
+            .threadingMode(ThreadingMode.SHARED)
+            .errorHandler(Throwable::printStackTrace)
+            .dirDeleteOnShutdown(true)
+            .dirDeleteOnStart(true);
+
+        archiveContext
+            .archiveDirectoryName(aeronDirectoryName + "-archive")
+            .deleteArchiveOnStart(isCleanStart)
+            .recordingEventsEnabled(false)
+            .threadingMode(ArchiveThreadingMode.SHARED);
+
+        final String clusterDirectoryName = aeronDirectoryName + "-cluster";
+
+        consensusModuleContext
+            .authenticatorSupplier(SimpleAuthenticator::new)
+            .clusterDirectoryName(clusterDirectoryName)
+            .aeronDirectoryName(aeronDirectoryName)
+            .ingressChannel(INGRESS_CHANNEL)
+            .replicationChannel(REPLICATION_CHANNEL)
+            .errorHandler(Throwable::printStackTrace)
+            .deleteDirOnStart(isCleanStart);
+
+        serviceContainerContext
+            .clusterDirectoryName(clusterDirectoryName)
+            .aeronDirectoryName(aeronDirectoryName)
+            .clusteredService(clusteredService)
+            .errorHandler(Throwable::printStackTrace);
+
+        clusteredMediaDriver = ClusteredMediaDriver.launch(
+            mediaDriverContext,
+            archiveContext,
+            consensusModuleContext
+        );
+
+        container = ClusteredServiceContainer.launch(serviceContainerContext);
+    }
+
     static class Service implements ClusteredService
     {
         protected Cluster cluster;
@@ -59,12 +108,27 @@ public final class TestClusterNode implements AutoCloseable
         private int messageCount = 0;
 
         private final Map<Long, AbstractSubscriberInvoker<?>> subscriberBySessionId = new HashMap<>();
-        private final Map<String, AbstractSubscriberInvoker<?>> invokerByClassName = new HashMap<>();
+        private final Map<String, AbstractSubscriberInvoker<?>> invokerByName = new HashMap<>();
 
-        public Service(final ClusterSystemTest.SimpleEventsImpl simpleEvents, final ClusterSystemTest.SampleEventsImpl sampleEvents)
+        private final Map<String, ClientSessionPublication<?>> clientSessionPublicationByName = new HashMap<>();
+
+
+        public Service(final IngressSubscribers ingressSubscribers, final EgressPublishers egressPublishers)
         {
-            invokerByClassName.put(SimpleEvents.class.getName(), AeronicWizard.createSubscriberInvoker(SimpleEvents.class, simpleEvents));
-            invokerByClassName.put(SampleEvents.class.getName(), AeronicWizard.createSubscriberInvoker(SampleEvents.class, sampleEvents));
+            ingressSubscribers.forEach(this::registerIngressSubscriberInvoker);
+            egressPublishers.forEach(this::registerEgressPublisher);
+        }
+
+        private void registerEgressPublisher(final ClientSessionPublication<?> clientSessionPublication)
+        {
+            clientSessionPublicationByName.put(clientSessionPublication.getName(), clientSessionPublication);
+        }
+
+        private void registerIngressSubscriberInvoker(final AbstractSubscriberInvoker<?> subscriberInvoker)
+        {
+            Arrays.stream(subscriberInvoker.getSubscriber().getClass().getInterfaces())
+                .map(Class::getCanonicalName)
+                .forEach(subscriberInterface -> invokerByName.put(subscriberInterface + "__IngressPublisher", subscriberInvoker));
         }
 
         public int getMessageCount()
@@ -83,10 +147,20 @@ public final class TestClusterNode implements AutoCloseable
             System.out.println("onSessionOpen " + session.id());
 
             final byte[] encodedPrincipal = session.encodedPrincipal();
+            final String subscriberName = new String(encodedPrincipal);
+
             if (encodedPrincipal.length != 0)
             {
-                final String subscriberClassName = new String(encodedPrincipal);
-                subscriberBySessionId.put(session.id(), invokerByClassName.get(subscriberClassName));
+                final AbstractSubscriberInvoker<?> invoker = invokerByName.get(subscriberName);
+                if (invoker != null)
+                {
+                    subscriberBySessionId.put(session.id(), invoker);
+                }
+
+                if (subscriberName.endsWith("__EgressSubscriber"))
+                {
+                    clientSessionPublicationByName.get(subscriberName.split("__")[0] + "__EgressPublisher").bindClientSession(session);
+                }
             }
         }
 
@@ -141,54 +215,6 @@ public final class TestClusterNode implements AutoCloseable
         {
             System.out.println("onNewLeadershipTermEvent");
         }
-    }
-
-    public TestClusterNode(final ClusteredService clusteredService, final boolean isCleanStart)
-    {
-        final String aeronDirectoryName = CommonContext.getAeronDirectoryName() + "-node";
-
-        final MediaDriver.Context mediaDriverContext = new MediaDriver.Context();
-        final ConsensusModule.Context consensusModuleContext = new ConsensusModule.Context();
-        final Archive.Context archiveContext = new Archive.Context();
-        final ClusteredServiceContainer.Context serviceContainerContext = new ClusteredServiceContainer.Context();
-
-        mediaDriverContext
-            .aeronDirectoryName(aeronDirectoryName)
-            .threadingMode(ThreadingMode.SHARED)
-            .errorHandler(Throwable::printStackTrace)
-            .dirDeleteOnShutdown(true)
-            .dirDeleteOnStart(true);
-
-        archiveContext
-            .archiveDirectoryName(aeronDirectoryName + "-archive")
-            .deleteArchiveOnStart(isCleanStart)
-            .recordingEventsEnabled(false)
-            .threadingMode(ArchiveThreadingMode.SHARED);
-
-        final String clusterDirectoryName = aeronDirectoryName + "-cluster";
-
-        consensusModuleContext
-            .authenticatorSupplier(SimpleAuthenticator::new)
-            .clusterDirectoryName(clusterDirectoryName)
-            .aeronDirectoryName(aeronDirectoryName)
-            .ingressChannel(INGRESS_CHANNEL)
-            .replicationChannel(REPLICATION_CHANNEL)
-            .errorHandler(Throwable::printStackTrace)
-            .deleteDirOnStart(isCleanStart);
-
-        serviceContainerContext
-            .clusterDirectoryName(clusterDirectoryName)
-            .aeronDirectoryName(aeronDirectoryName)
-            .clusteredService(clusteredService)
-            .errorHandler(Throwable::printStackTrace);
-
-        clusteredMediaDriver = ClusteredMediaDriver.launch(
-            mediaDriverContext,
-            archiveContext,
-            consensusModuleContext
-        );
-
-        container = ClusteredServiceContainer.launch(serviceContainerContext);
     }
 
     public void close()
