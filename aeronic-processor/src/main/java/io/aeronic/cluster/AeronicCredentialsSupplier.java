@@ -7,7 +7,7 @@ public class AeronicCredentialsSupplier implements CredentialsSupplier
 {
     private final String name;
 
-    public AeronicCredentialsSupplier(String name)
+    public AeronicCredentialsSupplier(final String name)
     {
         this.name = name;
     }
@@ -19,7 +19,7 @@ public class AeronicCredentialsSupplier implements CredentialsSupplier
     }
 
     @Override
-    public byte[] onChallenge(byte[] encodedChallenge)
+    public byte[] onChallenge(final byte[] encodedChallenge)
     {
         return ArrayUtil.EMPTY_BYTE_ARRAY;
     }
