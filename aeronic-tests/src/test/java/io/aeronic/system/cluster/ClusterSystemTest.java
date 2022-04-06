@@ -7,6 +7,7 @@ import io.aeron.driver.ThreadingMode;
 import io.aeronic.AeronicWizard;
 import io.aeronic.SampleEvents;
 import io.aeronic.SimpleEvents;
+import io.aeronic.cluster.AeronicClusteredServiceContainer;
 import io.aeronic.cluster.ClientSessionPublication;
 import io.aeronic.cluster.EgressPublishers;
 import io.aeronic.cluster.IngressSubscribers;
@@ -68,16 +69,19 @@ public class ClusterSystemTest
     {
         simpleEvents = new SimpleEventsImpl();
         sampleEvents = new SampleEventsImpl();
+        clusteredService = new TestClusterNode.Service();
 
-        clusteredService = new TestClusterNode.Service(
-            IngressSubscribers.create(
-                AeronicWizard.createSubscriberInvoker(SimpleEvents.class, simpleEvents),
-                AeronicWizard.createSubscriberInvoker(SampleEvents.class, sampleEvents)
+        clusterNode = new TestClusterNode(
+            new AeronicClusteredServiceContainer(
+                clusteredService,
+                IngressSubscribers.create(
+                    AeronicWizard.createSubscriberInvoker(SimpleEvents.class, simpleEvents),
+                    AeronicWizard.createSubscriberInvoker(SampleEvents.class, sampleEvents)
+                ),
+                EgressPublishers.none()
             ),
-            EgressPublishers.none()
+            true
         );
-
-        clusterNode = new TestClusterNode(clusteredService, true);
 
         final SimpleEvents simpleEventsPublisher = aeronic.createClusterIngressPublisher(SimpleEvents.class, INGRESS_CHANNEL);
         final SampleEvents sampleEventsPublisher = aeronic.createClusterIngressPublisher(SampleEvents.class, INGRESS_CHANNEL);
@@ -97,12 +101,16 @@ public class ClusterSystemTest
 
         final ClientSessionPublication<SimpleEvents> simpleEventsPublisher = AeronicWizard.createClusterEgressPublisher(SimpleEvents.class);
 
-        clusteredService = new TestClusterNode.Service(
-            IngressSubscribers.none(),
-            EgressPublishers.create(simpleEventsPublisher)
-        );
+        clusteredService = new TestClusterNode.Service();
 
-        clusterNode = new TestClusterNode(clusteredService, true);
+        clusterNode = new TestClusterNode(
+            new AeronicClusteredServiceContainer(
+                clusteredService,
+                IngressSubscribers.none(),
+                EgressPublishers.create(simpleEventsPublisher)
+            ),
+            true
+        );
 
         aeronic.registerClusterEgressSubscriber(SimpleEvents.class, simpleEvents, INGRESS_CHANNEL); // egress channel will be different
         aeronic.start();

@@ -19,17 +19,12 @@ import io.aeron.driver.ThreadingMode;
 import io.aeron.logbuffer.Header;
 import io.aeron.security.Authenticator;
 import io.aeron.security.SessionProxy;
-import io.aeronic.cluster.ClientSessionPublication;
-import io.aeronic.cluster.EgressPublishers;
-import io.aeronic.cluster.IngressSubscribers;
-import io.aeronic.net.AbstractSubscriberInvoker;
 import org.agrona.CloseHelper;
 import org.agrona.DirectBuffer;
 import org.agrona.ErrorHandler;
 import org.agrona.concurrent.IdleStrategy;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -104,32 +99,7 @@ public final class TestClusterNode implements AutoCloseable
     {
         protected Cluster cluster;
         protected IdleStrategy idleStrategy;
-
         private int messageCount = 0;
-
-        private final Map<Long, AbstractSubscriberInvoker<?>> subscriberBySessionId = new HashMap<>();
-        private final Map<String, AbstractSubscriberInvoker<?>> invokerByName = new HashMap<>();
-
-        private final Map<String, ClientSessionPublication<?>> clientSessionPublicationByName = new HashMap<>();
-
-
-        public Service(final IngressSubscribers ingressSubscribers, final EgressPublishers egressPublishers)
-        {
-            ingressSubscribers.forEach(this::registerIngressSubscriberInvoker);
-            egressPublishers.forEach(this::registerEgressPublisher);
-        }
-
-        private void registerEgressPublisher(final ClientSessionPublication<?> clientSessionPublication)
-        {
-            clientSessionPublicationByName.put(clientSessionPublication.getName(), clientSessionPublication);
-        }
-
-        private void registerIngressSubscriberInvoker(final AbstractSubscriberInvoker<?> subscriberInvoker)
-        {
-            Arrays.stream(subscriberInvoker.getSubscriber().getClass().getInterfaces())
-                .map(Class::getCanonicalName)
-                .forEach(subscriberInterface -> invokerByName.put(subscriberInterface + "__IngressPublisher", subscriberInvoker));
-        }
 
         public int getMessageCount()
         {
@@ -145,23 +115,6 @@ public final class TestClusterNode implements AutoCloseable
         public void onSessionOpen(final ClientSession session, final long timestamp)
         {
             System.out.println("onSessionOpen " + session.id());
-
-            final byte[] encodedPrincipal = session.encodedPrincipal();
-            final String subscriberName = new String(encodedPrincipal);
-
-            if (encodedPrincipal.length != 0)
-            {
-                final AbstractSubscriberInvoker<?> invoker = invokerByName.get(subscriberName);
-                if (invoker != null)
-                {
-                    subscriberBySessionId.put(session.id(), invoker);
-                }
-
-                if (subscriberName.endsWith("__EgressSubscriber"))
-                {
-                    clientSessionPublicationByName.get(subscriberName.split("__")[0] + "__EgressPublisher").bindClientSession(session);
-                }
-            }
         }
 
         public void onSessionMessage(
@@ -173,7 +126,6 @@ public final class TestClusterNode implements AutoCloseable
             final Header header
         )
         {
-            subscriberBySessionId.get(session.id()).handle(buffer, offset);
             messageCount++;
             System.out.println(cluster.role() + " onSessionMessage " + session.id() + " count=" + messageCount);
         }
