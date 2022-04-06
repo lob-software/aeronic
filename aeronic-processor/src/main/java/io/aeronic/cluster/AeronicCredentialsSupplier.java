@@ -3,11 +3,11 @@ package io.aeronic.cluster;
 import io.aeron.security.CredentialsSupplier;
 import org.agrona.collections.ArrayUtil;
 
-public class AeronicCredentialSupplier implements CredentialsSupplier
+public class AeronicCredentialsSupplier implements CredentialsSupplier
 {
     private final String name;
 
-    public AeronicCredentialSupplier(String name)
+    public AeronicCredentialsSupplier(String name)
     {
         this.name = name;
     }

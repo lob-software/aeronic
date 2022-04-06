@@ -13,7 +13,7 @@ public class AeronClusterPublication implements AeronicPublication
     {
         this.aeronCluster = AeronCluster.connect(
             new AeronCluster.Context()
-                .credentialsSupplier(new AeronicCredentialSupplier(publisherName))
+                .credentialsSupplier(new AeronicCredentialsSupplier(publisherName))
                 .ingressChannel(ingressChannel)
                 .errorHandler(Throwable::printStackTrace)
                 // TODO: will this work in presence of other pubs / subs on one physical machine?

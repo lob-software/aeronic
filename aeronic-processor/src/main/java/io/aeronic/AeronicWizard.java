@@ -4,7 +4,7 @@ import io.aeron.Aeron;
 import io.aeron.Subscription;
 import io.aeron.cluster.client.AeronCluster;
 import io.aeronic.cluster.AeronClusterPublication;
-import io.aeronic.cluster.AeronicCredentialSupplier;
+import io.aeronic.cluster.AeronicCredentialsSupplier;
 import io.aeronic.cluster.ClientSessionPublication;
 import io.aeronic.net.AbstractSubscriberAgent;
 import io.aeronic.net.AbstractSubscriberInvoker;
@@ -75,7 +75,7 @@ public class AeronicWizard
 
         return AeronCluster.connect(
             new AeronCluster.Context()
-                .credentialsSupplier(new AeronicCredentialSupplier(subscriberName))
+                .credentialsSupplier(new AeronicCredentialsSupplier(subscriberName))
                 .ingressChannel(ingressChannel)
                 .egressListener((clusterSessionId, timestamp, buffer, offset, length, header) -> subscriberInvoker.handle(buffer, offset))
                 .errorHandler(Throwable::printStackTrace)
