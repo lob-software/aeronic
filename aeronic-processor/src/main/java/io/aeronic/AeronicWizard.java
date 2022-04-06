@@ -6,10 +6,7 @@ import io.aeron.cluster.client.AeronCluster;
 import io.aeronic.cluster.AeronClusterPublication;
 import io.aeronic.cluster.AeronicCredentialsSupplier;
 import io.aeronic.cluster.ClientSessionPublication;
-import io.aeronic.net.AbstractSubscriberAgent;
-import io.aeronic.net.AbstractSubscriberInvoker;
-import io.aeronic.net.AeronicPublication;
-import io.aeronic.net.SimplePublication;
+import io.aeronic.net.*;
 import org.agrona.concurrent.Agent;
 import org.agrona.concurrent.AgentRunner;
 import org.agrona.concurrent.CompositeAgent;
@@ -68,27 +65,29 @@ public class AeronicWizard
         }
     }
 
-    public <T> AeronCluster registerClusterEgressSubscriber(final Class<T> clazz, final T subscriberImplementation, final String ingressChannel)
-    {
-        final String subscriberName = clazz.getName() + "__EgressSubscriber";
-        final AbstractSubscriberInvoker<T> subscriberInvoker = createSubscriberInvoker(clazz, subscriberImplementation);
-
-        return AeronCluster.connect(
-            new AeronCluster.Context()
-                .credentialsSupplier(new AeronicCredentialsSupplier(subscriberName))
-                .ingressChannel(ingressChannel)
-                .egressListener((clusterSessionId, timestamp, buffer, offset, length, header) -> subscriberInvoker.handle(buffer, offset))
-                .errorHandler(Throwable::printStackTrace)
-                .aeronDirectoryName(aeron.context().aeronDirectoryName()));
-    }
-
     public <T> void registerSubscriber(final Class<T> clazz, final T subscriberImplementation, final String channel, final int streamId)
     {
         final Subscription subscription = aeron.addSubscription(channel, streamId);
         subscriptions.add(subscription);
 
         final AbstractSubscriberInvoker<T> invoker = createSubscriberInvoker(clazz, subscriberImplementation);
-        subscriptionAgents.add(new AbstractSubscriberAgent<>(subscription, invoker));
+        subscriptionAgents.add(new SubscriptionAgent<>(subscription, invoker));
+    }
+
+    public <T> void registerClusterEgressSubscriber(final Class<T> clazz, final T subscriberImplementation, final String ingressChannel)
+    {
+        final String subscriberName = clazz.getName() + "__EgressSubscriber";
+        final AbstractSubscriberInvoker<T> invoker = createSubscriberInvoker(clazz, subscriberImplementation);
+
+        final AeronCluster aeronCluster = AeronCluster.connect(
+            new AeronCluster.Context()
+                .credentialsSupplier(new AeronicCredentialsSupplier(subscriberName))
+                .ingressChannel(ingressChannel)
+                .egressListener((clusterSessionId, timestamp, buffer, offset, length, header) -> invoker.handle(buffer, offset))
+                .errorHandler(Throwable::printStackTrace)
+                .aeronDirectoryName(aeron.context().aeronDirectoryName()));
+
+        subscriptionAgents.add(new AeronClusterAgent(aeronCluster, subscriberName));
     }
 
     @SuppressWarnings("unchecked")

@@ -5,12 +5,12 @@ import io.aeron.logbuffer.Header;
 import org.agrona.DirectBuffer;
 import org.agrona.concurrent.Agent;
 
-public class AbstractSubscriberAgent<T> implements Agent
+public class SubscriptionAgent<T> implements Agent
 {
     private final Subscription subscription;
     protected final AbstractSubscriberInvoker<T> invoker;
 
-    public AbstractSubscriberAgent(final Subscription subscription, final AbstractSubscriberInvoker<T> invoker)
+    public SubscriptionAgent(final Subscription subscription, final AbstractSubscriberInvoker<T> invoker)
     {
         this.subscription = subscription;
         this.invoker = invoker;

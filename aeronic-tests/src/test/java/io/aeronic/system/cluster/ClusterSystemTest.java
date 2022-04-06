@@ -2,7 +2,6 @@ package io.aeronic.system.cluster;
 
 import io.aeron.Aeron;
 import io.aeron.ChannelUriStringBuilder;
-import io.aeron.cluster.client.AeronCluster;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
 import io.aeronic.AeronicWizard;
@@ -105,10 +104,8 @@ public class ClusterSystemTest
 
         clusterNode = new TestClusterNode(clusteredService, true);
 
-        final AeronCluster aeronCluster = aeronic.registerClusterEgressSubscriber(SimpleEvents.class, simpleEvents, INGRESS_CHANNEL); // egress channel will be different
-
-        // TODO: poll on AeronicWizard's duty cycle
-        new Thread(() -> pollCluster(aeronCluster)).start();
+        aeronic.registerClusterEgressSubscriber(SimpleEvents.class, simpleEvents, INGRESS_CHANNEL); // egress channel will be different
+        aeronic.start();
 
         await()
             .timeout(Duration.ofSeconds(1))
@@ -119,14 +116,6 @@ public class ClusterSystemTest
         await()
             .timeout(Duration.ofSeconds(1))
             .until(() -> simpleEvents.value == 101L);
-    }
-
-    private void pollCluster(final AeronCluster aeronCluster)
-    {
-        while (!aeronCluster.isClosed())
-        {
-            aeronCluster.pollEgress();
-        }
     }
 
     @Test
