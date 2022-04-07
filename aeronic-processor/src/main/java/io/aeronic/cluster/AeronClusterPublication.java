@@ -16,7 +16,6 @@ public class AeronClusterPublication implements AeronicPublication
                 .credentialsSupplier(new AeronicCredentialsSupplier(publisherName))
                 .ingressChannel(ingressChannel)
                 .errorHandler(Throwable::printStackTrace)
-                // TODO: will this work in presence of other pubs / subs on one physical machine?
                 .aeronDirectoryName(aeronDirectoryName));
     }
 
