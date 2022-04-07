@@ -88,7 +88,6 @@ public class PublisherGenerator
                 return;
             }
 
-            // TODO: is there a better way?
             final String[] split = type.split("\\.");
             final String className = split[split.length - 1];
             methodsBuilder.append("        final %s %s".formatted(className, parameter.getName()));
