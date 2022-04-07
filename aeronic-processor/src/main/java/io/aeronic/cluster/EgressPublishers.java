@@ -1,30 +1,14 @@
 package io.aeronic.cluster;
 
+import io.aeronic.AeronicWizard;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class EgressPublishers
 {
-    private final ClientSessionPublication<?>[] clientSessionPublications;
-
-    private EgressPublishers()
-    {
-        this.clientSessionPublications = new ClientSessionPublication[0];
-    }
-
-    private EgressPublishers(final ClientSessionPublication<?>... clientSessionPublications)
-    {
-        this.clientSessionPublications = clientSessionPublications;
-    }
-
-    public static EgressPublishers none()
-    {
-        return new EgressPublishers();
-    }
-
-    public static EgressPublishers create(final ClientSessionPublication<?>... clientSessionPublications)
-    {
-        return new EgressPublishers(clientSessionPublications);
-    }
+    private final List<ClientSessionPublication<?>> clientSessionPublications = new ArrayList<>();
 
     public void forEach(final Consumer<ClientSessionPublication<?>> clientSessionPublicationConsumer)
     {
@@ -32,5 +16,10 @@ public class EgressPublishers
         {
             clientSessionPublicationConsumer.accept(clientSessionPublication);
         }
+    }
+
+    public <T> void register(final Class<T> clazz)
+    {
+        clientSessionPublications.add(AeronicWizard.createClusterEgressPublisher(clazz));
     }
 }

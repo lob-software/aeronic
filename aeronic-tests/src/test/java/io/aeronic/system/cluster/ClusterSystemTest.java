@@ -8,9 +8,6 @@ import io.aeronic.AeronicWizard;
 import io.aeronic.SampleEvents;
 import io.aeronic.SimpleEvents;
 import io.aeronic.cluster.AeronicClusteredServiceContainer;
-import io.aeronic.cluster.ClientSessionPublication;
-import io.aeronic.cluster.EgressPublishers;
-import io.aeronic.cluster.IngressSubscribers;
 import org.agrona.concurrent.BusySpinIdleStrategy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,17 +68,15 @@ public class ClusterSystemTest
     {
         clusteredService = new TestClusterNode.Service();
 
-        clusterNode = new TestClusterNode(
-            new AeronicClusteredServiceContainer(
-                clusteredService,
-                IngressSubscribers.create(
-                    AeronicWizard.createSubscriberInvoker(SimpleEvents.class, simpleEvents),
-                    AeronicWizard.createSubscriberInvoker(SampleEvents.class, sampleEvents)
-                ),
-                EgressPublishers.none()
-            ),
-            true
-        );
+        final AeronicClusteredServiceContainer aeronicClusteredService = AeronicClusteredServiceContainer.configure()
+            .clusteredService(clusteredService)
+            .registerIngressSubscriber(SimpleEvents.class, simpleEvents)
+            .registerIngressSubscriber(SampleEvents.class, sampleEvents)
+            .registerEgressPublisher(SimpleEvents.class)
+            .registerEgressPublisher(SampleEvents.class)
+            .create();
+
+        clusterNode = new TestClusterNode(aeronicClusteredService,true);
 
         final SimpleEvents simpleEventsPublisher = aeronic.createClusterIngressPublisher(SimpleEvents.class, INGRESS_CHANNEL);
         final SampleEvents sampleEventsPublisher = aeronic.createClusterIngressPublisher(SampleEvents.class, INGRESS_CHANNEL);
@@ -97,30 +92,25 @@ public class ClusterSystemTest
     @Test
     public void clusterEgress()
     {
-        final ClientSessionPublication<SimpleEvents> simpleEventsPublisher = AeronicWizard.createClusterEgressPublisher(SimpleEvents.class);
-        final ClientSessionPublication<SampleEvents> sampleEventsPublisher = AeronicWizard.createClusterEgressPublisher(SampleEvents.class);
-
         clusteredService = new TestClusterNode.Service();
 
-        clusterNode = new TestClusterNode(
-            new AeronicClusteredServiceContainer(
-                clusteredService,
-                IngressSubscribers.none(),
-                EgressPublishers.create(simpleEventsPublisher, sampleEventsPublisher)
-            ),
-            true
-        );
+        final AeronicClusteredServiceContainer aeronicClusteredService = AeronicClusteredServiceContainer.configure()
+            .clusteredService(clusteredService)
+            .registerEgressPublisher(SimpleEvents.class)
+            .registerEgressPublisher(SampleEvents.class)
+            .create();
+
+        final SimpleEvents simpleEventsPublisher = aeronicClusteredService.getPublisherFor(SimpleEvents.class);
+        final SampleEvents sampleEventsPublisher = aeronicClusteredService.getPublisherFor(SampleEvents.class);
+
+        clusterNode = new TestClusterNode(aeronicClusteredService, true);
 
         aeronic.registerClusterEgressSubscriber(SimpleEvents.class, simpleEvents, INGRESS_CHANNEL);
         aeronic.registerClusterEgressSubscriber(SampleEvents.class, sampleEvents, INGRESS_CHANNEL);
         aeronic.start();
 
-        await()
-            .timeout(Duration.ofSeconds(1))
-            .until(sampleEventsPublisher::isConnected);
-
-        simpleEventsPublisher.getPublisher().onEvent(101L);
-        sampleEventsPublisher.getPublisher().onEvent(202L);
+        simpleEventsPublisher.onEvent(101L);
+        sampleEventsPublisher.onEvent(202L);
 
         await()
             .timeout(Duration.ofSeconds(1))
@@ -133,25 +123,20 @@ public class ClusterSystemTest
         final SimpleEventsImpl clusterIngressSimpleEventsImpl = new SimpleEventsImpl();
         final SampleEventsImpl clusterIngressSampleEventsImpl = new SampleEventsImpl();
 
-        final ClientSessionPublication<SimpleEvents> clusterEgressSimpleEventsPublisher = AeronicWizard.createClusterEgressPublisher(SimpleEvents.class);
-        final ClientSessionPublication<SampleEvents> clusterEgressSampleEventsPublisher = AeronicWizard.createClusterEgressPublisher(SampleEvents.class);
-
         clusteredService = new TestClusterNode.Service();
 
-        clusterNode = new TestClusterNode(
-            new AeronicClusteredServiceContainer(
-                clusteredService,
-                IngressSubscribers.create(
-                    AeronicWizard.createSubscriberInvoker(SimpleEvents.class, clusterIngressSimpleEventsImpl),
-                    AeronicWizard.createSubscriberInvoker(SampleEvents.class, clusterIngressSampleEventsImpl)
-                ),
-                EgressPublishers.create(
-                    clusterEgressSimpleEventsPublisher,
-                    clusterEgressSampleEventsPublisher
-                )
-            ),
-            true
-        );
+        final AeronicClusteredServiceContainer aeronicClusteredService = AeronicClusteredServiceContainer.configure()
+            .clusteredService(clusteredService)
+            .registerIngressSubscriber(SimpleEvents.class, clusterIngressSimpleEventsImpl)
+            .registerIngressSubscriber(SampleEvents.class, clusterIngressSampleEventsImpl)
+            .registerEgressPublisher(SimpleEvents.class)
+            .registerEgressPublisher(SampleEvents.class)
+            .create();
+
+        final SimpleEvents clusterEgressSimpleEventsPublisher = aeronicClusteredService.getPublisherFor(SimpleEvents.class);
+        final SampleEvents clusterEgressSampleEventsPublisher = aeronicClusteredService.getPublisherFor(SampleEvents.class);
+
+        clusterNode = new TestClusterNode(aeronicClusteredService, true);
 
         final SimpleEvents clusterIngressSimpleEventsPublisher = aeronic.createClusterIngressPublisher(SimpleEvents.class, INGRESS_CHANNEL);
         final SampleEvents clusterIngressSampleEventsPublisher = aeronic.createClusterIngressPublisher(SampleEvents.class, INGRESS_CHANNEL);
@@ -160,13 +145,9 @@ public class ClusterSystemTest
         aeronic.registerClusterEgressSubscriber(SampleEvents.class, sampleEvents, INGRESS_CHANNEL);
         aeronic.start();
 
-        await()
-            .timeout(Duration.ofSeconds(1))
-            .until(clusterEgressSampleEventsPublisher::isConnected);
-
         // cluster -> client
-        clusterEgressSimpleEventsPublisher.getPublisher().onEvent(101L);
-        clusterEgressSampleEventsPublisher.getPublisher().onEvent(202L);
+        clusterEgressSimpleEventsPublisher.onEvent(101L);
+        clusterEgressSampleEventsPublisher.onEvent(202L);
 
 
         // client -> cluster

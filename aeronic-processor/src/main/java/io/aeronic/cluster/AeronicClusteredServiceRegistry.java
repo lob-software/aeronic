@@ -19,6 +19,19 @@ public class AeronicClusteredServiceRegistry
         clientSessionPublicationByName.put(clientSessionPublication.getName(), clientSessionPublication);
     }
 
+    @SuppressWarnings("unchecked")
+    public <T> T getPublisherFor(final Class<T> clazz)
+    {
+        try
+        {
+            return (T)clientSessionPublicationByName.get(clazz.getName() + "__EgressPublisher").getPublisher();
+        }
+        catch (final Exception e)
+        {
+            throw new RuntimeException("Could not retrieve publisher for " + clazz);
+        }
+    }
+
     public void registerIngressSubscriberInvoker(final AbstractSubscriberInvoker<?> subscriberInvoker)
     {
         Arrays.stream(subscriberInvoker.getSubscriber().getClass().getInterfaces())

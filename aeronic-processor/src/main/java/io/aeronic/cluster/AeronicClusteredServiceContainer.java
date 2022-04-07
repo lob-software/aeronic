@@ -16,7 +16,7 @@ public class AeronicClusteredServiceContainer implements ClusteredService
     private final ClusteredService clusteredService;
     private final AeronicClusteredServiceRegistry registry = new AeronicClusteredServiceRegistry();
 
-    public AeronicClusteredServiceContainer(
+    private AeronicClusteredServiceContainer(
         final ClusteredService clusteredService,
         final IngressSubscribers ingressSubscribers,
         final EgressPublishers egressPublishers
@@ -25,6 +25,46 @@ public class AeronicClusteredServiceContainer implements ClusteredService
         this.clusteredService = clusteredService;
         ingressSubscribers.forEach(registry::registerIngressSubscriberInvoker);
         egressPublishers.forEach(registry::registerEgressPublisher);
+    }
+
+    public static Configuration configure()
+    {
+        return new Configuration();
+    }
+
+    public <T> T getPublisherFor(final Class<T> clazz)
+    {
+        return registry.getPublisherFor(clazz);
+    }
+
+    public static class Configuration
+    {
+        private ClusteredService clusteredService;
+        private final IngressSubscribers ingressSubscribers = new IngressSubscribers();
+        private final EgressPublishers egressPublishers = new EgressPublishers();
+
+        public Configuration clusteredService(final ClusteredService clusteredService)
+        {
+            this.clusteredService = clusteredService;
+            return this;
+        }
+
+        public <T> Configuration registerIngressSubscriber(final Class<T> clazz, final T subscriberImplementation)
+        {
+            ingressSubscribers.register(clazz, subscriberImplementation);
+            return this;
+        }
+
+        public <T> Configuration registerEgressPublisher(final Class<T> clazz)
+        {
+            egressPublishers.register(clazz);
+            return this;
+        }
+
+        public AeronicClusteredServiceContainer create()
+        {
+            return new AeronicClusteredServiceContainer(clusteredService, ingressSubscribers, egressPublishers);
+        }
     }
 
     @Override
