@@ -104,7 +104,4 @@ public class BufferEncoderTest
         assertEquals(stringValue.length(), encodedLength);
         assertArrayEquals(stringValue.getBytes(), encodedBytes);
     }
-
-
-    // TODO: all together now
 }

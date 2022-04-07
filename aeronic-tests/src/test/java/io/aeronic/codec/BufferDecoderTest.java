@@ -120,6 +120,4 @@ public class BufferDecoderTest
 
         assertEquals(stringValue, bufferDecoder.decodeString());
     }
-
-    // TODO: all together now
 }
