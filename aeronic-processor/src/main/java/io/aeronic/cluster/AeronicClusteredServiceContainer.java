@@ -37,6 +37,11 @@ public class AeronicClusteredServiceContainer implements ClusteredService
         return registry.getPublisherFor(clazz);
     }
 
+    public boolean egressConnected()
+    {
+        return registry.egressConnected();
+    }
+
     public static class Configuration
     {
         private ClusteredService clusteredService;

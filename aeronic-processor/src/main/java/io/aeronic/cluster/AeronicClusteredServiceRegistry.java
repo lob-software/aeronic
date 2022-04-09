@@ -39,6 +39,11 @@ public class AeronicClusteredServiceRegistry
             .forEach(subscriberInterface -> invokerByName.put(subscriberInterface + "__IngressPublisher", subscriberInvoker));
     }
 
+    public boolean egressConnected()
+    {
+        return clientSessionPublicationByName.values().stream().allMatch(ClientSessionPublication::isConnected);
+    }
+
     public void onSessionOpen(final ClientSession session)
     {
         final byte[] encodedPrincipal = session.encodedPrincipal();

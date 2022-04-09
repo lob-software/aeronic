@@ -72,14 +72,14 @@ public class ClusterSystemTest
             .clusteredService(clusteredService)
             .registerIngressSubscriber(SimpleEvents.class, simpleEvents)
             .registerIngressSubscriber(SampleEvents.class, sampleEvents)
-            .registerEgressPublisher(SimpleEvents.class)
-            .registerEgressPublisher(SampleEvents.class)
             .create();
 
-        clusterNode = new TestClusterNode(aeronicClusteredService,true);
+        clusterNode = new TestClusterNode(aeronicClusteredService, true);
 
         final SimpleEvents simpleEventsPublisher = aeronic.createClusterIngressPublisher(SimpleEvents.class, INGRESS_CHANNEL);
         final SampleEvents sampleEventsPublisher = aeronic.createClusterIngressPublisher(SampleEvents.class, INGRESS_CHANNEL);
+
+        aeronic.awaitUntilPubsAndSubsConnect();
 
         simpleEventsPublisher.onEvent(101L);
         sampleEventsPublisher.onEvent(201L);
@@ -108,6 +108,8 @@ public class ClusterSystemTest
         aeronic.registerClusterEgressSubscriber(SimpleEvents.class, simpleEvents, INGRESS_CHANNEL);
         aeronic.registerClusterEgressSubscriber(SampleEvents.class, sampleEvents, INGRESS_CHANNEL);
         aeronic.start();
+        aeronic.awaitUntilPubsAndSubsConnect();
+        await().timeout(Duration.ofSeconds(1)).until(aeronicClusteredService::egressConnected);
 
         simpleEventsPublisher.onEvent(101L);
         sampleEventsPublisher.onEvent(202L);
@@ -144,6 +146,8 @@ public class ClusterSystemTest
         aeronic.registerClusterEgressSubscriber(SimpleEvents.class, simpleEvents, INGRESS_CHANNEL);
         aeronic.registerClusterEgressSubscriber(SampleEvents.class, sampleEvents, INGRESS_CHANNEL);
         aeronic.start();
+        aeronic.awaitUntilPubsAndSubsConnect();
+        await().timeout(Duration.ofSeconds(1)).until(aeronicClusteredService::egressConnected);
 
         // cluster -> client
         clusterEgressSimpleEventsPublisher.onEvent(101L);
