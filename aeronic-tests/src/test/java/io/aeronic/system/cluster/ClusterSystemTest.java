@@ -2,12 +2,17 @@ package io.aeronic.system.cluster;
 
 import io.aeron.Aeron;
 import io.aeron.ChannelUriStringBuilder;
+import io.aeron.CommonContext;
+import io.aeron.cluster.client.AeronCluster;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
 import io.aeronic.AeronicWizard;
 import io.aeronic.SampleEvents;
 import io.aeronic.SimpleEvents;
 import io.aeronic.cluster.AeronicClusteredServiceContainer;
+import io.aeronic.cluster.AeronicCredentialsSupplier;
+import org.agrona.ExpandableArrayBuffer;
+import org.agrona.IoUtil;
 import org.agrona.concurrent.BusySpinIdleStrategy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -164,6 +169,31 @@ public class ClusterSystemTest
                 sampleEvents.value == 202L &&
                 clusterIngressSimpleEventsImpl.value == 303L &&
                 clusterIngressSampleEventsImpl.value == 404L);
+    }
+
+    @Test
+    public void emptyClusteredServiceContainer()
+    {
+        clusteredService = new TestClusterNode.Service();
+
+        final AeronicClusteredServiceContainer aeronicClusteredService = AeronicClusteredServiceContainer.configure()
+            .clusteredService(clusteredService)
+            .create();
+
+        clusterNode = new TestClusterNode(aeronicClusteredService, true);
+
+        final AeronCluster anotherClient = AeronCluster.connect(
+            new AeronCluster.Context()
+                .ingressChannel(INGRESS_CHANNEL)
+                .aeronDirectoryName(aeron.context().aeronDirectoryName())
+                .errorHandler(Throwable::printStackTrace));
+
+        final ExpandableArrayBuffer buffer = new ExpandableArrayBuffer();
+        buffer.putLong(0, 100);
+
+        anotherClient.offer(buffer, 0, buffer.capacity());
+
+        await().until(() -> clusteredService.getMessageCount() == 1);
     }
 
     public static class SimpleEventsImpl implements SimpleEvents

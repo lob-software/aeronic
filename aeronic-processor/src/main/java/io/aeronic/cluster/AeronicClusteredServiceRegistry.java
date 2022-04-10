@@ -2,6 +2,7 @@ package io.aeronic.cluster;
 
 import io.aeron.cluster.service.ClientSession;
 import io.aeronic.net.AbstractSubscriberInvoker;
+import io.aeronic.net.NullSubscriberInvokerImpl;
 import org.agrona.DirectBuffer;
 
 import java.util.Arrays;
@@ -66,6 +67,6 @@ public class AeronicClusteredServiceRegistry
 
     public void onSessionMessage(final ClientSession session, final DirectBuffer buffer, final int offset)
     {
-        subscriberBySessionId.get(session.id()).handle(buffer, offset);
+        subscriberBySessionId.getOrDefault(session.id(), NullSubscriberInvokerImpl.INSTANCE).handle(buffer, offset);
     }
 }
