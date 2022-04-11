@@ -104,6 +104,18 @@ public class AeronicWizard
         subscriptionAgents.add(new AeronClusterAgent(aeronCluster, subscriberName));
     }
 
+    public <T> void registerClusterEgressSubscriber(final Class<T> clazz, final T subscriberImplementation, final AeronCluster.Context aeronClusterCtx)
+    {
+        final String subscriberName = clazz.getName() + "__EgressSubscriber";
+        final AbstractSubscriberInvoker<T> invoker = createSubscriberInvoker(clazz, subscriberImplementation);
+        final AeronCluster aeronCluster = AeronCluster.connect(
+            aeronClusterCtx
+                .credentialsSupplier(new AeronicCredentialsSupplier(subscriberName))
+                .egressListener((clusterSessionId, timestamp, buffer, offset, length, header) -> invoker.handle(buffer, offset))
+        );
+        subscriptionAgents.add(new AeronClusterAgent(aeronCluster, subscriberName));
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> AbstractSubscriberInvoker<T> createSubscriberInvoker(final Class<T> clazz, final T subscriberImplementation)
     {

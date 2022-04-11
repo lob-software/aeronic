@@ -114,7 +114,11 @@ public class ClusterSystemTest
 
         clusterNode = new TestClusterNode(aeronicClusteredService, true);
 
-        aeronic.registerClusterEgressSubscriber(SimpleEvents.class, simpleEvents, INGRESS_CHANNEL);
+        aeronic.registerClusterEgressSubscriber(SimpleEvents.class, simpleEvents, new AeronCluster.Context()
+            .aeronDirectoryName(aeron.context().aeronDirectoryName())
+            .errorHandler(Throwable::printStackTrace)
+            .ingressChannel(INGRESS_CHANNEL));
+
         aeronic.registerClusterEgressSubscriber(SampleEvents.class, sampleEvents, INGRESS_CHANNEL);
         aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
