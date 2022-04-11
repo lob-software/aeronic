@@ -7,6 +7,7 @@ import io.aeron.cluster.service.ClientSession;
 import io.aeron.cluster.service.Cluster;
 import io.aeron.cluster.service.ClusteredService;
 import io.aeron.logbuffer.Header;
+import io.aeronic.AeronicWizard;
 import org.agrona.DirectBuffer;
 
 import java.util.concurrent.TimeUnit;
@@ -14,17 +15,15 @@ import java.util.concurrent.TimeUnit;
 public class AeronicClusteredServiceContainer implements ClusteredService
 {
     private final ClusteredService clusteredService;
-    private final AeronicClusteredServiceRegistry registry = new AeronicClusteredServiceRegistry();
+    private final AeronicClusteredServiceRegistry registry;
 
     private AeronicClusteredServiceContainer(
         final ClusteredService clusteredService,
-        final IngressSubscribers ingressSubscribers,
-        final EgressPublishers egressPublishers
+        final AeronicClusteredServiceRegistry registry
     )
     {
         this.clusteredService = clusteredService;
-        ingressSubscribers.forEach(registry::registerIngressSubscriberInvoker);
-        egressPublishers.forEach(registry::registerEgressPublisher);
+        this.registry = registry;
     }
 
     public static Configuration configure()
@@ -45,8 +44,7 @@ public class AeronicClusteredServiceContainer implements ClusteredService
     public static class Configuration
     {
         private ClusteredService clusteredService;
-        private final IngressSubscribers ingressSubscribers = new IngressSubscribers();
-        private final EgressPublishers egressPublishers = new EgressPublishers();
+        private final AeronicClusteredServiceRegistry registry = new AeronicClusteredServiceRegistry();
 
         public Configuration clusteredService(final ClusteredService clusteredService)
         {
@@ -56,19 +54,24 @@ public class AeronicClusteredServiceContainer implements ClusteredService
 
         public <T> Configuration registerIngressSubscriber(final Class<T> clazz, final T subscriberImplementation)
         {
-            ingressSubscribers.register(clazz, subscriberImplementation);
+            registry.registerIngressSubscriberInvoker(AeronicWizard.createSubscriberInvoker(clazz, subscriberImplementation));
             return this;
         }
 
         public <T> Configuration registerEgressPublisher(final Class<T> clazz)
         {
-            egressPublishers.register(clazz);
+            registry.registerEgressPublisher(AeronicWizard.createClusterEgressPublisher(clazz));
             return this;
+        }
+
+        public AeronicClusteredServiceRegistry registry()
+        {
+            return registry;
         }
 
         public AeronicClusteredServiceContainer create()
         {
-            return new AeronicClusteredServiceContainer(clusteredService, ingressSubscribers, egressPublishers);
+            return new AeronicClusteredServiceContainer(clusteredService, registry);
         }
     }
 

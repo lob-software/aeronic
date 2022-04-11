@@ -102,14 +102,15 @@ public class ClusterSystemTest
     {
         clusteredService = new TestClusterNode.Service();
 
-        final AeronicClusteredServiceContainer aeronicClusteredService = AeronicClusteredServiceContainer.configure()
+        final AeronicClusteredServiceContainer.Configuration configuration = AeronicClusteredServiceContainer.configure()
             .clusteredService(clusteredService)
             .registerEgressPublisher(SimpleEvents.class)
-            .registerEgressPublisher(SampleEvents.class)
-            .create();
+            .registerEgressPublisher(SampleEvents.class);
 
-        final SimpleEvents simpleEventsPublisher = aeronicClusteredService.getPublisherFor(SimpleEvents.class);
-        final SampleEvents sampleEventsPublisher = aeronicClusteredService.getPublisherFor(SampleEvents.class);
+        final SimpleEvents simpleEventsPublisher = configuration.registry().getPublisherFor(SimpleEvents.class);
+        final SampleEvents sampleEventsPublisher = configuration.registry().getPublisherFor(SampleEvents.class);
+
+        final AeronicClusteredServiceContainer aeronicClusteredService = configuration.create();
 
         clusterNode = new TestClusterNode(aeronicClusteredService, true);
 
