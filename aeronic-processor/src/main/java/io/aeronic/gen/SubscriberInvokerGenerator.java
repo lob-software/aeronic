@@ -37,7 +37,6 @@ public class SubscriberInvokerGenerator
         }
 
         handleMethodBuilder.append("""
-                        default -> throw new RuntimeException("Unexpected message type: " + msgType);
                     }
                 }
             """);

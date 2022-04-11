@@ -44,7 +44,6 @@ public class SubscriberInvokerGeneratorTest
                             final String stringValue = bufferDecoder.decodeString();
                             subscriber.onEvent(longValue, intValue, floatValue, doubleValue, byteValue, charValue, simpleImpl, stringValue);
                         }
-                        default -> throw new RuntimeException("Unexpected message type: " + msgType);
                     }
                 }
             }     
