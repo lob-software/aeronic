@@ -38,7 +38,21 @@ public class AeronicWizard
     public <T> T createClusterIngressPublisher(final Class<T> clazz, final String ingressChannel)
     {
         final String publisherName = clazz.getName() + "__IngressPublisher";
-        final AeronicPublication publication = new AeronClusterPublication(publisherName, ingressChannel, aeron.context().aeronDirectoryName());
+        final AeronicPublication publication = new AeronClusterPublication(
+            publisherName,
+            new AeronCluster.Context()
+                .errorHandler(Throwable::printStackTrace)
+                .ingressChannel(ingressChannel)
+                .aeronDirectoryName(aeron.context().aeronDirectoryName())
+        );
+        publications.add(publication);
+        return createPublisher(clazz, publication);
+    }
+
+    public <T> T createClusterIngressPublisher(final Class<T> clazz, final AeronCluster.Context aeronClusterCtx)
+    {
+        final String publisherName = clazz.getName() + "__IngressPublisher";
+        final AeronicPublication publication = new AeronClusterPublication(publisherName, aeronClusterCtx);
         publications.add(publication);
         return createPublisher(clazz, publication);
     }

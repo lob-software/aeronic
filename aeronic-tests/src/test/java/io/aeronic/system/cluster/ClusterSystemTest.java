@@ -2,7 +2,6 @@ package io.aeronic.system.cluster;
 
 import io.aeron.Aeron;
 import io.aeron.ChannelUriStringBuilder;
-import io.aeron.CommonContext;
 import io.aeron.cluster.client.AeronCluster;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
@@ -10,9 +9,7 @@ import io.aeronic.AeronicWizard;
 import io.aeronic.SampleEvents;
 import io.aeronic.SimpleEvents;
 import io.aeronic.cluster.AeronicClusteredServiceContainer;
-import io.aeronic.cluster.AeronicCredentialsSupplier;
 import org.agrona.ExpandableArrayBuffer;
-import org.agrona.IoUtil;
 import org.agrona.concurrent.BusySpinIdleStrategy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -82,7 +79,13 @@ public class ClusterSystemTest
         clusterNode = new TestClusterNode(aeronicClusteredService, true);
 
         final SimpleEvents simpleEventsPublisher = aeronic.createClusterIngressPublisher(SimpleEvents.class, INGRESS_CHANNEL);
-        final SampleEvents sampleEventsPublisher = aeronic.createClusterIngressPublisher(SampleEvents.class, INGRESS_CHANNEL);
+        final SampleEvents sampleEventsPublisher = aeronic.createClusterIngressPublisher(
+            SampleEvents.class,
+            new AeronCluster.Context()
+                .errorHandler(Throwable::printStackTrace)
+                .ingressChannel(INGRESS_CHANNEL)
+                .aeronDirectoryName(aeron.context().aeronDirectoryName())
+        );
 
         aeronic.awaitUntilPubsAndSubsConnect();
 

@@ -9,14 +9,11 @@ public class AeronClusterPublication implements AeronicPublication
 
     private final AeronCluster aeronCluster;
 
-    public AeronClusterPublication(final String publisherName, final String ingressChannel, final String aeronDirectoryName)
+    public AeronClusterPublication(final String publisherName, final AeronCluster.Context aeronClusterCtx)
     {
         this.aeronCluster = AeronCluster.connect(
-            new AeronCluster.Context()
-                .credentialsSupplier(new AeronicCredentialsSupplier(publisherName))
-                .ingressChannel(ingressChannel)
-                .errorHandler(Throwable::printStackTrace)
-                .aeronDirectoryName(aeronDirectoryName));
+            aeronClusterCtx
+                .credentialsSupplier(new AeronicCredentialsSupplier(publisherName)));
     }
 
     @Override
