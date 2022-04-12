@@ -55,7 +55,7 @@ public class PublisherGeneratorTest
                     final long timestamp
                 )
                 {
-                    bufferEncoder.encodeInt(0);
+                    bufferEncoder.encodeInt(1);
                     bufferEncoder.encodeLong(timestamp);
                     offer();
                 }

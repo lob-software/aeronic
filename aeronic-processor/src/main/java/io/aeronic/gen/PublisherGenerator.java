@@ -35,8 +35,8 @@ public class PublisherGenerator
 
             final StringBuilder methodBodyBuilder = new StringBuilder();
             methodBodyBuilder.append("""
-                        bufferEncoder.encodeInt(0);
-                """);
+                        bufferEncoder.encodeInt(%s);
+                """.formatted(interfaceMethod.getIndex()));
 
             for (int j = 0; j < parameters.size(); j++)
             {
