@@ -10,47 +10,57 @@ public class PublisherGeneratorTest
 {
     private static final String SAMPLE_PUBLISHER =
         """
-        package io.aeronic.gen;
-                
-        import io.aeron.Publication;
-        import io.aeronic.net.AbstractPublisher;
-        import io.aeronic.net.AeronicPublication;
-        import org.agrona.BitUtil;
-        import io.aeronic.codec.SimpleImpl;
-                
-        public class TestEventsPublisher extends AbstractPublisher implements TestEvents
-        {
-                
-            public TestEventsPublisher(final AeronicPublication publication)
+            package io.aeronic.gen;
+                    
+            import io.aeron.Publication;
+            import io.aeronic.net.AbstractPublisher;
+            import io.aeronic.net.AeronicPublication;
+            import org.agrona.BitUtil;
+            import io.aeronic.codec.SimpleImpl;
+                    
+            public class TestEventsPublisher extends AbstractPublisher implements TestEvents
             {
-                super(publication);
-            }
+                    
+                public TestEventsPublisher(final AeronicPublication publication)
+                {
+                    super(publication);
+                }
+                    
+                @Override
+                public void onEvent(
+                    final long aLong,
+                    final int intValue,
+                    final float floatValue,
+                    final double doubleValue,
+                    final byte byteValue,
+                    final char charValue,
+                    final SimpleImpl simpleImpl,
+                    final String stringValue
+                )
+                {
+                    bufferEncoder.encodeInt(0);
+                    bufferEncoder.encodeLong(aLong);
+                    bufferEncoder.encodeInt(intValue);
+                    bufferEncoder.encodeFloat(floatValue);
+                    bufferEncoder.encodeDouble(doubleValue);
+                    bufferEncoder.encodeByte(byteValue);
+                    bufferEncoder.encodeChar(charValue);
+                    simpleImpl.encode(bufferEncoder);
+                    bufferEncoder.encodeString(stringValue);
+                    offer();
+                }
                 
-            @Override
-            public void onEvent(
-                final long aLong,
-                final int intValue,
-                final float floatValue,
-                final double doubleValue,
-                final byte byteValue,
-                final char charValue,
-                final SimpleImpl simpleImpl,
-                final String stringValue
-            )
-            {
-                bufferEncoder.encodeInt(0);
-                bufferEncoder.encodeLong(aLong);
-                bufferEncoder.encodeInt(intValue);
-                bufferEncoder.encodeFloat(floatValue);
-                bufferEncoder.encodeDouble(doubleValue);
-                bufferEncoder.encodeByte(byteValue);
-                bufferEncoder.encodeChar(charValue);
-                simpleImpl.encode(bufferEncoder);
-                bufferEncoder.encodeString(stringValue);
-                offer();
+                @Override
+                public void onTimer(
+                    final long timestamp
+                )
+                {
+                    bufferEncoder.encodeInt(0);
+                    bufferEncoder.encodeLong(timestamp);
+                    offer();
+                }
             }
-        }
-        """;
+            """;
 
     @Test
     public void shouldGeneratePublisherSource()
@@ -69,6 +79,9 @@ public class PublisherGeneratorTest
                     new ParameterInfo("charValue", "char", true),
                     new ParameterInfo("simpleImpl", "io.aeronic.codec.SimpleImpl", false),
                     new ParameterInfo("stringValue", "java.lang.String", false)
+                )),
+                new MethodInfo(1, "onTimer", List.of(
+                    new ParameterInfo("timestamp", "long", true)
                 ))
             )
         );

@@ -24,8 +24,9 @@ public class PublisherGenerator
     private String generateMethods(final List<MethodInfo> methods, final StringBuilder packageAndImports)
     {
         final StringBuilder methodsBuilder = new StringBuilder();
-        for (final MethodInfo interfaceMethod : methods)
+        for (int i = 0; i < methods.size(); i++)
         {
+            final MethodInfo interfaceMethod = methods.get(i);
             final String methodName = interfaceMethod.getName();
             final List<ParameterInfo> parameters = interfaceMethod.getParameters();
 
@@ -37,11 +38,11 @@ public class PublisherGenerator
                         bufferEncoder.encodeInt(0);
                 """);
 
-            for (int i = 0; i < parameters.size(); i++)
+            for (int j = 0; j < parameters.size(); j++)
             {
-                writeParameter(methodsBuilder, methodBodyBuilder, parameters.get(i), packageAndImports);
+                writeParameter(methodsBuilder, methodBodyBuilder, parameters.get(j), packageAndImports);
 
-                if (i < parameters.size() - 1)
+                if (j < parameters.size() - 1)
                 {
                     methodsBuilder.append(",\n");
                 }
@@ -56,6 +57,14 @@ public class PublisherGenerator
                     
                     {
                 """);
+
+            if (i < methods.size() - 1)
+            {
+                methodBodyBuilder.append("""
+                        }
+                        
+                    """);
+            }
 
             methodsBuilder.append(methodBodyBuilder);
         }
@@ -73,8 +82,8 @@ public class PublisherGenerator
         {
             methodsBuilder.append("        final %s %s".formatted(parameter.getType(), parameter.getName()));
             methodBodyBuilder.append("""
-                bufferEncoder.encode%s(%s);
-        """.formatted(capitalize(parameter.getType()), parameter.getName()));
+                        bufferEncoder.encode%s(%s);
+                """.formatted(capitalize(parameter.getType()), parameter.getName()));
         }
         else
         {
@@ -83,8 +92,8 @@ public class PublisherGenerator
             {
                 methodsBuilder.append("        final String %s".formatted(parameter.getName()));
                 methodBodyBuilder.append("""
-                        bufferEncoder.encodeString(%s);
-                """.formatted(parameter.getName()));
+                            bufferEncoder.encodeString(%s);
+                    """.formatted(parameter.getName()));
                 return;
             }
 
@@ -92,8 +101,8 @@ public class PublisherGenerator
             final String className = split[split.length - 1];
             methodsBuilder.append("        final %s %s".formatted(className, parameter.getName()));
             methodBodyBuilder.append("""
-                %s.encode(bufferEncoder);
-        """.formatted(parameter.getName()));
+                        %s.encode(bufferEncoder);
+                """.formatted(parameter.getName()));
             packageAndImports.append("import %s;".formatted(type));
         }
     }

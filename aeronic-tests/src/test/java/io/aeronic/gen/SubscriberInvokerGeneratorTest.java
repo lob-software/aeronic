@@ -44,6 +44,10 @@ public class SubscriberInvokerGeneratorTest
                             final String stringValue = bufferDecoder.decodeString();
                             subscriber.onEvent(longValue, intValue, floatValue, doubleValue, byteValue, charValue, simpleImpl, stringValue);
                         }
+                        case 1 -> {
+                            final long timestamp = bufferDecoder.decodeLong();
+                            subscriber.onTimer(timestamp);
+                        }
                     }
                 }
             }     
@@ -66,6 +70,9 @@ public class SubscriberInvokerGeneratorTest
                     new ParameterInfo("charValue", "char", true),
                     new ParameterInfo("simpleImpl", "io.aeronic.codec.SimpleImpl", false),
                     new ParameterInfo("stringValue", "java.lang.String", false)
+                )),
+                new MethodInfo(1, "onTimer", List.of(
+                    new ParameterInfo("timestamp", "long", true)
                 ))
             )
         );
