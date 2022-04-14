@@ -2,7 +2,7 @@
 
 # aeronic
 
-Use it in a `build.gradle.kts`:
+Usage:
 
 ```kotlin
 repositories {
@@ -21,7 +21,7 @@ dependencies {
 ## Quickstart
 
 Aeronic allows for flexible usage of [Aeron](https://github.com/real-logic/simple-binary-encoding) by way of proxy generation for 
-subscriptions and publications:
+subscriptions and publications. Use `@Aeronic` to make the compiler generate subscriber and publisher proxies:
 
 ```java
 @Aeronic
@@ -52,7 +52,8 @@ public class TradeEventsImpl implements TradeEvents
 }
 ```
 
-`AeronicWizard` can then be used to create a publisher of type `TradeEvents` and bind a subscriber implemented above:
+`AeronicWizard` can then be used to create a publisher of type `TradeEvents` and bind a subscriber implemented above. 
+The two will communicate via a given Aeron channel / stream ID:
 
 ```java
 final Aeron aeron = Aeron.connect(aeronCtx);
