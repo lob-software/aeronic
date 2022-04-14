@@ -45,6 +45,11 @@ public class AeronicClusteredServiceRegistry
         return clientSessionPublicationByName.values().stream().allMatch(ClientSessionPublication::isConnected);
     }
 
+    public void close()
+    {
+        clientSessionPublicationByName.values().forEach(ClientSessionPublication::close);
+    }
+
     public void onSessionOpen(final ClientSession session)
     {
         final byte[] encodedPrincipal = session.encodedPrincipal();
