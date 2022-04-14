@@ -22,7 +22,7 @@
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
-          <entry name="$PROJECT_DIR$/aeronic-processor/build/libs/aeronic-processor-0.0.1.jar" />
+          <entry name="$PROJECT_DIR$/aeronic-processor/build/libs/aeronic-processor-0.0.7.jar" />
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.auto.service/auto-service/1.0.1/c9779f7372192a96c957a3df1faeeabd07881085/auto-service-1.0.1.jar" />
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.aeron/aeron-all/1.37.0/e80d72f6b452361be7175310b323018d4311a3f4/aeron-all-1.37.0.jar" />
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.auto.service/auto-service-annotations/1.0.1/ac86dacc0eb9285ea9d42eee6aad8629ca3a7432/auto-service-annotations-1.0.1.jar" />
@@ -38,6 +38,6 @@
         <module name="aeronic.aeronic-tests.test" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="16" />
+    <bytecodeTargetLevel target="17" />
   </component>
 </project>

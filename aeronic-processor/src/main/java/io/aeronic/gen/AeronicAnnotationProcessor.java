@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Set;
 
 @SupportedAnnotationTypes("io.aeronic.Aeronic")
-@SupportedSourceVersion(SourceVersion.RELEASE_16)
+@SupportedSourceVersion(SourceVersion.RELEASE_17)
 @AutoService(Processor.class)
 public class AeronicAnnotationProcessor extends AbstractProcessor
 {
