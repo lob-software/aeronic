@@ -3,7 +3,6 @@ package io.aeronic.system.cluster;
 import io.aeron.Aeron;
 import io.aeron.ChannelUriStringBuilder;
 import io.aeron.cluster.client.AeronCluster;
-import io.aeron.cluster.service.ClusteredService;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
 import io.aeronic.AeronicWizard;
