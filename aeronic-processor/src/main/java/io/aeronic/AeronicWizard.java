@@ -7,10 +7,7 @@ import io.aeronic.cluster.AeronClusterPublication;
 import io.aeronic.cluster.AeronicCredentialsSupplier;
 import io.aeronic.cluster.ClientSessionPublication;
 import io.aeronic.net.*;
-import org.agrona.concurrent.Agent;
-import org.agrona.concurrent.AgentRunner;
-import org.agrona.concurrent.CompositeAgent;
-import org.agrona.concurrent.NoOpIdleStrategy;
+import org.agrona.concurrent.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -134,7 +131,7 @@ public class AeronicWizard
     public void start()
     {
         compositeAgentRunner = new AgentRunner(
-            NoOpIdleStrategy.INSTANCE,
+            BusySpinIdleStrategy.INSTANCE,
             Throwable::printStackTrace,
             null,
             new CompositeAgent(subscriptionAgents)
