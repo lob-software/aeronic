@@ -27,4 +27,13 @@ public class AeronClusterPublication implements AeronicPublication
     {
         aeronCluster.offer(buffer, 0, buffer.capacity());
     }
+
+    @Override
+    public void close()
+    {
+        if (!aeronCluster.isClosed())
+        {
+            aeronCluster.close();
+        }
+    }
 }

@@ -24,4 +24,13 @@ public class SimplePublication implements AeronicPublication
     {
         publication.offer(buffer);
     }
+
+    @Override
+    public void close()
+    {
+        if (publication.isConnected())
+        {
+            publication.close();
+        }
+    }
 }

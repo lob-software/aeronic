@@ -27,6 +27,15 @@ public class ClientSessionPublication<T> implements AeronicPublication
         clientSession.offer(buffer, 0, buffer.capacity());
     }
 
+    @Override
+    public void close()
+    {
+        if (isConnected())
+        {
+            clientSession.close();
+        }
+    }
+
     public void bindClientSession(final ClientSession clientSession)
     {
         this.clientSession = clientSession;

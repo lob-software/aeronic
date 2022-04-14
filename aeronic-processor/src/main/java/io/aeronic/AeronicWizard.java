@@ -149,6 +149,7 @@ public class AeronicWizard
         {
             compositeAgentRunner.close();
         }
+        publications.forEach(AeronicPublication::close);
     }
 
     public boolean allConnected()
