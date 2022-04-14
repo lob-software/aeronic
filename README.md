@@ -2,40 +2,66 @@
 
 # aeronic
 
+Use it in a `build.gradle.kts`:
+
+```kotlin
+repositories {
+    mavenCentral()
+    maven {
+        setUrl("https://dl.cloudsmith.io/public/lob-software/aeronic/maven/")
+    }
+}
+
+dependencies {
+    annotationProcessor("io.aeronic:aeronic:0.0.7")
+    implementation("io.aeronic:aeronic:0.0.7")
+}
+```
+
+## Quickstart
+
 Aeronic allows for flexible usage of [Aeron](https://github.com/real-logic/simple-binary-encoding) by way of proxy generation for 
 subscriptions and publications:
 
 ```java
 @Aeronic
-public interface Events
+public interface TradeEvents
 {
-    void onEvent(long value);
+    void onTrade(long price);
 }
+```
 
-public class EventsImpl implements Events
+A subscriber, defining business logic can then be defined by implementing the interface above:
+
+```java
+public class TradeEventsImpl implements TradeEvents
 {
 
-    private long value;
+    private long lastPrice;
 
     @Override
-    public void onEvent(final long value)
+    public void onTrade(final long price)
     {
-        this.value = value;
+        this.lastPrice = price;
     }
     
-    public long getValue()
+    public long getLastPrice()
     {
-        return value;
+        return lastPrice;
     }
 }
+```
 
+`AeronicWizard` can then be used to create a publisher of type `TradeEvents` and bind a subscriber implemented above:
+
+```java
 final Aeron aeron = Aeron.connect(aeronCtx);
 final AeronicWizard aeronic = new AeronicWizard(aeron);
 
-final Events eventsPublisher = aeronic.createPublisher(Events.class, "aeron:ipc", 10);
-final EventsImpl subscriberImpl = new EventsImpl();
-aeronic.registerSubscriber(Events.class, subscriberImpl, "aeron:ipc", 10);
+final TradeEvents eventsPublisher = aeronic.createPublisher(TradeEvents.class, "aeron:ipc", 10);
+final TradeEventsImpl subscriberImpl = new TradeEventsImpl();
+aeronic.registerSubscriber(TradeEvents.class, subscriberImpl, "aeron:ipc", 10);
 
-publisher.onEvent(123L);
-subscriberImpl.getValue(); // 123L
+publisher.onTrade(123L);
+subscriberImpl.getLastPrice(); // 123L
 ```
