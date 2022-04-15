@@ -25,4 +25,10 @@ public class AeronClusterAgent implements Agent
     {
         return subscriberName;
     }
+
+    @Override
+    public void onClose()
+    {
+        aeronCluster.close();
+    }
 }
