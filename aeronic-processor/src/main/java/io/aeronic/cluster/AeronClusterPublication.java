@@ -36,4 +36,13 @@ public class AeronClusterPublication implements AeronicPublication
             aeronCluster.close();
         }
     }
+
+    public int pollCluster()
+    {
+        if (isConnected())
+        {
+            return aeronCluster.pollEgress();
+        }
+        return 0;
+    }
 }

@@ -4,6 +4,7 @@ import io.aeron.Aeron;
 import io.aeron.Subscription;
 import io.aeron.cluster.client.AeronCluster;
 import io.aeronic.cluster.AeronClusterPublication;
+import io.aeronic.cluster.AeronClusterPublicationAgent;
 import io.aeronic.cluster.AeronicCredentialsSupplier;
 import io.aeronic.cluster.ClientSessionPublication;
 import io.aeronic.net.*;
@@ -20,7 +21,7 @@ public class AeronicWizard
     private final Aeron aeron;
     private final List<AeronicPublication> publications = new ArrayList<>();
     private final List<Subscription> subscriptions = new ArrayList<>();
-    private final List<Agent> subscriptionAgents = new ArrayList<>();
+    private final List<Agent> agents = new ArrayList<>();
     private AgentRunner compositeAgentRunner;
 
     public AeronicWizard(final Aeron aeron)
@@ -38,13 +39,15 @@ public class AeronicWizard
     public <T> T createClusterIngressPublisher(final Class<T> clazz, final String ingressChannel)
     {
         final String publisherName = clazz.getName() + "__IngressPublisher";
-        final AeronicPublication publication = new AeronClusterPublication(
+        final AeronClusterPublication publication = new AeronClusterPublication(
             publisherName,
             new AeronCluster.Context()
                 .errorHandler(Throwable::printStackTrace)
                 .ingressChannel(ingressChannel)
                 .aeronDirectoryName(aeron.context().aeronDirectoryName())
         );
+
+        agents.add(new AeronClusterPublicationAgent(publication, publisherName));
         publications.add(publication);
         return createPublisher(clazz, publication);
     }
@@ -52,7 +55,9 @@ public class AeronicWizard
     public <T> T createClusterIngressPublisher(final Class<T> clazz, final AeronCluster.Context aeronClusterCtx)
     {
         final String publisherName = clazz.getName() + "__IngressPublisher";
-        final AeronicPublication publication = new AeronClusterPublication(publisherName, aeronClusterCtx);
+        final AeronClusterPublication publication = new AeronClusterPublication(publisherName, aeronClusterCtx);
+
+        agents.add(new AeronClusterPublicationAgent(publication, publisherName));
         publications.add(publication);
         return createPublisher(clazz, publication);
     }
@@ -85,7 +90,7 @@ public class AeronicWizard
         subscriptions.add(subscription);
 
         final AbstractSubscriberInvoker<T> invoker = createSubscriberInvoker(clazz, subscriberImplementation);
-        subscriptionAgents.add(new SubscriptionAgent<>(subscription, invoker));
+        agents.add(new SubscriptionAgent<>(subscription, invoker));
     }
 
     public <T> void registerClusterEgressSubscriber(final Class<T> clazz, final T subscriberImplementation, final String ingressChannel)
@@ -101,7 +106,7 @@ public class AeronicWizard
                 .errorHandler(Throwable::printStackTrace)
                 .aeronDirectoryName(aeron.context().aeronDirectoryName()));
 
-        subscriptionAgents.add(new AeronClusterAgent(aeronCluster, subscriberName));
+        agents.add(new AeronClusterAgent(aeronCluster, subscriberName));
     }
 
     public <T> void registerClusterEgressSubscriber(final Class<T> clazz, final T subscriberImplementation, final AeronCluster.Context aeronClusterCtx)
@@ -113,7 +118,7 @@ public class AeronicWizard
                 .credentialsSupplier(new AeronicCredentialsSupplier(subscriberName))
                 .egressListener((clusterSessionId, timestamp, buffer, offset, length, header) -> invoker.handle(buffer, offset))
         );
-        subscriptionAgents.add(new AeronClusterAgent(aeronCluster, subscriberName));
+        agents.add(new AeronClusterAgent(aeronCluster, subscriberName));
     }
 
     @SuppressWarnings("unchecked")
@@ -137,7 +142,7 @@ public class AeronicWizard
             BusySpinIdleStrategy.INSTANCE,
             Throwable::printStackTrace,
             null,
-            new CompositeAgent(subscriptionAgents)
+            new CompositeAgent(agents)
         );
 
         AgentRunner.startOnThread(compositeAgentRunner);
