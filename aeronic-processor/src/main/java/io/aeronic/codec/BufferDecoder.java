@@ -70,12 +70,80 @@ public class BufferDecoder
         return shortValue;
     }
 
-    public String decodeString()
+    public long[] decodeLongArray()
+    {
+        final int length = decodeInt();
+        final long[] longs = new long[length];
+        for (int i = 0; i < longs.length; i++)
+        {
+            longs[i] = decodeLong();
+        }
+
+        return longs;
+    }
+
+    public int[] decodeIntArray()
+    {
+        final int length = decodeInt();
+        final int[] ints = new int[length];
+        for (int i = 0; i < ints.length; i++)
+        {
+            ints[i] = decodeInt();
+        }
+
+        return ints;
+    }
+
+    public float[] decodeFloatArray()
+    {
+        final int length = decodeInt();
+        final float[] floats = new float[length];
+        for (int i = 0; i < floats.length; i++)
+        {
+            floats[i] = decodeFloat();
+        }
+
+        return floats;
+    }
+
+    public double[] decodeDoubleArray()
+    {
+        final int length = decodeInt();
+        final double[] doubles = new double[length];
+        for (int i = 0; i < doubles.length; i++)
+        {
+            doubles[i] = decodeDouble();
+        }
+
+        return doubles;
+    }
+
+    public byte[] decodeByteArray()
     {
         final int length = decodeInt();
         final byte[] bytes = new byte[length];
-        buffer.getBytes(currentOffset, bytes);
-        currentOffset += BitUtil.SIZE_OF_BYTE * length;
-        return new String(bytes);
+        for (int i = 0; i < bytes.length; i++)
+        {
+            bytes[i] = decodeByte();
+        }
+
+        return bytes;
+    }
+
+    public char[] decodeCharArray()
+    {
+        final int length = decodeInt();
+        final char[] chars = new char[length];
+        for (int i = 0; i < chars.length; i++)
+        {
+            chars[i] = decodeChar();
+        }
+
+        return chars;
+    }
+
+    public String decodeString()
+    {
+        return new String(decodeByteArray());
     }
 }

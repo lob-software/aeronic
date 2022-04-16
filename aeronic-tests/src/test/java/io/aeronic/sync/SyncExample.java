@@ -1,12 +1,10 @@
-package io.aeronic.example;
+package io.aeronic.sync;
 
 import io.aeron.Aeron;
 import io.aeron.ChannelUriStringBuilder;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
 import io.aeronic.AeronicWizard;
-import io.aeronic.system.transport.SyncEvents;
-import io.aeronic.system.transport.SyncEventsResponse;
 import org.agrona.concurrent.BusySpinIdleStrategy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

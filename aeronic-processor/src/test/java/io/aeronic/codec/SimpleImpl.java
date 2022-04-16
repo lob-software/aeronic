@@ -16,9 +16,9 @@ public class SimpleImpl implements Encoder
     @Override
     public void encode(final BufferEncoder bufferEncoder)
     {
-        bufferEncoder.encodeInt(anInt);
-        bufferEncoder.encodeByte(aByte);
-        bufferEncoder.encodeLong(aLong);
+        bufferEncoder.encode(anInt);
+        bufferEncoder.encode(aByte);
+        bufferEncoder.encode(aLong);
     }
 
     @Decoder

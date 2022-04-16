@@ -25,11 +25,11 @@ public class Composite implements Encoder
     @Override
     public void encode(final BufferEncoder bufferEncoder)
     {
-        bufferEncoder.encodeInt(anInt);
-        bufferEncoder.encodeLong(aLong);
-        bufferEncoder.encodeBoolean(aBoolean);
-        bufferEncoder.encodeByte(aByte);
-        bufferEncoder.encodeDouble(aDouble);
+        bufferEncoder.encode(anInt);
+        bufferEncoder.encode(aLong);
+        bufferEncoder.encode(aBoolean);
+        bufferEncoder.encode(aByte);
+        bufferEncoder.encode(aDouble);
     }
 
     @Decoder

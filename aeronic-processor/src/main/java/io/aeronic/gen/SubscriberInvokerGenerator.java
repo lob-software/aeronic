@@ -49,7 +49,7 @@ public class SubscriberInvokerGenerator
         final String methodName = interfaceMethod.getName();
         final List<ParameterInfo> parameters = interfaceMethod.getParameters();
         final StringBuilder subscriberInvocation =
-            new StringBuilder("                subscriber.%s(".formatted(methodName));
+            new StringBuilder("                subscriber.%s(\n".formatted(methodName));
 
         handleMethodBuilder.append("""
                         case %s -> {
@@ -61,12 +61,13 @@ public class SubscriberInvokerGenerator
 
             if (i < parameters.size() - 1)
             {
-                subscriberInvocation.append(", ");
+                subscriberInvocation.append(",\n");
             }
         }
 
         subscriberInvocation.append("""
-            );
+            
+                            );
             """);
 
         handleMethodBuilder.append(subscriberInvocation);
@@ -85,30 +86,38 @@ public class SubscriberInvokerGenerator
         if (parameter.isPrimitive())
         {
             handleMethodBuilder.append("""
-                            final %s %s = bufferDecoder.decode%s();
-            """.formatted(parameter.getType(), parameter.getName(), capitalize(parameter.getType())));
-            subscriberInvocation.append(parameter.getName());
+                                final %s %s = bufferDecoder.decode%s();
+                """.formatted(parameter.getType(), parameter.getName(), capitalize(parameter.getType())));
+            subscriberInvocation.append("                    %s".formatted(parameter.getName()));
+            return;
         }
-        else
+
+        if (parameter.isArray())
         {
-            if (parameter.getType().equals(String.class.getName()))
-            {
-                handleMethodBuilder.append("""
+            handleMethodBuilder.append("""
+                                final %s %s = bufferDecoder.decode%sArray();
+                """.formatted(parameter.getType(), parameter.getName(), capitalize(parameter.getType().substring(0, parameter.getType().length() - 2))));
+            subscriberInvocation.append("                    %s".formatted(parameter.getName()));
+            return;
+        }
+
+        if (parameter.getType().equals(String.class.getName()))
+        {
+            handleMethodBuilder.append("""
                                 final String %s = bufferDecoder.decodeString();
                 """.formatted(parameter.getName()));
-                subscriberInvocation.append(parameter.getName());
-                return;
-            }
+            subscriberInvocation.append("                    %s".formatted(parameter.getName()));
+            return;
+        }
 
-            final String[] split = parameter.getType().split("\\.");
-            final String className = split[split.length - 1];
+        final String[] split = parameter.getType().split("\\.");
+        final String className = split[split.length - 1];
 
-            handleMethodBuilder.append("""
+        handleMethodBuilder.append("""
                             final %s %s = %s.decode(bufferDecoder);
             """.formatted(className, parameter.getName(), className));
-            subscriberInvocation.append(parameter.getName());
-            classImports.append("import %s;".formatted(parameter.getType()));
-        }
+        subscriberInvocation.append("                    %s".formatted(parameter.getName()));
+        classImports.append("import %s;".formatted(parameter.getType()));
     }
 
     private String generateConstructor(final String interfaceName)

@@ -5,8 +5,7 @@ import org.agrona.ExpandableDirectByteBuffer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BufferDecoderTest
 {
@@ -108,6 +107,102 @@ public class BufferDecoderTest
         bufferDecoder.wrap(buffer, 0);
 
         assertEquals(shortValue, bufferDecoder.decodeShort());
+    }
+
+    @Test
+    public void shouldDecodeLongArray()
+    {
+        final long[] longs = { 1L, 2L, 4L, 5L };
+        buffer.putInt(0, longs.length);
+
+        int idx = BitUtil.SIZE_OF_INT;
+        for (int i = 0; i < longs.length; i++)
+        {
+            buffer.putLong(idx, longs[i]);
+            idx += BitUtil.SIZE_OF_LONG;
+        }
+
+        bufferDecoder.wrap(buffer, 0);
+        assertArrayEquals(longs, bufferDecoder.decodeLongArray());
+    }
+
+    @Test
+    public void shouldDecodeIntArray()
+    {
+        final int[] ints = { 1, 2, 4, 5 };
+        buffer.putInt(0, ints.length);
+
+        int idx = BitUtil.SIZE_OF_INT;
+        for (int i = 0; i < ints.length; i++)
+        {
+            buffer.putInt(idx, ints[i]);
+            idx += BitUtil.SIZE_OF_INT;
+        }
+
+        bufferDecoder.wrap(buffer, 0);
+        assertArrayEquals(ints, bufferDecoder.decodeIntArray());
+    }
+
+    @Test
+    public void shouldDecodeFloatArray()
+    {
+        final float[] floats = { 1.f, 2.f, 4.f, 5.f };
+        buffer.putInt(0, floats.length);
+
+        int idx = BitUtil.SIZE_OF_INT;
+        for (int i = 0; i < floats.length; i++)
+        {
+            buffer.putFloat(idx, floats[i]);
+            idx += BitUtil.SIZE_OF_FLOAT;
+        }
+
+        bufferDecoder.wrap(buffer, 0);
+        assertArrayEquals(floats, bufferDecoder.decodeFloatArray());
+    }
+
+    @Test
+    public void shouldDecodeDoubleArray()
+    {
+        final double[] doubles = { 1., 2., 4., 5. };
+        buffer.putInt(0, doubles.length);
+
+        int idx = BitUtil.SIZE_OF_INT;
+        for (int i = 0; i < doubles.length; i++)
+        {
+            buffer.putDouble(idx, doubles[i]);
+            idx += BitUtil.SIZE_OF_DOUBLE;
+        }
+
+        bufferDecoder.wrap(buffer, 0);
+        assertArrayEquals(doubles, bufferDecoder.decodeDoubleArray());
+    }
+
+    @Test
+    public void shouldDecodeByteArray()
+    {
+        final byte[] bytes = { 0x1, 0x2, 0x3, 0x5 };
+        buffer.putInt(0, bytes.length);
+        buffer.putBytes(BitUtil.SIZE_OF_INT, bytes);
+
+        bufferDecoder.wrap(buffer, 0);
+        assertArrayEquals(bytes, bufferDecoder.decodeByteArray());
+    }
+
+    @Test
+    public void shouldDecodeCharArray()
+    {
+        final char[] chars = { '1', '2', '4', '5' };
+        buffer.putInt(0, chars.length);
+
+        int idx = BitUtil.SIZE_OF_INT;
+        for (int i = 0; i < chars.length; i++)
+        {
+            buffer.putChar(idx, chars[i]);
+            idx += BitUtil.SIZE_OF_CHAR;
+        }
+
+        bufferDecoder.wrap(buffer, 0);
+        assertArrayEquals(chars, bufferDecoder.decodeCharArray());
     }
 
     @Test

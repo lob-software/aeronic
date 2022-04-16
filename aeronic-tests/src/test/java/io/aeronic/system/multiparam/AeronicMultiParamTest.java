@@ -13,8 +13,7 @@ import java.time.Duration;
 
 import static io.aeronic.Assertions.assertReflectiveEquals;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AeronicMultiParamTest
 {
@@ -70,6 +69,12 @@ public class AeronicMultiParamTest
         final short shortValue = 123;
         final String stringValue = "stringValue";
         final Composite compositeValue = new Composite(12, Long.MAX_VALUE, true, Byte.MAX_VALUE, 123.123);
+        final long[] longArray = { 1L, 2L, 3L, Long.MAX_VALUE, Long.MIN_VALUE };
+        final int[] intArray = { 1, 2, 3 };
+        final double[] doubleArray = { 1., 2., 3. };
+        final float[] floatArray = { 1.f, 2.f, 3.f };
+        final byte[] byteArray = { 0x1, 0x2, 0x5 };
+        final char[] charArray = { '1', '2', '3' };
 
         publisher.onEvent(
             longValue,
@@ -81,13 +86,20 @@ public class AeronicMultiParamTest
             booleanValue,
             shortValue,
             stringValue,
-            compositeValue
+            compositeValue,
+            longArray,
+            intArray,
+            doubleArray,
+            floatArray,
+            byteArray,
+            charArray
         );
 
         await()
             .timeout(Duration.ofSeconds(1))
             .until(() -> {
-                assertReflectiveEquals(compositeValue, subscriberImpl.compositeValue);
+                // wait for last updated value only because of "happens before"
+                assertArrayEquals(charArray, subscriberImpl.charArray);
                 return true;
             });
 
@@ -99,6 +111,12 @@ public class AeronicMultiParamTest
         assertEquals(charValue, subscriberImpl.charValue);
         assertEquals(booleanValue, subscriberImpl.booleanValue);
         assertEquals(stringValue, subscriberImpl.stringValue);
+        assertReflectiveEquals(compositeValue, subscriberImpl.compositeValue);
+        assertArrayEquals(longArray, subscriberImpl.longArray);
+        assertArrayEquals(intArray, subscriberImpl.intArray);
+        assertArrayEquals(floatArray, subscriberImpl.floatArray);
+        assertArrayEquals(doubleArray, subscriberImpl.doubleArray);
+        assertArrayEquals(byteArray, subscriberImpl.byteArray);
 
         publisher.onEvent(
             123L,
@@ -110,7 +128,13 @@ public class AeronicMultiParamTest
             false,
             (short) (shortValue + 1),
             stringValue,
-            compositeValue
+            compositeValue,
+            longArray,
+            intArray,
+            doubleArray,
+            floatArray,
+            byteArray,
+            charArray
         );
 
         await()
@@ -138,6 +162,12 @@ public class AeronicMultiParamTest
         private volatile short shortValue;
         private volatile String stringValue;
         private volatile Composite compositeValue;
+        private volatile long[] longArray;
+        private volatile int[] intArray;
+        private volatile double[] doubleArray;
+        private volatile float[] floatArray;
+        private volatile byte[] byteArray;
+        private volatile char[] charArray;
 
         @Override
         public void onEvent(
@@ -150,7 +180,13 @@ public class AeronicMultiParamTest
             final boolean booleanValue,
             final short shortValue,
             final String stringValue,
-            final Composite compositeValue
+            final Composite compositeValue,
+            final long[] longArray,
+            final int[] intArray,
+            final double[] doubleArray,
+            final float[] floatArray,
+            final byte[] byteArray,
+            final char[] charArray
         )
         {
             this.longValue = longValue;
@@ -163,6 +199,12 @@ public class AeronicMultiParamTest
             this.shortValue = shortValue;
             this.stringValue = stringValue;
             this.compositeValue = compositeValue;
+            this.longArray = longArray;
+            this.intArray = intArray;
+            this.doubleArray = doubleArray;
+            this.floatArray = floatArray;
+            this.byteArray = byteArray;
+            this.charArray = charArray;
         }
     }
 }

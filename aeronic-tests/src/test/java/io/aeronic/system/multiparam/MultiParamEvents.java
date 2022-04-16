@@ -15,6 +15,12 @@ public interface MultiParamEvents
         boolean booleanValue,
         short shortValue,
         String stringValue,
-        Composite compositeValue
+        Composite compositeValue,
+        long[] longArray,
+        int[] intArray,
+        double[] doubleArray,
+        float[] floatArray,
+        byte[] byteArray,
+        char[] charArray
     );
 }

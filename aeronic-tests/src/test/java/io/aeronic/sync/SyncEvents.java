@@ -1,4 +1,4 @@
-package io.aeronic.system.transport;
+package io.aeronic.sync;
 
 import io.aeronic.Aeronic;
 

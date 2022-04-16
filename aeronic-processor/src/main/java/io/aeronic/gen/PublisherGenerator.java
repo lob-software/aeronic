@@ -2,8 +2,6 @@ package io.aeronic.gen;
 
 import java.util.List;
 
-import static io.aeronic.gen.StringUtil.capitalize;
-
 public class PublisherGenerator
 {
     public String generate(final String packageName, final String interfaceName, final List<MethodInfo> methods)
@@ -35,7 +33,7 @@ public class PublisherGenerator
 
             final StringBuilder methodBodyBuilder = new StringBuilder();
             methodBodyBuilder.append("""
-                        bufferEncoder.encodeInt(%s);
+                        bufferEncoder.encode(%s);
                 """.formatted(interfaceMethod.getIndex()));
 
             for (int j = 0; j < parameters.size(); j++)
@@ -76,35 +74,48 @@ public class PublisherGenerator
         return methodsBuilder.toString();
     }
 
-    private void writeParameter(final StringBuilder methodsBuilder, final StringBuilder methodBodyBuilder, final ParameterInfo parameter, final StringBuilder packageAndImports)
+    private void writeParameter(
+        final StringBuilder methodsBuilder,
+        final StringBuilder methodBodyBuilder,
+        final ParameterInfo parameter,
+        final StringBuilder packageAndImports
+    )
     {
         if (parameter.isPrimitive())
         {
             methodsBuilder.append("        final %s %s".formatted(parameter.getType(), parameter.getName()));
             methodBodyBuilder.append("""
-                        bufferEncoder.encode%s(%s);
-                """.formatted(capitalize(parameter.getType()), parameter.getName()));
-        }
-        else
-        {
-            final String type = parameter.getType();
-            if (type.equals(String.class.getName()))
-            {
-                methodsBuilder.append("        final String %s".formatted(parameter.getName()));
-                methodBodyBuilder.append("""
-                            bufferEncoder.encodeString(%s);
-                    """.formatted(parameter.getName()));
-                return;
-            }
-
-            final String[] split = type.split("\\.");
-            final String className = split[split.length - 1];
-            methodsBuilder.append("        final %s %s".formatted(className, parameter.getName()));
-            methodBodyBuilder.append("""
-                        %s.encode(bufferEncoder);
+                        bufferEncoder.encode(%s);
                 """.formatted(parameter.getName()));
-            packageAndImports.append("import %s;".formatted(type));
+            return;
         }
+
+        if (parameter.isArray())
+        {
+            methodsBuilder.append("        final %s %s".formatted(parameter.getType(), parameter.getName()));
+            methodBodyBuilder.append("""
+                        bufferEncoder.encode(%s);
+                """.formatted(parameter.getName()));
+            return;
+        }
+
+        final String type = parameter.getType();
+        if (type.equals(String.class.getName()))
+        {
+            methodsBuilder.append("        final String %s".formatted(parameter.getName()));
+            methodBodyBuilder.append("""
+                        bufferEncoder.encode(%s);
+                """.formatted(parameter.getName()));
+            return;
+        }
+
+        final String[] split = type.split("\\.");
+        final String className = split[split.length - 1];
+        methodsBuilder.append("        final %s %s".formatted(className, parameter.getName()));
+        methodBodyBuilder.append("""
+                    %s.encode(bufferEncoder);
+            """.formatted(parameter.getName()));
+        packageAndImports.append("import %s;".formatted(type));
     }
 
     private String generateConstructor(final String interfaceName)

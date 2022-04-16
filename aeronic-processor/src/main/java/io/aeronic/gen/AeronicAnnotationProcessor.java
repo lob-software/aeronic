@@ -1,7 +1,6 @@
 package io.aeronic.gen;
 
 
-
 import com.google.auto.service.AutoService;
 import io.aeronic.Aeronic;
 
@@ -11,6 +10,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeKind;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
@@ -48,8 +48,10 @@ public class AeronicAnnotationProcessor extends AbstractProcessor
                 final List<ParameterInfo> parameters = new ArrayList<>();
                 for (final VariableElement param : params)
                 {
-                    final boolean isPrimitive = param.asType().getKind().isPrimitive();
-                    final ParameterInfo parameter = new ParameterInfo(param.getSimpleName().toString(), param.asType().toString(), isPrimitive);
+                    final TypeKind typeKind = param.asType().getKind();
+                    final boolean isPrimitive = typeKind.isPrimitive();
+                    final boolean isArray = typeKind == TypeKind.ARRAY;
+                    final ParameterInfo parameter = new ParameterInfo(param.getSimpleName().toString(), param.asType().toString(), isPrimitive, isArray);
                     parameters.add(parameter);
                 }
 
