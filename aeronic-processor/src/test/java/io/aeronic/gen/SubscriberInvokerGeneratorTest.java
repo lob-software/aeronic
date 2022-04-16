@@ -42,12 +42,12 @@ public class SubscriberInvokerGeneratorTest
                             final char charValue = bufferDecoder.decodeChar();
                             final SimpleImpl simpleImpl = SimpleImpl.decode(bufferDecoder);
                             final String stringValue = bufferDecoder.decodeString();
-                            final long[] longs = bufferDecoder.decodelongs();
-                            final int[] ints = bufferDecoder.decodeints();
-                            final float[] floats = bufferDecoder.decodefloats();
-                            final double[] doubles = bufferDecoder.decodedoubles();
-                            final byte[] bytes = bufferDecoder.decodebytes();
-                            final char[] chars = bufferDecoder.decodechars();
+                            final long[] longs = bufferDecoder.decodeLongArray();
+                            final int[] ints = bufferDecoder.decodeIntArray();
+                            final float[] floats = bufferDecoder.decodeFloatArray();
+                            final double[] doubles = bufferDecoder.decodeDoubleArray();
+                            final byte[] bytes = bufferDecoder.decodeByteArray();
+                            final char[] chars = bufferDecoder.decodeCharArray();
                             final SimpleImpl[] simpleImplArray = bufferDecoder.decode(SimpleImpl::decode, SimpleImpl[]::new);
                             subscriber.onEvent(
                                 longValue,
