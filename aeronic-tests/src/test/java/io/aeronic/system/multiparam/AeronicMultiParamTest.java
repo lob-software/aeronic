@@ -63,18 +63,23 @@ public class AeronicMultiParamTest
         final int intValue = 123;
         final float floatValue = 1.21312f;
         final double doubleValue = .03412342;
-        final byte byteValue = (byte) 56;
+        final byte byteValue = (byte)56;
         final char charValue = 'a';
         final boolean booleanValue = true;
         final short shortValue = 123;
         final String stringValue = "stringValue";
         final Composite compositeValue = new Composite(12, Long.MAX_VALUE, true, Byte.MAX_VALUE, 123.123);
-        final long[] longArray = { 1L, 2L, 3L, Long.MAX_VALUE, Long.MIN_VALUE };
-        final int[] intArray = { 1, 2, 3 };
-        final double[] doubleArray = { 1., 2., 3. };
-        final float[] floatArray = { 1.f, 2.f, 3.f };
-        final byte[] byteArray = { 0x1, 0x2, 0x5 };
-        final char[] charArray = { '1', '2', '3' };
+        final long[] longs = { 1L, 2L, 3L, Long.MAX_VALUE, Long.MIN_VALUE };
+        final int[] ints = { 1, 2, 3 };
+        final double[] doubles = { 1., 2., 3. };
+        final float[] floats = { 1.f, 2.f, 3.f };
+        final short[] shorts = { 1, 2, 3 };
+        final byte[] bytes = { 0x1, 0x2, 0x5 };
+        final char[] chars = { '1', '2', '3' };
+        final Composite[] compositeArray = new Composite[]{
+            new Composite(1, 4L, false, Byte.MAX_VALUE, 123.11),
+            new Composite(1, 4L, false, Byte.MIN_VALUE, 123.11)
+        };
 
         publisher.onEvent(
             longValue,
@@ -87,19 +92,21 @@ public class AeronicMultiParamTest
             shortValue,
             stringValue,
             compositeValue,
-            longArray,
-            intArray,
-            doubleArray,
-            floatArray,
-            byteArray,
-            charArray
+            longs,
+            ints,
+            doubles,
+            floats,
+            shorts,
+            bytes,
+            chars,
+            compositeArray
         );
 
         await()
             .timeout(Duration.ofSeconds(1))
             .until(() -> {
                 // wait for last updated value only because of "happens before"
-                assertArrayEquals(charArray, subscriberImpl.charArray);
+                assertEquals(shortValue, subscriberImpl.shortValue);
                 return true;
             });
 
@@ -112,11 +119,14 @@ public class AeronicMultiParamTest
         assertEquals(booleanValue, subscriberImpl.booleanValue);
         assertEquals(stringValue, subscriberImpl.stringValue);
         assertReflectiveEquals(compositeValue, subscriberImpl.compositeValue);
-        assertArrayEquals(longArray, subscriberImpl.longArray);
-        assertArrayEquals(intArray, subscriberImpl.intArray);
-        assertArrayEquals(floatArray, subscriberImpl.floatArray);
-        assertArrayEquals(doubleArray, subscriberImpl.doubleArray);
-        assertArrayEquals(byteArray, subscriberImpl.byteArray);
+        assertArrayEquals(longs, subscriberImpl.longs);
+        assertArrayEquals(ints, subscriberImpl.ints);
+        assertArrayEquals(floats, subscriberImpl.floats);
+        assertArrayEquals(doubles, subscriberImpl.doubles);
+        assertArrayEquals(shorts, subscriberImpl.shorts);
+        assertArrayEquals(bytes, subscriberImpl.bytes);
+        assertArrayEquals(chars, subscriberImpl.chars);
+        assertReflectiveEquals(compositeArray, subscriberImpl.compositeArray);
 
         publisher.onEvent(
             123L,
@@ -126,20 +136,26 @@ public class AeronicMultiParamTest
             byteValue,
             charValue,
             false,
-            (short) (shortValue + 1),
+            (short)(shortValue + 1),
             stringValue,
             compositeValue,
-            longArray,
-            intArray,
-            doubleArray,
-            floatArray,
-            byteArray,
-            charArray
+            longs,
+            ints,
+            doubles,
+            floats,
+            shorts,
+            bytes,
+            chars,
+            compositeArray
         );
 
         await()
             .timeout(Duration.ofSeconds(1))
-            .until(() -> subscriberImpl.shortValue == 124);
+            .until(() -> {
+                // wait for last updated value only because of "happens before"
+                assertEquals(shortValue + 1, subscriberImpl.shortValue);
+                return true;
+            });
 
         assertEquals(123L, subscriberImpl.longValue);
         assertEquals(intValue, subscriberImpl.intValue);
@@ -148,6 +164,16 @@ public class AeronicMultiParamTest
         assertEquals(byteValue, subscriberImpl.byteValue);
         assertEquals(charValue, subscriberImpl.charValue);
         assertFalse(subscriberImpl.booleanValue);
+        assertEquals(stringValue, subscriberImpl.stringValue);
+        assertReflectiveEquals(compositeValue, subscriberImpl.compositeValue);
+        assertArrayEquals(longs, subscriberImpl.longs);
+        assertArrayEquals(ints, subscriberImpl.ints);
+        assertArrayEquals(floats, subscriberImpl.floats);
+        assertArrayEquals(doubles, subscriberImpl.doubles);
+        assertArrayEquals(shorts, subscriberImpl.shorts);
+        assertArrayEquals(bytes, subscriberImpl.bytes);
+        assertArrayEquals(chars, subscriberImpl.chars);
+        assertReflectiveEquals(compositeArray, subscriberImpl.compositeArray);
     }
 
     private static class MultiParamEventsImpl implements MultiParamEvents
@@ -162,12 +188,14 @@ public class AeronicMultiParamTest
         private volatile short shortValue;
         private volatile String stringValue;
         private volatile Composite compositeValue;
-        private volatile long[] longArray;
-        private volatile int[] intArray;
-        private volatile double[] doubleArray;
-        private volatile float[] floatArray;
-        private volatile byte[] byteArray;
-        private volatile char[] charArray;
+        private volatile long[] longs;
+        private volatile int[] ints;
+        private volatile double[] doubles;
+        private volatile float[] floats;
+        private volatile short[] shorts;
+        private volatile byte[] bytes;
+        private volatile char[] chars;
+        private volatile Composite[] compositeArray;
 
         @Override
         public void onEvent(
@@ -181,12 +209,14 @@ public class AeronicMultiParamTest
             final short shortValue,
             final String stringValue,
             final Composite compositeValue,
-            final long[] longArray,
-            final int[] intArray,
-            final double[] doubleArray,
-            final float[] floatArray,
-            final byte[] byteArray,
-            final char[] charArray
+            final long[] longs,
+            final int[] ints,
+            final double[] doubles,
+            final float[] floats,
+            final short[] shorts,
+            final byte[] bytes,
+            final char[] chars,
+            final Composite[] compositeArray
         )
         {
             this.longValue = longValue;
@@ -196,15 +226,17 @@ public class AeronicMultiParamTest
             this.byteValue = byteValue;
             this.charValue = charValue;
             this.booleanValue = booleanValue;
-            this.shortValue = shortValue;
             this.stringValue = stringValue;
             this.compositeValue = compositeValue;
-            this.longArray = longArray;
-            this.intArray = intArray;
-            this.doubleArray = doubleArray;
-            this.floatArray = floatArray;
-            this.byteArray = byteArray;
-            this.charArray = charArray;
+            this.longs = longs;
+            this.ints = ints;
+            this.doubles = doubles;
+            this.floats = floats;
+            this.shorts = shorts;
+            this.bytes = bytes;
+            this.chars = chars;
+            this.compositeArray = compositeArray;
+            this.shortValue = shortValue;
         }
     }
 }

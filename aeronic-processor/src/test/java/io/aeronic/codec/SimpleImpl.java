@@ -21,7 +21,7 @@ public class SimpleImpl implements Encoder
         bufferEncoder.encode(aLong);
     }
 
-    @Decoder
+    @DecodedBy
     public static SimpleImpl decode(final BufferDecoder bufferDecoder)
     {
         final int anInt = bufferDecoder.decodeInt();

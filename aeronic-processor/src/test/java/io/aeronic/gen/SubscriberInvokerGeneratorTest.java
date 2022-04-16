@@ -42,12 +42,13 @@ public class SubscriberInvokerGeneratorTest
                             final char charValue = bufferDecoder.decodeChar();
                             final SimpleImpl simpleImpl = SimpleImpl.decode(bufferDecoder);
                             final String stringValue = bufferDecoder.decodeString();
-                            final long[] longArray = bufferDecoder.decodeLongArray();
-                            final int[] intArray = bufferDecoder.decodeIntArray();
-                            final float[] floatArray = bufferDecoder.decodeFloatArray();
-                            final double[] doubleArray = bufferDecoder.decodeDoubleArray();
-                            final byte[] byteArray = bufferDecoder.decodeByteArray();
-                            final char[] charArray = bufferDecoder.decodeCharArray();
+                            final long[] longs = bufferDecoder.decodelongs();
+                            final int[] ints = bufferDecoder.decodeints();
+                            final float[] floats = bufferDecoder.decodefloats();
+                            final double[] doubles = bufferDecoder.decodedoubles();
+                            final byte[] bytes = bufferDecoder.decodebytes();
+                            final char[] chars = bufferDecoder.decodechars();
+                            final SimpleImpl[] simpleImplArray = bufferDecoder.decode(SimpleImpl::decode, SimpleImpl[]::new);
                             subscriber.onEvent(
                                 longValue,
                                 intValue,
@@ -57,12 +58,13 @@ public class SubscriberInvokerGeneratorTest
                                 charValue,
                                 simpleImpl,
                                 stringValue,
-                                longArray,
-                                intArray,
-                                floatArray,
-                                doubleArray,
-                                byteArray,
-                                charArray
+                                longs,
+                                ints,
+                                floats,
+                                doubles,
+                                bytes,
+                                chars,
+                                simpleImplArray
                             );
                         }
                         case 1 -> {
@@ -93,12 +95,13 @@ public class SubscriberInvokerGeneratorTest
                     new ParameterInfo("charValue", "char", true, false),
                     new ParameterInfo("simpleImpl", "io.aeronic.codec.SimpleImpl", false, false),
                     new ParameterInfo("stringValue", "java.lang.String", false, false),
-                    new ParameterInfo("longArray", "long[]", false, true),
-                    new ParameterInfo("intArray", "int[]", false, true),
-                    new ParameterInfo("floatArray", "float[]", false, true),
-                    new ParameterInfo("doubleArray", "double[]", false, true),
-                    new ParameterInfo("byteArray", "byte[]", false, true),
-                    new ParameterInfo("charArray", "char[]", false, true)
+                    new ParameterInfo("longs", "long[]", false, true),
+                    new ParameterInfo("ints", "int[]", false, true),
+                    new ParameterInfo("floats", "float[]", false, true),
+                    new ParameterInfo("doubles", "double[]", false, true),
+                    new ParameterInfo("bytes", "byte[]", false, true),
+                    new ParameterInfo("chars", "char[]", false, true),
+                    new ParameterInfo("simpleImplArray", "io.aeronic.codec.SimpleImpl[]", false, true)
                 )),
                 new MethodInfo(1, "onTimer", List.of(
                     new ParameterInfo("timestamp", "long", true, false)

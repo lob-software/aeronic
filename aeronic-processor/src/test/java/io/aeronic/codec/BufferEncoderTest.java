@@ -178,6 +178,24 @@ public class BufferEncoderTest
     }
 
     @Test
+    public void shouldEncodeShortArray()
+    {
+        final short[] shorts = { 1, 2, 4, 5 };
+        bufferEncoder.encode(shorts);
+        final int encodedLength = buffer.getInt(0);
+        final short[] encodedArray = new short[encodedLength];
+
+        int idx = BitUtil.SIZE_OF_INT;
+        for (int i = 0; i < encodedLength; i++)
+        {
+            encodedArray[i] = buffer.getShort(idx);
+            idx += BitUtil.SIZE_OF_SHORT;
+        }
+
+        assertArrayEquals(shorts, encodedArray);
+    }
+
+    @Test
     public void shouldEncodeByteArray()
     {
         final byte[] bytes = { 0x1, 0x2, 0x3, 0x5 };

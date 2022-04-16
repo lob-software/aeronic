@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.aeronic.Assertions.assertCodec;
 
-public class CodecTest
+public class ObjectCodecTest
 {
     @Test
     public void shouldEncodeAndDecodeAnObject()

@@ -36,12 +36,13 @@ public class PublisherGeneratorTest
                     final char charValue,
                     final SimpleImpl simpleImpl,
                     final String stringValue,
-                    final long[] longArray,
-                    final int[] intArray,
-                    final float[] floatArray,
-                    final double[] doubleArray,
-                    final byte[] byteArray,
-                    final char[] charArray
+                    final long[] longs,
+                    final int[] ints,
+                    final float[] floats,
+                    final double[] doubles,
+                    final byte[] bytes,
+                    final char[] chars,
+                    final SimpleImpl[] simpleImplArray
                 )
                 {
                     bufferEncoder.encode(0);
@@ -53,12 +54,13 @@ public class PublisherGeneratorTest
                     bufferEncoder.encode(charValue);
                     simpleImpl.encode(bufferEncoder);
                     bufferEncoder.encode(stringValue);
-                    bufferEncoder.encode(longArray);
-                    bufferEncoder.encode(intArray);
-                    bufferEncoder.encode(floatArray);
-                    bufferEncoder.encode(doubleArray);
-                    bufferEncoder.encode(byteArray);
-                    bufferEncoder.encode(charArray);
+                    bufferEncoder.encode(longs);
+                    bufferEncoder.encode(ints);
+                    bufferEncoder.encode(floats);
+                    bufferEncoder.encode(doubles);
+                    bufferEncoder.encode(bytes);
+                    bufferEncoder.encode(chars);
+                    bufferEncoder.encode(simpleImplArray);
                     offer();
                 }
                 
@@ -91,12 +93,13 @@ public class PublisherGeneratorTest
                     new ParameterInfo("charValue", "char", true, false),
                     new ParameterInfo("simpleImpl", "io.aeronic.codec.SimpleImpl", false, false),
                     new ParameterInfo("stringValue", "java.lang.String", false, false),
-                    new ParameterInfo("longArray", "long[]", false, true),
-                    new ParameterInfo("intArray", "int[]", false, true),
-                    new ParameterInfo("floatArray", "float[]", false, true),
-                    new ParameterInfo("doubleArray", "double[]", false, true),
-                    new ParameterInfo("byteArray", "byte[]", false, true),
-                    new ParameterInfo("charArray", "char[]", false, true)
+                    new ParameterInfo("longs", "long[]", false, true),
+                    new ParameterInfo("ints", "int[]", false, true),
+                    new ParameterInfo("floats", "float[]", false, true),
+                    new ParameterInfo("doubles", "double[]", false, true),
+                    new ParameterInfo("bytes", "byte[]", false, true),
+                    new ParameterInfo("chars", "char[]", false, true),
+                    new ParameterInfo("simpleImplArray", "io.aeronic.codec.SimpleImpl[]", false, true)
                 )),
                 new MethodInfo(1, "onTimer", List.of(
                     new ParameterInfo("timestamp", "long", true, false)

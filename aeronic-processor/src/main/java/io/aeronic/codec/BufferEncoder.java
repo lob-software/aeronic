@@ -66,57 +66,75 @@ public class BufferEncoder
         encode(stringValue.getBytes());
     }
 
-    public void encode(final long[] longArray)
+    public void encode(final long[] longs)
     {
-        encode(longArray.length);
-        for (int i = 0; i < longArray.length; i++)
+        encode(longs.length);
+        for (int i = 0; i < longs.length; i++)
         {
-            encode(longArray[i]);
+            encode(longs[i]);
         }
     }
 
-    public void encode(final int[] intArray)
+    public void encode(final int[] ints)
     {
-        encode(intArray.length);
-        for (int i = 0; i < intArray.length; i++)
+        encode(ints.length);
+        for (int i = 0; i < ints.length; i++)
         {
-            encode(intArray[i]);
+            encode(ints[i]);
         }
     }
 
-    public void encode(final float[] floatArray)
+    public void encode(final float[] floats)
     {
-        encode(floatArray.length);
-        for (int i = 0; i < floatArray.length; i++)
+        encode(floats.length);
+        for (int i = 0; i < floats.length; i++)
         {
-            encode(floatArray[i]);
+            encode(floats[i]);
         }
     }
 
-    public void encode(final double[] doubleArray)
+    public void encode(final double[] doubles)
     {
-        encode(doubleArray.length);
-        for (int i = 0; i < doubleArray.length; i++)
+        encode(doubles.length);
+        for (int i = 0; i < doubles.length; i++)
         {
-            encode(doubleArray[i]);
+            encode(doubles[i]);
         }
     }
 
-    public void encode(final byte[] byteArray)
+    public void encode(final short[] shorts)
     {
-        encode(byteArray.length);
-        for (int i = 0; i < byteArray.length; i++)
+        encode(shorts.length);
+        for (int i = 0; i < shorts.length; i++)
         {
-            encode(byteArray[i]);
+            encode(shorts[i]);
         }
     }
 
-    public void encode(final char[] charArray)
+    public void encode(final byte[] bytes)
     {
-        encode(charArray.length);
-        for (int i = 0; i < charArray.length; i++)
+        encode(bytes.length);
+        for (int i = 0; i < bytes.length; i++)
         {
-            encode(charArray[i]);
+            encode(bytes[i]);
+        }
+    }
+
+    public void encode(final char[] chars)
+    {
+        encode(chars.length);
+        for (int i = 0; i < chars.length; i++)
+        {
+            encode(chars[i]);
+        }
+    }
+
+    public <T extends Encoder> void encode(final T[] array)
+    {
+        encode(array.length);
+        for (int i = 0; i < array.length; i++)
+        {
+            array[i].encode(this);
         }
     }
 

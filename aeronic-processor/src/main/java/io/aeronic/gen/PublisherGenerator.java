@@ -2,6 +2,8 @@ package io.aeronic.gen;
 
 import java.util.List;
 
+import static io.aeronic.gen.TypeUtil.isPrimitive;
+
 public class PublisherGenerator
 {
     public String generate(final String packageName, final String interfaceName, final List<MethodInfo> methods)
@@ -81,41 +83,50 @@ public class PublisherGenerator
         final StringBuilder packageAndImports
     )
     {
+        final String parameterType = parameter.getType();
+        final String parameterName = parameter.getName();
         if (parameter.isPrimitive())
         {
-            methodsBuilder.append("        final %s %s".formatted(parameter.getType(), parameter.getName()));
+            methodsBuilder.append("        final %s %s".formatted(parameterType, parameterName));
             methodBodyBuilder.append("""
                         bufferEncoder.encode(%s);
-                """.formatted(parameter.getName()));
+                """.formatted(parameterName));
             return;
         }
 
         if (parameter.isArray())
         {
-            methodsBuilder.append("        final %s %s".formatted(parameter.getType(), parameter.getName()));
+            final String arrayType = parameterType.substring(0, parameterType.length() - 2);
+            if (isPrimitive(arrayType))
+            {
+                methodsBuilder.append("        final %s %s".formatted(parameterType, parameterName));
+            }
+            else
+            {
+                final String className = TypeUtil.extractClassName(arrayType);
+                methodsBuilder.append("        final %s[] %s".formatted(className, parameterName));
+            }
             methodBodyBuilder.append("""
                         bufferEncoder.encode(%s);
-                """.formatted(parameter.getName()));
+                """.formatted(parameterName));
             return;
         }
 
-        final String type = parameter.getType();
-        if (type.equals(String.class.getName()))
+        if (parameterType.equals(String.class.getName()))
         {
-            methodsBuilder.append("        final String %s".formatted(parameter.getName()));
+            methodsBuilder.append("        final String %s".formatted(parameterName));
             methodBodyBuilder.append("""
                         bufferEncoder.encode(%s);
-                """.formatted(parameter.getName()));
+                """.formatted(parameterName));
             return;
         }
 
-        final String[] split = type.split("\\.");
-        final String className = split[split.length - 1];
-        methodsBuilder.append("        final %s %s".formatted(className, parameter.getName()));
+        final String className = TypeUtil.extractClassName(parameterType);
+        methodsBuilder.append("        final %s %s".formatted(className, parameterName));
         methodBodyBuilder.append("""
                     %s.encode(bufferEncoder);
-            """.formatted(parameter.getName()));
-        packageAndImports.append("import %s;".formatted(type));
+            """.formatted(parameterName));
+        packageAndImports.append("import %s;".formatted(parameterType));
     }
 
     private String generateConstructor(final String interfaceName)

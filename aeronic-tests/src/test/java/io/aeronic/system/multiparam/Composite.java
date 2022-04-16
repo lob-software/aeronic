@@ -2,7 +2,7 @@ package io.aeronic.system.multiparam;
 
 import io.aeronic.codec.BufferDecoder;
 import io.aeronic.codec.BufferEncoder;
-import io.aeronic.codec.Decoder;
+import io.aeronic.codec.DecodedBy;
 import io.aeronic.codec.Encoder;
 
 public class Composite implements Encoder
@@ -32,7 +32,7 @@ public class Composite implements Encoder
         bufferEncoder.encode(aDouble);
     }
 
-    @Decoder
+    @DecodedBy
     public static Composite decode(final BufferDecoder bufferDecoder)
     {
         final int anInt = bufferDecoder.decodeInt();

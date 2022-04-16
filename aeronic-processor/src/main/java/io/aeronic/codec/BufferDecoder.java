@@ -3,6 +3,8 @@ package io.aeronic.codec;
 import org.agrona.BitUtil;
 import org.agrona.DirectBuffer;
 
+import java.util.function.IntFunction;
+
 public class BufferDecoder
 {
     private DirectBuffer buffer;
@@ -118,6 +120,18 @@ public class BufferDecoder
         return doubles;
     }
 
+    public short[] decodeShortArray()
+    {
+        final int length = decodeInt();
+        final short[] shorts = new short[length];
+        for (int i = 0; i < shorts.length; i++)
+        {
+            shorts[i] = decodeShort();
+        }
+
+        return shorts;
+    }
+
     public byte[] decodeByteArray()
     {
         final int length = decodeInt();
@@ -140,6 +154,17 @@ public class BufferDecoder
         }
 
         return chars;
+    }
+
+    public <T> T[] decode(final Decoder<T> decoder, final IntFunction<T[]> arrayCreator)
+    {
+        final int length = decodeInt();
+        final T[] array = arrayCreator.apply(length);
+        for (int i = 0; i < length; i++)
+        {
+            array[i] = decoder.decode(this);
+        }
+        return array;
     }
 
     public String decodeString()

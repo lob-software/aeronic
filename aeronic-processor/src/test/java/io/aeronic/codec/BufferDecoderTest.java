@@ -178,6 +178,23 @@ public class BufferDecoderTest
     }
 
     @Test
+    public void shouldDecodeShortArray()
+    {
+        final short[] shorts = { 1, 2, 4, 5 };
+        buffer.putInt(0, shorts.length);
+
+        int idx = BitUtil.SIZE_OF_INT;
+        for (int i = 0; i < shorts.length; i++)
+        {
+            buffer.putShort(idx, shorts[i]);
+            idx += BitUtil.SIZE_OF_SHORT;
+        }
+
+        bufferDecoder.wrap(buffer, 0);
+        assertArrayEquals(shorts, bufferDecoder.decodeShortArray());
+    }
+
+    @Test
     public void shouldDecodeByteArray()
     {
         final byte[] bytes = { 0x1, 0x2, 0x3, 0x5 };

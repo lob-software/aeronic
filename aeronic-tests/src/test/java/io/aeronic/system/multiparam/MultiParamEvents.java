@@ -16,11 +16,13 @@ public interface MultiParamEvents
         short shortValue,
         String stringValue,
         Composite compositeValue,
-        long[] longArray,
-        int[] intArray,
-        double[] doubleArray,
-        float[] floatArray,
-        byte[] byteArray,
-        char[] charArray
+        long[] longs,
+        int[] ints,
+        double[] doubles,
+        float[] floats,
+        short[] shorts,
+        byte[] bytes,
+        char[] chars,
+        Composite[] compositeArray
     );
 }
