@@ -1,4 +1,4 @@
-[![build](https://github.com/eliquinox/aeronic/actions/workflows/gradle.yml/badge.svg)](https://github.com/eliquinox/aeronic/actions/workflows/gradle.yml)
+[![Java CI with Gradle](https://github.com/eliquinox/aeronic/actions/workflows/gradle.yml/badge.svg)](https://github.com/eliquinox/aeronic/actions/workflows/gradle.yml)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 # aeronic
 
