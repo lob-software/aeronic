@@ -13,8 +13,8 @@ repositories {
 }
 
 dependencies {
-    annotationProcessor("io.aeronic:aeronic:0.0.7")
-    implementation("io.aeronic:aeronic:0.0.7")
+    annotationProcessor("io.aeronic:aeronic:0.0.8")
+    implementation("io.aeronic:aeronic:0.0.8")
 }
 ```
 
