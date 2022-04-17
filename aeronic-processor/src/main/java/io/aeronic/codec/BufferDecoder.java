@@ -156,7 +156,7 @@ public class BufferDecoder
         return chars;
     }
 
-    public <T> T[] decode(final Decoder<T> decoder, final IntFunction<T[]> arrayCreator)
+    public <T> T[] decodeArray(final Decoder<T> decoder, final IntFunction<T[]> arrayCreator)
     {
         final int length = decodeInt();
         final T[] array = arrayCreator.apply(length);

@@ -108,7 +108,7 @@ public class SubscriberInvokerGenerator
             {
                 final String className = TypeUtil.extractClassName(arrayType);
                 handleMethodBuilder.append("""
-                                final %s[] %s = bufferDecoder.decode(%s::decode, %s[]::new);
+                                final %s[] %s = bufferDecoder.decodeArray(%s::decode, %s[]::new);
                 """.formatted(className, parameterName, className, className));
             }
 
