@@ -4,10 +4,14 @@ import io.aeron.cluster.service.ClientSession;
 import io.aeronic.net.AeronicPublication;
 import org.agrona.DirectBuffer;
 
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Set;
+
 public class ClientSessionPublication<T> implements AeronicPublication
 {
     private final String publisherName;
-    private ClientSession clientSession;
+    private final Set<ClientSession> clientSessions = Collections.newSetFromMap(new IdentityHashMap<>());
     private T publisher;
 
     public ClientSessionPublication(final String publisherName)
@@ -18,13 +22,13 @@ public class ClientSessionPublication<T> implements AeronicPublication
     @Override
     public boolean isConnected()
     {
-        return clientSession != null && !clientSession.isClosing();
+        return !clientSessions.isEmpty() && clientSessions.stream().noneMatch(ClientSession::isClosing);
     }
 
     @Override
     public void offer(final DirectBuffer buffer)
     {
-        clientSession.offer(buffer, 0, buffer.capacity());
+        clientSessions.forEach(s -> s.offer(buffer, 0, buffer.capacity()));
     }
 
     @Override
@@ -32,13 +36,13 @@ public class ClientSessionPublication<T> implements AeronicPublication
     {
         if (isConnected())
         {
-            clientSession.close();
+            clientSessions.forEach(ClientSession::close);
         }
     }
 
     public void bindClientSession(final ClientSession clientSession)
     {
-        this.clientSession = clientSession;
+        clientSessions.add(clientSession);
     }
 
     public void bindPublisher(final T publisher)

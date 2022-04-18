@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class AeronicClusteredServiceRegistry
 {
-    private final Map<Long, AbstractSubscriberInvoker<?>> subscriberBySessionId = new HashMap<>();
+    private final Map<Long, AbstractSubscriberInvoker<?>> invokersBySessionId = new HashMap<>();
     private final Map<String, AbstractSubscriberInvoker<?>> invokerByName = new HashMap<>();
     private final Map<String, ClientSessionPublication<?>> clientSessionPublicationByName = new HashMap<>();
 
@@ -60,7 +60,7 @@ public class AeronicClusteredServiceRegistry
             final AbstractSubscriberInvoker<?> invoker = invokerByName.get(subscriberName);
             if (invoker != null)
             {
-                subscriberBySessionId.put(session.id(), invoker);
+                invokersBySessionId.put(session.id(), invoker);
             }
 
             if (subscriberName.endsWith("__EgressSubscriber"))
@@ -72,6 +72,6 @@ public class AeronicClusteredServiceRegistry
 
     public void onSessionMessage(final ClientSession session, final DirectBuffer buffer, final int offset)
     {
-        subscriberBySessionId.getOrDefault(session.id(), NullSubscriberInvokerImpl.INSTANCE).handle(buffer, offset);
+        invokersBySessionId.getOrDefault(session.id(), NullSubscriberInvokerImpl.INSTANCE).handle(buffer, offset);
     }
 }

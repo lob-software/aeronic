@@ -6,9 +6,12 @@ import io.aeronic.codec.Encoder;
 import org.agrona.ExpandableDirectByteBuffer;
 
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.Arrays;
+import java.util.function.BooleanSupplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 public class Assertions
 {
@@ -54,5 +57,17 @@ public class Assertions
         {
             throw new AssertionError(e);
         }
+    }
+
+    public static void assertEventuallyTrue(final BooleanSupplier assertion, final long timeoutInMillis)
+    {
+        await()
+            .timeout(Duration.ofMillis(timeoutInMillis))
+            .until(assertion::getAsBoolean);
+    }
+
+    public static void assertEventuallyTrue(final BooleanSupplier assertion)
+    {
+        assertEventuallyTrue(assertion, 1000L);
     }
 }

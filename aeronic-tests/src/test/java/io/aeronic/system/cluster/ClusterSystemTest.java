@@ -13,11 +13,10 @@ import org.agrona.ExpandableArrayBuffer;
 import org.agrona.concurrent.BusySpinIdleStrategy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
-
-import static org.awaitility.Awaitility.await;
+import static io.aeronic.Assertions.assertEventuallyTrue;
 
 public class ClusterSystemTest
 {
@@ -92,9 +91,7 @@ public class ClusterSystemTest
         simpleEventsPublisher.onEvent(101L);
         sampleEventsPublisher.onEvent(201L);
 
-        await()
-            .timeout(Duration.ofSeconds(1))
-            .until(() -> simpleEvents.value == 101L && sampleEvents.value == 201L && service.getMessageCount() == 2);
+        assertEventuallyTrue(() -> simpleEvents.value == 101L && sampleEvents.value == 201L && service.getMessageCount() == 2);
     }
 
     @Test
@@ -122,14 +119,12 @@ public class ClusterSystemTest
         aeronic.registerClusterEgressSubscriber(SampleEvents.class, sampleEvents, INGRESS_CHANNEL);
         aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
-        await().timeout(Duration.ofSeconds(1)).until(clusteredService::egressConnected);
+        assertEventuallyTrue(clusteredService::egressConnected);
 
         simpleEventsPublisher.onEvent(101L);
         sampleEventsPublisher.onEvent(202L);
 
-        await()
-            .timeout(Duration.ofSeconds(1))
-            .until(() -> simpleEvents.value == 101L && sampleEvents.value == 202L);
+        assertEventuallyTrue(() -> simpleEvents.value == 101L && sampleEvents.value == 202L);
     }
 
     @Test
@@ -160,7 +155,7 @@ public class ClusterSystemTest
         aeronic.registerClusterEgressSubscriber(SampleEvents.class, sampleEvents, INGRESS_CHANNEL);
         aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
-        await().timeout(Duration.ofSeconds(1)).until(clusteredService::egressConnected);
+        assertEventuallyTrue(clusteredService::egressConnected);
 
         // cluster -> client
         clusterEgressSimpleEventsPublisher.onEvent(101L);
@@ -171,9 +166,7 @@ public class ClusterSystemTest
         clusterIngressSimpleEventsPublisher.onEvent(303L);
         clusterIngressSampleEventsPublisher.onEvent(404L);
 
-        await()
-            .timeout(Duration.ofSeconds(1))
-            .until(() -> simpleEvents.value == 101L &&
+        assertEventuallyTrue(() -> simpleEvents.value == 101L &&
                 sampleEvents.value == 202L &&
                 clusterIngressSimpleEventsImpl.value == 303L &&
                 clusterIngressSampleEventsImpl.value == 404L);
@@ -201,7 +194,105 @@ public class ClusterSystemTest
 
         anotherClient.offer(buffer, 0, buffer.capacity());
 
-        await().until(() -> service.getMessageCount() == 1);
+        assertEventuallyTrue(() -> service.getMessageCount() == 1);
+    }
+
+    @Test
+    public void sameIngressChannelPublishing()
+    {
+        final TestClusterNode.Service service = new TestClusterNode.Service();
+
+        clusteredService = AeronicClusteredServiceContainer.configure()
+            .clusteredService(service)
+            .registerIngressSubscriber(SimpleEvents.class, simpleEvents)
+            .create();
+
+        clusterNode = new TestClusterNode(clusteredService, true);
+
+        final SimpleEvents simpleEventsPublisher1 = aeronic.createClusterIngressPublisher(SimpleEvents.class, INGRESS_CHANNEL);
+        final SimpleEvents simpleEventsPublisher2 = aeronic.createClusterIngressPublisher(SimpleEvents.class, INGRESS_CHANNEL);
+
+        aeronic.awaitUntilPubsAndSubsConnect();
+
+        simpleEventsPublisher1.onEvent(101L);
+        assertEventuallyTrue(() -> simpleEvents.value == 101L && service.getMessageCount() == 1);
+
+        simpleEventsPublisher2.onEvent(201L);
+        assertEventuallyTrue(() -> simpleEvents.value == 201L && service.getMessageCount() == 2);
+    }
+
+    @Test
+    public void sameEgressChannelPublishing()
+    {
+        final TestClusterNode.Service service = new TestClusterNode.Service();
+
+        clusteredService = AeronicClusteredServiceContainer.configure()
+            .clusteredService(service)
+            .registerEgressPublisher(SimpleEvents.class)
+            .create();
+
+        final SimpleEvents clusterEgressSimpleEventsPublisher = clusteredService.getPublisherFor(SimpleEvents.class);
+
+        clusterNode = new TestClusterNode(clusteredService, true);
+
+        final SimpleEventsImpl sub1 = new SimpleEventsImpl();
+        final SimpleEventsImpl sub2 = new SimpleEventsImpl();
+
+        aeronic.registerClusterEgressSubscriber(SimpleEvents.class, sub1, INGRESS_CHANNEL);
+        aeronic.registerClusterEgressSubscriber(SimpleEvents.class, sub2, INGRESS_CHANNEL);
+
+        aeronic.start();
+        aeronic.awaitUntilPubsAndSubsConnect();
+        assertEventuallyTrue(clusteredService::egressConnected);
+
+        clusterEgressSimpleEventsPublisher.onEvent(101L);
+        assertEventuallyTrue(() -> sub1.value == 101L && sub2.value == 101L);
+
+        clusterEgressSimpleEventsPublisher.onEvent(201L);
+        assertEventuallyTrue(() -> sub1.value == 201L && sub2.value == 201L);
+    }
+
+    @Test
+    @Disabled("WIP: find out how UDP multicast egress works")
+    public void sameEgressChannelPublishingUDPMulticast()
+    {
+        // UDP multicast
+        final String egressChannel = "aeron:udp?endpoint=224.0.1.1:44444|reliable=true";
+        final TestClusterNode.Service service = new TestClusterNode.Service();
+
+        clusteredService = AeronicClusteredServiceContainer.configure()
+            .clusteredService(service)
+            .registerEgressPublisher(SimpleEvents.class)
+            .create();
+
+        final SimpleEvents clusterEgressSimpleEventsPublisher = clusteredService.getPublisherFor(SimpleEvents.class);
+
+        clusterNode = new TestClusterNode(clusteredService, true);
+
+        final SimpleEventsImpl sub1 = new SimpleEventsImpl();
+        final SimpleEventsImpl sub2 = new SimpleEventsImpl();
+
+        aeronic.registerClusterEgressSubscriber(SimpleEvents.class, sub1, new AeronCluster.Context()
+            .aeronDirectoryName(aeron.context().aeronDirectoryName())
+            .errorHandler(Throwable::printStackTrace)
+            .ingressChannel(INGRESS_CHANNEL)
+            .egressChannel(egressChannel));
+
+        aeronic.registerClusterEgressSubscriber(SimpleEvents.class, sub2, new AeronCluster.Context()
+            .aeronDirectoryName(aeron.context().aeronDirectoryName())
+            .errorHandler(Throwable::printStackTrace)
+            .ingressChannel(INGRESS_CHANNEL)
+            .egressChannel(egressChannel));
+
+        aeronic.start();
+        aeronic.awaitUntilPubsAndSubsConnect();
+        assertEventuallyTrue(clusteredService::egressConnected);
+
+        clusterEgressSimpleEventsPublisher.onEvent(101L);
+        assertEventuallyTrue(() -> sub1.value == 101L && sub2.value == 101L);
+
+        clusterEgressSimpleEventsPublisher.onEvent(201L);
+        assertEventuallyTrue(() -> sub1.value == 201L && sub2.value == 201L);
     }
 
     public static class SimpleEventsImpl implements SimpleEvents
