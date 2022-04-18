@@ -167,9 +167,9 @@ public class ClusterSystemTest
         clusterIngressSampleEventsPublisher.onEvent(404L);
 
         assertEventuallyTrue(() -> simpleEvents.value == 101L &&
-                sampleEvents.value == 202L &&
-                clusterIngressSimpleEventsImpl.value == 303L &&
-                clusterIngressSampleEventsImpl.value == 404L);
+            sampleEvents.value == 202L &&
+            clusterIngressSimpleEventsImpl.value == 303L &&
+            clusterIngressSampleEventsImpl.value == 404L);
     }
 
     @Test
@@ -255,6 +255,49 @@ public class ClusterSystemTest
     @Test
     @Disabled("WIP: find out how UDP multicast egress works")
     public void sameEgressChannelPublishingUDPMulticast()
+    {
+        // UDP multicast
+        final String egressChannel = "aeron:udp?endpoint=224.0.1.1:44444|reliable=true";
+        final TestClusterNode.Service service = new TestClusterNode.Service();
+
+        clusteredService = AeronicClusteredServiceContainer.configure()
+            .clusteredService(service)
+            .registerEgressPublisher(SimpleEvents.class)
+            .create();
+
+        final SimpleEvents clusterEgressSimpleEventsPublisher = clusteredService.getPublisherFor(SimpleEvents.class);
+
+        clusterNode = new TestClusterNode(clusteredService, true);
+
+        final SimpleEventsImpl sub1 = new SimpleEventsImpl();
+        final SimpleEventsImpl sub2 = new SimpleEventsImpl();
+
+        aeronic.registerClusterEgressSubscriber(SimpleEvents.class, sub1, new AeronCluster.Context()
+            .aeronDirectoryName(aeron.context().aeronDirectoryName())
+            .errorHandler(Throwable::printStackTrace)
+            .ingressChannel(INGRESS_CHANNEL)
+            .egressChannel(egressChannel));
+
+        aeronic.registerClusterEgressSubscriber(SimpleEvents.class, sub2, new AeronCluster.Context()
+            .aeronDirectoryName(aeron.context().aeronDirectoryName())
+            .errorHandler(Throwable::printStackTrace)
+            .ingressChannel(INGRESS_CHANNEL)
+            .egressChannel(egressChannel));
+
+        aeronic.start();
+        aeronic.awaitUntilPubsAndSubsConnect();
+        assertEventuallyTrue(clusteredService::egressConnected);
+
+        clusterEgressSimpleEventsPublisher.onEvent(101L);
+        assertEventuallyTrue(() -> sub1.value == 101L && sub2.value == 101L);
+
+        clusterEgressSimpleEventsPublisher.onEvent(201L);
+        assertEventuallyTrue(() -> sub1.value == 201L && sub2.value == 201L);
+    }
+
+    @Test
+    @Disabled("WIP: find out how MDC egress works")
+    public void sameEgressChannelPublishingMDCCast()
     {
         // UDP multicast
         final String egressChannel = "aeron:udp?endpoint=224.0.1.1:44444|reliable=true";
