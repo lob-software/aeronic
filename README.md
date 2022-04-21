@@ -31,7 +31,7 @@ public interface TradeEvents
 }
 ```
 
-A subscriber, containing business logic can then be defined by implementing the interface above:
+A subscriber, containing business logic can then be defined by implementing the interface:
 
 ```java
 public class TradeEventsImpl implements TradeEvents
