@@ -19,7 +19,7 @@ public class SubscriptionAgent<T> implements Agent
     @Override
     public int doWork()
     {
-        return subscription.poll(this::handle, 1000);
+        return subscription.poll(this::handle, Integer.MAX_VALUE);
     }
 
     @Override
