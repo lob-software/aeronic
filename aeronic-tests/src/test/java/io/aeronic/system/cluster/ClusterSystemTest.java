@@ -288,6 +288,7 @@ public class ClusterSystemTest
         aeronic.awaitUntilPubsAndSubsConnect();
         assertEventuallyTrue(clusteredService::egressConnected);
 
+        // expectation: publishing to just one ClientSession publishes to both egress subscribers
         clusterEgressSimpleEventsPublisher.onEvent(101L);
         assertEventuallyTrue(() -> sub1.value == 101L && sub2.value == 101L);
 
