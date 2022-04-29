@@ -5,6 +5,9 @@ import org.agrona.ExpandableDirectByteBuffer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BufferDecoderTest
@@ -231,5 +234,27 @@ public class BufferDecoderTest
         bufferDecoder.wrap(buffer, 0);
 
         assertEquals(stringValue, bufferDecoder.decodeString());
+    }
+
+    @Test
+    public void shouldDecodeBigInteger()
+    {
+        final BigInteger bigInteger = BigInteger.TEN;
+        buffer.putInt(0, bigInteger.toByteArray().length);
+        buffer.putBytes(BitUtil.SIZE_OF_INT, bigInteger.toByteArray());
+        bufferDecoder.wrap(buffer, 0);
+
+        assertEquals(bigInteger, bufferDecoder.decodeBigInteger());
+    }
+
+    @Test
+    public void shouldDecodeBigDecimal()
+    {
+        final BigDecimal bigDecimal = BigDecimal.ONE;
+        buffer.putInt(0, bigDecimal.toString().length());
+        buffer.putBytes(BitUtil.SIZE_OF_INT, bigDecimal.toString().getBytes());
+        bufferDecoder.wrap(buffer, 0);
+
+        assertEquals(bigDecimal, bufferDecoder.decodeBigDecimal());
     }
 }

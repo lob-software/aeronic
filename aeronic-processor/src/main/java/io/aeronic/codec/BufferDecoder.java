@@ -3,6 +3,8 @@ package io.aeronic.codec;
 import org.agrona.BitUtil;
 import org.agrona.DirectBuffer;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.function.IntFunction;
 
 public class BufferDecoder
@@ -70,6 +72,21 @@ public class BufferDecoder
         final short shortValue = buffer.getShort(currentOffset);
         currentOffset += BitUtil.SIZE_OF_SHORT;
         return shortValue;
+    }
+
+    public String decodeString()
+    {
+        return new String(decodeByteArray());
+    }
+
+    public BigInteger decodeBigInteger()
+    {
+        return new BigInteger(decodeByteArray());
+    }
+
+    public BigDecimal decodeBigDecimal()
+    {
+        return new BigDecimal(decodeString());
     }
 
     public long[] decodeLongArray()
@@ -165,10 +182,5 @@ public class BufferDecoder
             array[i] = decoder.decode(this);
         }
         return array;
-    }
-
-    public String decodeString()
-    {
-        return new String(decodeByteArray());
     }
 }

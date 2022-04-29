@@ -5,6 +5,9 @@ import org.agrona.ExpandableDirectByteBuffer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -225,5 +228,27 @@ public class BufferEncoderTest
         }
 
         assertArrayEquals(chars, encodedArray);
+    }
+
+    @Test
+    public void shouldEncodeBigInteger()
+    {
+        bufferEncoder.encode(BigInteger.TEN);
+        final int arrLen = buffer.getInt(0);
+        final byte[] bigIntBytes = new byte[arrLen];
+        buffer.getBytes(BitUtil.SIZE_OF_INT, bigIntBytes);
+        final BigInteger actual = new BigInteger(bigIntBytes);
+        assertEquals(BigInteger.TEN, actual);
+    }
+
+    @Test
+    public void shouldEncodeBigDecimal()
+    {
+        bufferEncoder.encode(BigDecimal.TEN);
+        final int arrLen = buffer.getInt(0);
+        final byte[] bigDecimalBytes = new byte[arrLen];
+        buffer.getBytes(BitUtil.SIZE_OF_INT, bigDecimalBytes);
+        final BigDecimal actual = new BigDecimal(new String(bigDecimalBytes));
+        assertEquals(BigDecimal.TEN, actual);
     }
 }

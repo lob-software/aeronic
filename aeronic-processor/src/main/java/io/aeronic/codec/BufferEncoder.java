@@ -3,6 +3,9 @@ package io.aeronic.codec;
 import org.agrona.BitUtil;
 import org.agrona.MutableDirectBuffer;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 public class BufferEncoder
 {
     private final MutableDirectBuffer buffer;
@@ -64,6 +67,16 @@ public class BufferEncoder
     public void encode(final String stringValue)
     {
         encode(stringValue.getBytes());
+    }
+
+    public void encode(final BigInteger bigInteger)
+    {
+        encode(bigInteger.toByteArray());
+    }
+
+    public void encode(final BigDecimal bigDecimal)
+    {
+        encode(bigDecimal.toString());
     }
 
     public void encode(final long[] longs)
