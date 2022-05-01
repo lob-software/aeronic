@@ -1,6 +1,7 @@
 package io.aeronic.system.multiparam;
 
 import io.aeronic.Aeronic;
+import io.aeronic.MyEnum;
 
 @Aeronic
 public interface MultiParamEvents
@@ -23,6 +24,7 @@ public interface MultiParamEvents
         short[] shorts,
         byte[] bytes,
         char[] chars,
-        Composite[] compositeArray
+        Composite[] compositeArray,
+        MyEnum myEnum
     );
 }

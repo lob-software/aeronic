@@ -19,6 +19,8 @@ public class SubscriberInvokerGeneratorTest
             import org.agrona.BitUtil;
             import org.agrona.DirectBuffer;
             import io.aeronic.codec.SimpleImpl;
+            import io.aeronic.MyEnum;
+            
                     
             public class TestEventsInvoker extends AbstractSubscriberInvoker<TestEvents>
             {
@@ -49,6 +51,7 @@ public class SubscriberInvokerGeneratorTest
                             final byte[] bytes = bufferDecoder.decodeByteArray();
                             final char[] chars = bufferDecoder.decodeCharArray();
                             final SimpleImpl[] simpleImplArray = bufferDecoder.decodeArray(SimpleImpl::decode, SimpleImpl[]::new);
+                            final MyEnum myEnum = MyEnum.decode(bufferDecoder);
                             subscriber.onEvent(
                                 longValue,
                                 intValue,
@@ -64,7 +67,8 @@ public class SubscriberInvokerGeneratorTest
                                 doubles,
                                 bytes,
                                 chars,
-                                simpleImplArray
+                                simpleImplArray,
+                                myEnum
                             );
                         }
                         case 1 -> {
@@ -101,7 +105,8 @@ public class SubscriberInvokerGeneratorTest
                     new ParameterInfo("doubles", "double[]", false, true),
                     new ParameterInfo("bytes", "byte[]", false, true),
                     new ParameterInfo("chars", "char[]", false, true),
-                    new ParameterInfo("simpleImplArray", "io.aeronic.codec.SimpleImpl[]", false, true)
+                    new ParameterInfo("simpleImplArray", "io.aeronic.codec.SimpleImpl[]", false, true),
+                    new ParameterInfo("myEnum", "io.aeronic.MyEnum", false, false)
                 )),
                 new MethodInfo(1, "onTimer", List.of(
                     new ParameterInfo("timestamp", "long", true, false)

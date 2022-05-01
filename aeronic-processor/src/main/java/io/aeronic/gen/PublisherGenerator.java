@@ -126,7 +126,7 @@ public class PublisherGenerator
         methodBodyBuilder.append("""
                     %s.encode(bufferEncoder);
             """.formatted(parameterName));
-        packageAndImports.append("import %s;".formatted(parameterType));
+        packageAndImports.append("import %s;\n".formatted(parameterType));
     }
 
     private String generateConstructor(final String interfaceName)

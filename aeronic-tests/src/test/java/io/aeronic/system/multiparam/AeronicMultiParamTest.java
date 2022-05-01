@@ -4,15 +4,14 @@ import io.aeron.Aeron;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
 import io.aeronic.AeronicWizard;
+import io.aeronic.MyEnum;
 import org.agrona.concurrent.BusySpinIdleStrategy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
-
+import static io.aeronic.Assertions.assertEventually;
 import static io.aeronic.Assertions.assertReflectiveEquals;
-import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AeronicMultiParamTest
@@ -99,34 +98,30 @@ public class AeronicMultiParamTest
             shorts,
             bytes,
             chars,
-            compositeArray
+            compositeArray,
+            MyEnum.ONE
         );
 
-        await()
-            .timeout(Duration.ofSeconds(1))
-            .until(() -> {
-                // wait for last updated value only because of "happens before"
-                assertEquals(shortValue, subscriberImpl.shortValue);
-                return true;
-            });
-
-        assertEquals(longValue, subscriberImpl.longValue);
-        assertEquals(intValue, subscriberImpl.intValue);
-        assertEquals(floatValue, subscriberImpl.floatValue);
-        assertEquals(doubleValue, subscriberImpl.doubleValue);
-        assertEquals(byteValue, subscriberImpl.byteValue);
-        assertEquals(charValue, subscriberImpl.charValue);
-        assertEquals(booleanValue, subscriberImpl.booleanValue);
-        assertEquals(stringValue, subscriberImpl.stringValue);
-        assertReflectiveEquals(compositeValue, subscriberImpl.compositeValue);
-        assertArrayEquals(longs, subscriberImpl.longs);
-        assertArrayEquals(ints, subscriberImpl.ints);
-        assertArrayEquals(floats, subscriberImpl.floats);
-        assertArrayEquals(doubles, subscriberImpl.doubles);
-        assertArrayEquals(shorts, subscriberImpl.shorts);
-        assertArrayEquals(bytes, subscriberImpl.bytes);
-        assertArrayEquals(chars, subscriberImpl.chars);
-        assertReflectiveEquals(compositeArray, subscriberImpl.compositeArray);
+        assertEventually(() -> {
+            assertEquals(shortValue, subscriberImpl.shortValue);
+            assertEquals(longValue, subscriberImpl.longValue);
+            assertEquals(intValue, subscriberImpl.intValue);
+            assertEquals(floatValue, subscriberImpl.floatValue);
+            assertEquals(doubleValue, subscriberImpl.doubleValue);
+            assertEquals(byteValue, subscriberImpl.byteValue);
+            assertEquals(charValue, subscriberImpl.charValue);
+            assertEquals(booleanValue, subscriberImpl.booleanValue);
+            assertEquals(stringValue, subscriberImpl.stringValue);
+            assertReflectiveEquals(compositeValue, subscriberImpl.compositeValue);
+            assertArrayEquals(longs, subscriberImpl.longs);
+            assertArrayEquals(ints, subscriberImpl.ints);
+            assertArrayEquals(floats, subscriberImpl.floats);
+            assertArrayEquals(doubles, subscriberImpl.doubles);
+            assertArrayEquals(shorts, subscriberImpl.shorts);
+            assertArrayEquals(bytes, subscriberImpl.bytes);
+            assertArrayEquals(chars, subscriberImpl.chars);
+            assertReflectiveEquals(compositeArray, subscriberImpl.compositeArray);
+        });
 
         publisher.onEvent(
             123L,
@@ -146,34 +141,30 @@ public class AeronicMultiParamTest
             shorts,
             bytes,
             chars,
-            compositeArray
+            compositeArray,
+            MyEnum.ONE
         );
 
-        await()
-            .timeout(Duration.ofSeconds(1))
-            .until(() -> {
-                // wait for last updated value only because of "happens before"
-                assertEquals(shortValue + 1, subscriberImpl.shortValue);
-                return true;
-            });
-
-        assertEquals(123L, subscriberImpl.longValue);
-        assertEquals(intValue, subscriberImpl.intValue);
-        assertEquals(floatValue, subscriberImpl.floatValue);
-        assertEquals(doubleValue, subscriberImpl.doubleValue);
-        assertEquals(byteValue, subscriberImpl.byteValue);
-        assertEquals(charValue, subscriberImpl.charValue);
-        assertFalse(subscriberImpl.booleanValue);
-        assertEquals(stringValue, subscriberImpl.stringValue);
-        assertReflectiveEquals(compositeValue, subscriberImpl.compositeValue);
-        assertArrayEquals(longs, subscriberImpl.longs);
-        assertArrayEquals(ints, subscriberImpl.ints);
-        assertArrayEquals(floats, subscriberImpl.floats);
-        assertArrayEquals(doubles, subscriberImpl.doubles);
-        assertArrayEquals(shorts, subscriberImpl.shorts);
-        assertArrayEquals(bytes, subscriberImpl.bytes);
-        assertArrayEquals(chars, subscriberImpl.chars);
-        assertReflectiveEquals(compositeArray, subscriberImpl.compositeArray);
+        assertEventually(() -> {
+            assertEquals(shortValue + 1, subscriberImpl.shortValue);
+            assertEquals(123L, subscriberImpl.longValue);
+            assertEquals(intValue, subscriberImpl.intValue);
+            assertEquals(floatValue, subscriberImpl.floatValue);
+            assertEquals(doubleValue, subscriberImpl.doubleValue);
+            assertEquals(byteValue, subscriberImpl.byteValue);
+            assertEquals(charValue, subscriberImpl.charValue);
+            assertFalse(subscriberImpl.booleanValue);
+            assertEquals(stringValue, subscriberImpl.stringValue);
+            assertReflectiveEquals(compositeValue, subscriberImpl.compositeValue);
+            assertArrayEquals(longs, subscriberImpl.longs);
+            assertArrayEquals(ints, subscriberImpl.ints);
+            assertArrayEquals(floats, subscriberImpl.floats);
+            assertArrayEquals(doubles, subscriberImpl.doubles);
+            assertArrayEquals(shorts, subscriberImpl.shorts);
+            assertArrayEquals(bytes, subscriberImpl.bytes);
+            assertArrayEquals(chars, subscriberImpl.chars);
+            assertReflectiveEquals(compositeArray, subscriberImpl.compositeArray);
+        });
     }
 
     private static class MultiParamEventsImpl implements MultiParamEvents
@@ -216,7 +207,8 @@ public class AeronicMultiParamTest
             final short[] shorts,
             final byte[] bytes,
             final char[] chars,
-            final Composite[] compositeArray
+            final Composite[] compositeArray,
+            final MyEnum myEnum
         )
         {
             this.longValue = longValue;

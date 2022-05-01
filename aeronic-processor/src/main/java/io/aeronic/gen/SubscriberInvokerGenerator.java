@@ -132,7 +132,7 @@ public class SubscriberInvokerGenerator
                             final %s %s = %s.decode(bufferDecoder);
             """.formatted(className, parameterName, className));
         subscriberInvocation.append("                    %s".formatted(parameterName));
-        classImports.append("import %s;".formatted(parameterType));
+        classImports.append("import %s;\n".formatted(parameterType));
     }
 
     private String generateConstructor(final String interfaceName)

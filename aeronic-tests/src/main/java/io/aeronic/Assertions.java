@@ -4,6 +4,7 @@ import io.aeronic.codec.BufferDecoder;
 import io.aeronic.codec.BufferEncoder;
 import io.aeronic.codec.Encoder;
 import org.agrona.ExpandableDirectByteBuffer;
+import org.awaitility.core.ThrowingRunnable;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
@@ -69,5 +70,13 @@ public class Assertions
     public static void assertEventuallyTrue(final BooleanSupplier assertion)
     {
         assertEventuallyTrue(assertion, 1000L);
+    }
+
+    public static void assertEventually(final ThrowingRunnable runnable)
+    {
+        await()
+            .pollInterval(Duration.ofMillis(100))
+            .atMost(Duration.ofSeconds(1))
+            .untilAsserted(runnable);
     }
 }

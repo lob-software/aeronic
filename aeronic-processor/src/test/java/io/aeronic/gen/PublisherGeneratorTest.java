@@ -17,6 +17,8 @@ public class PublisherGeneratorTest
             import io.aeronic.net.AeronicPublication;
             import org.agrona.BitUtil;
             import io.aeronic.codec.SimpleImpl;
+            import io.aeronic.MyEnum;
+            
                     
             public class TestEventsPublisher extends AbstractPublisher implements TestEvents
             {
@@ -42,7 +44,8 @@ public class PublisherGeneratorTest
                     final double[] doubles,
                     final byte[] bytes,
                     final char[] chars,
-                    final SimpleImpl[] simpleImplArray
+                    final SimpleImpl[] simpleImplArray,
+                    final MyEnum myEnum
                 )
                 {
                     bufferEncoder.encode(0);
@@ -61,6 +64,7 @@ public class PublisherGeneratorTest
                     bufferEncoder.encode(bytes);
                     bufferEncoder.encode(chars);
                     bufferEncoder.encode(simpleImplArray);
+                    myEnum.encode(bufferEncoder);
                     offer();
                 }
                 
@@ -99,7 +103,8 @@ public class PublisherGeneratorTest
                     new ParameterInfo("doubles", "double[]", false, true),
                     new ParameterInfo("bytes", "byte[]", false, true),
                     new ParameterInfo("chars", "char[]", false, true),
-                    new ParameterInfo("simpleImplArray", "io.aeronic.codec.SimpleImpl[]", false, true)
+                    new ParameterInfo("simpleImplArray", "io.aeronic.codec.SimpleImpl[]", false, true),
+                    new ParameterInfo("myEnum", "io.aeronic.MyEnum", false, false)
                 )),
                 new MethodInfo(1, "onTimer", List.of(
                     new ParameterInfo("timestamp", "long", true, false)
