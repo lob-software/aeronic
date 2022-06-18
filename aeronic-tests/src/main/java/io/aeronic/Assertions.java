@@ -2,7 +2,7 @@ package io.aeronic;
 
 import io.aeronic.codec.BufferDecoder;
 import io.aeronic.codec.BufferEncoder;
-import io.aeronic.codec.Encoder;
+import io.aeronic.codec.Encodable;
 import org.agrona.ExpandableDirectByteBuffer;
 import org.awaitility.core.ThrowingRunnable;
 
@@ -28,9 +28,9 @@ public class Assertions
             final Class<?> clazz = object.getClass();
 
             Arrays.stream(clazz.getInterfaces())
-                .filter(i -> i.equals(Encoder.class))
+                .filter(i -> i.equals(Encodable.class))
                 .findFirst()
-                .orElseThrow(() -> new AssertionError(object + " does not implement Encoder interface"));
+                .orElseThrow(() -> new AssertionError(object + " does not implement Encodable interface"));
 
             final Method[] methods = clazz.getMethods();
             final Method encoderMethod = Arrays.stream(methods)

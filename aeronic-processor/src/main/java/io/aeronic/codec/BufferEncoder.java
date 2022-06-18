@@ -5,6 +5,8 @@ import org.agrona.MutableDirectBuffer;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Collection;
+import java.util.List;
 
 public class BufferEncoder
 {
@@ -142,13 +144,27 @@ public class BufferEncoder
         }
     }
 
-    public <T extends Encoder> void encode(final T[] array)
+    public <T extends Encodable> void encode(final T[] array)
     {
         encode(array.length);
         for (int i = 0; i < array.length; i++)
         {
             array[i].encode(this);
         }
+    }
+
+    public <T extends Encodable> void encode(final List<T> collection)
+    {
+        final int size = collection.size();
+        encode(size);
+        collection.forEach(e -> e.encode(this));
+    }
+
+    public <T> void encode(final Collection<T> collection, final Encoder<T> encoder)
+    {
+        final int size = collection.size();
+        encode(size);
+        collection.forEach(e -> encoder.encode(this, e));
     }
 
     public void reset()

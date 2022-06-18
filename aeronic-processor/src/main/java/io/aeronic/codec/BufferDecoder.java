@@ -5,7 +5,9 @@ import org.agrona.DirectBuffer;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.function.IntFunction;
+import java.util.function.Supplier;
 
 public class BufferDecoder
 {
@@ -182,5 +184,18 @@ public class BufferDecoder
             array[i] = decoder.decode(this);
         }
         return array;
+    }
+
+    public <T> List<T> decodeList(final Decoder<T> decoder, final Supplier<List<T>> listCreator)
+    {
+        final int length = decodeInt();
+        final List<T> list = listCreator.get();
+
+        for (int i = 0; i < length; i++)
+        {
+            list.add(decoder.decode(this));
+        }
+
+        return list;
     }
 }

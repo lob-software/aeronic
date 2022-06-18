@@ -20,7 +20,9 @@ public class SubscriberInvokerGeneratorTest
             import org.agrona.DirectBuffer;
             import io.aeronic.codec.SimpleImpl;
             import io.aeronic.MyEnum;
-            
+            import io.aeronic.Composite;
+            import java.util.List;
+                        
                     
             public class TestEventsInvoker extends AbstractSubscriberInvoker<TestEvents>
             {
@@ -52,6 +54,7 @@ public class SubscriberInvokerGeneratorTest
                             final char[] chars = bufferDecoder.decodeCharArray();
                             final SimpleImpl[] simpleImplArray = bufferDecoder.decodeArray(SimpleImpl::decode, SimpleImpl[]::new);
                             final MyEnum myEnum = MyEnum.decode(bufferDecoder);
+                            final List<Composite> compositeList = bufferDecoder.decodeList(Composite::decode, ArrayList::new);
                             subscriber.onEvent(
                                 longValue,
                                 intValue,
@@ -68,7 +71,8 @@ public class SubscriberInvokerGeneratorTest
                                 bytes,
                                 chars,
                                 simpleImplArray,
-                                myEnum
+                                myEnum,
+                                compositeList
                             );
                         }
                         case 1 -> {
@@ -91,25 +95,32 @@ public class SubscriberInvokerGeneratorTest
             "TestEvents",
             List.of(
                 new MethodInfo(0, "onEvent", List.of(
-                    new ParameterInfo("longValue", "long", true, false),
-                    new ParameterInfo("intValue", "int", true, false),
-                    new ParameterInfo("floatValue", "float", true, false),
-                    new ParameterInfo("doubleValue", "double", true, false),
-                    new ParameterInfo("byteValue", "byte", true, false),
-                    new ParameterInfo("charValue", "char", true, false),
-                    new ParameterInfo("simpleImpl", "io.aeronic.codec.SimpleImpl", false, false),
-                    new ParameterInfo("stringValue", "java.lang.String", false, false),
-                    new ParameterInfo("longs", "long[]", false, true),
-                    new ParameterInfo("ints", "int[]", false, true),
-                    new ParameterInfo("floats", "float[]", false, true),
-                    new ParameterInfo("doubles", "double[]", false, true),
-                    new ParameterInfo("bytes", "byte[]", false, true),
-                    new ParameterInfo("chars", "char[]", false, true),
-                    new ParameterInfo("simpleImplArray", "io.aeronic.codec.SimpleImpl[]", false, true),
-                    new ParameterInfo("myEnum", "io.aeronic.MyEnum", false, false)
+                    new ParameterInfo("longValue", "long", true, false, List.of()),
+                    new ParameterInfo("intValue", "int", true, false, List.of()),
+                    new ParameterInfo("floatValue", "float", true, false, List.of()),
+                    new ParameterInfo("doubleValue", "double", true, false, List.of()),
+                    new ParameterInfo("byteValue", "byte", true, false, List.of()),
+                    new ParameterInfo("charValue", "char", true, false, List.of()),
+                    new ParameterInfo("simpleImpl", "io.aeronic.codec.SimpleImpl", false, false, List.of()),
+                    new ParameterInfo("stringValue", "java.lang.String", false, false, List.of()),
+                    new ParameterInfo("longs", "long[]", false, true, List.of()),
+                    new ParameterInfo("ints", "int[]", false, true, List.of()),
+                    new ParameterInfo("floats", "float[]", false, true, List.of()),
+                    new ParameterInfo("doubles", "double[]", false, true, List.of()),
+                    new ParameterInfo("bytes", "byte[]", false, true, List.of()),
+                    new ParameterInfo("chars", "char[]", false, true, List.of()),
+                    new ParameterInfo("simpleImplArray", "io.aeronic.codec.SimpleImpl[]", false, true, List.of()),
+                    new ParameterInfo("myEnum", "io.aeronic.MyEnum", false, false, List.of()),
+                    new ParameterInfo(
+                        "compositeList",
+                        "java.util.List<io.aeronic.Composite>",
+                        false,
+                        false,
+                        List.of("io.aeronic.Composite")
+                    )
                 )),
                 new MethodInfo(1, "onTimer", List.of(
-                    new ParameterInfo("timestamp", "long", true, false)
+                    new ParameterInfo("timestamp", "long", true, false, List.of())
                 ))
             )
         );

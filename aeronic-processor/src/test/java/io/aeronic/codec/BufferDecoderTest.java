@@ -7,6 +7,9 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -256,5 +259,23 @@ public class BufferDecoderTest
         bufferDecoder.wrap(buffer, 0);
 
         assertEquals(bigDecimal, bufferDecoder.decodeBigDecimal());
+    }
+
+    @Test
+    public void shouldDecodeCollection()
+    {
+        final List<Long> list = List.of(1L, 2L, Long.MAX_VALUE, Long.MIN_VALUE);
+        buffer.putInt(0, list.size());
+
+        int idx = BitUtil.SIZE_OF_INT;
+        for (int i = 0; i < list.size(); i++)
+        {
+            buffer.putLong(idx, list.get(i));
+            idx += BitUtil.SIZE_OF_LONG;
+        }
+
+        bufferDecoder.wrap(buffer, 0);
+        final Collection<Long> decodeCollection = bufferDecoder.decodeList(BufferDecoder::decodeLong, ArrayList::new);
+        assertEquals(list, decodeCollection);
     }
 }

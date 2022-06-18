@@ -3,9 +3,9 @@ package io.aeronic.system.multiparam;
 import io.aeronic.codec.BufferDecoder;
 import io.aeronic.codec.BufferEncoder;
 import io.aeronic.codec.DecodedBy;
-import io.aeronic.codec.Encoder;
+import io.aeronic.codec.Encodable;
 
-public class Composite implements Encoder
+public class Composite implements Encodable
 {
     private final int anInt;
     private final long aLong;
@@ -41,5 +41,17 @@ public class Composite implements Encoder
         final byte aByte = bufferDecoder.decodeByte();
         final double aDouble = bufferDecoder.decodeDouble();
         return new Composite(anInt, aLong, aBoolean, aByte, aDouble);
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Composite{" +
+            "anInt=" + anInt +
+            ", aLong=" + aLong +
+            ", aBoolean=" + aBoolean +
+            ", aByte=" + aByte +
+            ", aDouble=" + aDouble +
+            '}';
     }
 }

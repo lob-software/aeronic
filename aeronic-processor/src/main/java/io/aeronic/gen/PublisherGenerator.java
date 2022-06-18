@@ -121,6 +121,25 @@ public class PublisherGenerator
             return;
         }
 
+        final List<String> genericParameters = parameter.getGenericParameters();
+        if (!genericParameters.isEmpty())
+        {
+            final String genericParameter = genericParameters.get(0);
+            final String genericParameterClassName = TypeUtil.extractClassName(genericParameter);
+            final String fullyQualifiedType = parameterType.split("<")[0];
+            final String className = TypeUtil.extractClassName(fullyQualifiedType);
+
+            methodsBuilder.append("        final %s<%s> %s".formatted(className, genericParameterClassName, parameterName));
+            methodBodyBuilder.append("""
+                        bufferEncoder.encode(%s);
+                """.formatted(parameterName));
+
+            packageAndImports.append("import %s;\n".formatted(genericParameter));
+            packageAndImports.append("import %s;\n".formatted(fullyQualifiedType));
+
+            return;
+        }
+
         final String className = TypeUtil.extractClassName(parameterType);
         methodsBuilder.append("        final %s %s".formatted(className, parameterName));
         methodBodyBuilder.append("""

@@ -3,6 +3,8 @@ package io.aeronic.system.multiparam;
 import io.aeronic.Aeronic;
 import io.aeronic.MyEnum;
 
+import java.util.List;
+
 @Aeronic
 public interface MultiParamEvents
 {
@@ -25,6 +27,7 @@ public interface MultiParamEvents
         byte[] bytes,
         char[] chars,
         Composite[] compositeArray,
-        MyEnum myEnum
+        MyEnum myEnum,
+        List<Composite> compositeList
     );
 }

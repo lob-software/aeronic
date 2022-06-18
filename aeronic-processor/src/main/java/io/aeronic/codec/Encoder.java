@@ -2,7 +2,7 @@ package io.aeronic.codec;
 
 
 @FunctionalInterface
-public interface Encoder
+public interface Encoder<T>
 {
-    void encode(BufferEncoder bufferEncoder);
+    void encode(BufferEncoder bufferEncoder, T toEncode);
 }

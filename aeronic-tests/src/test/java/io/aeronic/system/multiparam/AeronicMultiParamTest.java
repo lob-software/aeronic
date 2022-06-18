@@ -10,6 +10,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static io.aeronic.Assertions.assertEventually;
 import static io.aeronic.Assertions.assertReflectiveEquals;
 import static org.junit.jupiter.api.Assertions.*;
@@ -79,6 +81,10 @@ public class AeronicMultiParamTest
             new Composite(1, 4L, false, Byte.MAX_VALUE, 123.11),
             new Composite(1, 4L, false, Byte.MIN_VALUE, 123.11)
         };
+        final List<Composite> compositeList = List.of(
+            new Composite(1, 4L, false, Byte.MAX_VALUE, 123.11),
+            new Composite(1, 4L, false, Byte.MIN_VALUE, 123.11)
+        );
 
         publisher.onEvent(
             longValue,
@@ -99,7 +105,8 @@ public class AeronicMultiParamTest
             bytes,
             chars,
             compositeArray,
-            MyEnum.ONE
+            MyEnum.ONE,
+            compositeList
         );
 
         assertEventually(() -> {
@@ -121,6 +128,8 @@ public class AeronicMultiParamTest
             assertArrayEquals(bytes, subscriberImpl.bytes);
             assertArrayEquals(chars, subscriberImpl.chars);
             assertReflectiveEquals(compositeArray, subscriberImpl.compositeArray);
+            assertEquals(MyEnum.ONE, subscriberImpl.myEnum);
+            assertReflectiveEquals(compositeList, subscriberImpl.compositeList);
         });
 
         publisher.onEvent(
@@ -142,7 +151,8 @@ public class AeronicMultiParamTest
             bytes,
             chars,
             compositeArray,
-            MyEnum.ONE
+            MyEnum.TWO,
+            List.of()
         );
 
         assertEventually(() -> {
@@ -164,6 +174,8 @@ public class AeronicMultiParamTest
             assertArrayEquals(bytes, subscriberImpl.bytes);
             assertArrayEquals(chars, subscriberImpl.chars);
             assertReflectiveEquals(compositeArray, subscriberImpl.compositeArray);
+            assertEquals(MyEnum.TWO, subscriberImpl.myEnum);
+            assertEquals(List.of(), subscriberImpl.compositeList);
         });
     }
 
@@ -187,6 +199,8 @@ public class AeronicMultiParamTest
         private volatile byte[] bytes;
         private volatile char[] chars;
         private volatile Composite[] compositeArray;
+        private volatile MyEnum myEnum;
+        private volatile List<Composite> compositeList;
 
         @Override
         public void onEvent(
@@ -208,7 +222,8 @@ public class AeronicMultiParamTest
             final byte[] bytes,
             final char[] chars,
             final Composite[] compositeArray,
-            final MyEnum myEnum
+            final MyEnum myEnum,
+            final List<Composite> compositeList
         )
         {
             this.longValue = longValue;
@@ -229,6 +244,8 @@ public class AeronicMultiParamTest
             this.chars = chars;
             this.compositeArray = compositeArray;
             this.shortValue = shortValue;
+            this.myEnum = myEnum;
+            this.compositeList = compositeList;
         }
     }
 }

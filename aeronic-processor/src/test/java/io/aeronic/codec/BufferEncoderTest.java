@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -250,5 +252,24 @@ public class BufferEncoderTest
         buffer.getBytes(BitUtil.SIZE_OF_INT, bigDecimalBytes);
         final BigDecimal actual = new BigDecimal(new String(bigDecimalBytes));
         assertEquals(BigDecimal.TEN, actual);
+    }
+
+    @Test
+    public void shouldEncodeList()
+    {
+        final List<Long> longList = List.of(1L, 2L, 3L, Long.MAX_VALUE, Long.MIN_VALUE);
+        bufferEncoder.encode(longList, BufferEncoder::encode);
+
+        final int encodedLength = buffer.getInt(0);
+        final List<Long> encodedCollection = new ArrayList<>();
+
+        int idx = BitUtil.SIZE_OF_INT;
+        for (int i = 0; i < encodedLength; i++)
+        {
+            encodedCollection.add(buffer.getLong(idx));
+            idx += BitUtil.SIZE_OF_LONG;
+        }
+
+        assertEquals(longList, encodedCollection);
     }
 }

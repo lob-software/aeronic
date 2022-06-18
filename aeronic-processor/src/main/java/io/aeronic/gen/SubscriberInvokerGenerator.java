@@ -125,9 +125,27 @@ public class SubscriberInvokerGenerator
             return;
         }
 
-        final String[] split = parameterType.split("\\.");
-        final String className = split[split.length - 1];
+        final List<String> genericParameters = parameter.getGenericParameters();
 
+        if (!genericParameters.isEmpty())
+        {
+            final String genericParameter = genericParameters.get(0);
+            final String genericParameterClassName = TypeUtil.extractClassName(genericParameter);
+            final String fullyQualifiedType = parameterType.split("<")[0];
+            final String className = TypeUtil.extractClassName(fullyQualifiedType);
+
+            handleMethodBuilder.append("""
+                                final %s<%s> %s = bufferDecoder.decodeList(%s::decode, ArrayList::new);
+                """.formatted(className, genericParameterClassName, parameterName, genericParameterClassName));
+            subscriberInvocation.append("                    %s".formatted(parameterName));
+
+            classImports.append("import %s;\n".formatted(genericParameter));
+            classImports.append("import %s;\n".formatted(fullyQualifiedType));
+            classImports.append("import java.util.ArrayList;\n");
+            return;
+        }
+
+        final String className = TypeUtil.extractClassName(parameterType);
         handleMethodBuilder.append("""
                             final %s %s = %s.decode(bufferDecoder);
             """.formatted(className, parameterName, className));
