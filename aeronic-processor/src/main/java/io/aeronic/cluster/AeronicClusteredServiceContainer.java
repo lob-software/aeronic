@@ -10,30 +10,34 @@ import io.aeron.logbuffer.Header;
 import io.aeronic.AeronicWizard;
 import org.agrona.DirectBuffer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class AeronicClusteredServiceContainer implements ClusteredService
 {
     private final ClusteredService clusteredService;
     private final AeronicClusteredServiceRegistry registry;
+    private final AtomicReference<AeronicWizard> aeronicRef;
+    private final List<Runnable> onStartJobs;
 
-    private AeronicClusteredServiceContainer(
-        final ClusteredService clusteredService,
-        final AeronicClusteredServiceRegistry registry
-    )
+    public AeronicClusteredServiceContainer(final Configuration configuration)
     {
-        this.clusteredService = clusteredService;
-        this.registry = registry;
-    }
-
-    public static Configuration configure()
-    {
-        return new Configuration();
+        this.clusteredService = configuration.clusteredService;
+        this.registry = configuration.registry;
+        this.onStartJobs = configuration.onStartJobs;
+        this.aeronicRef = configuration.aeronicRef;
     }
 
     public <T> T getPublisherFor(final Class<T> clazz)
     {
         return registry.getPublisherFor(clazz);
+    }
+
+    public <T> T getMultiplexingPublisherFor(final Class<T> clazz)
+    {
+        return registry.getMultiplexingPublisherFor(clazz);
     }
 
     public boolean egressConnected()
@@ -46,44 +50,12 @@ public class AeronicClusteredServiceContainer implements ClusteredService
         registry.close();
     }
 
-    public static class Configuration
-    {
-        private ClusteredService clusteredService;
-        private final AeronicClusteredServiceRegistry registry = new AeronicClusteredServiceRegistry();
-
-        public Configuration clusteredService(final ClusteredService clusteredService)
-        {
-            this.clusteredService = clusteredService;
-            return this;
-        }
-
-        public <T> Configuration registerIngressSubscriber(final Class<T> clazz, final T subscriberImplementation)
-        {
-            registry.registerIngressSubscriberInvoker(AeronicWizard.createSubscriberInvoker(clazz, subscriberImplementation));
-            return this;
-        }
-
-        public <T> Configuration registerEgressPublisher(final Class<T> clazz)
-        {
-            registry.registerEgressPublisher(AeronicWizard.createClusterEgressPublisher(clazz));
-            return this;
-        }
-
-        public AeronicClusteredServiceRegistry registry()
-        {
-            return registry;
-        }
-
-        public AeronicClusteredServiceContainer create()
-        {
-            return new AeronicClusteredServiceContainer(clusteredService, registry);
-        }
-    }
-
     @Override
     public void onStart(final Cluster cluster, final Image snapshotImage)
     {
         clusteredService.onStart(cluster, snapshotImage);
+        aeronicRef.set(new AeronicWizard(cluster.aeron()));
+        onStartJobs.forEach(Runnable::run);
     }
 
     @Override
@@ -128,6 +100,7 @@ public class AeronicClusteredServiceContainer implements ClusteredService
     @Override
     public void onRoleChange(final Cluster.Role newRole)
     {
+        registry.onRoleChange(newRole);
         clusteredService.onRoleChange(newRole);
     }
 
@@ -160,4 +133,58 @@ public class AeronicClusteredServiceContainer implements ClusteredService
             appVersion
         );
     }
+
+    public static class Configuration
+    {
+        private ClusteredService clusteredService;
+        private final AeronicClusteredServiceRegistry registry = new AeronicClusteredServiceRegistry();
+        private final List<Runnable> onStartJobs = new ArrayList<>();
+        private final AtomicReference<AeronicWizard> aeronicRef = new AtomicReference<>();
+
+        public Configuration clusteredService(final ClusteredService clusteredService)
+        {
+            this.clusteredService = clusteredService;
+            return this;
+        }
+
+        public <T> Configuration registerIngressSubscriber(final Class<T> clazz, final T subscriberImplementation)
+        {
+            registry.registerIngressSubscriberInvoker(AeronicWizard.createSubscriberInvoker(clazz, subscriberImplementation));
+            return this;
+        }
+
+        public <T> Configuration registerEgressPublisher(final Class<T> clazz)
+        {
+            registry.registerEgressPublisher(AeronicWizard.createClusterEgressPublisher(clazz));
+            return this;
+        }
+
+        public <T> Configuration registerMultiplexingEgressPublisher(final Class<T> clazz, final String egressChannel, final int streamId)
+        {
+            onStartJobs.add(() -> {
+                final AeronicWizard aeronic = aeronicRef.get();
+                registry.registerRoleAwareEgressPublisher(aeronic, clazz, egressChannel, streamId);
+            });
+
+            return this;
+        }
+
+        public AeronicClusteredServiceRegistry registry()
+        {
+            return registry;
+        }
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

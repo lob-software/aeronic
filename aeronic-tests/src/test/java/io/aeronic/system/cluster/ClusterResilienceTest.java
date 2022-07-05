@@ -84,11 +84,11 @@ public class ClusterResilienceTest
 
         final TestClusterNode.Service service = new TestClusterNode.Service();
 
-        clusteredService1 = AeronicClusteredServiceContainer.configure()
-            .clusteredService(service)
-            .registerIngressSubscriber(SimpleEvents.class, clusterIngressSimpleEventsImpl)
-            .registerEgressPublisher(SampleEvents.class)
-            .create();
+        clusteredService1 = new AeronicClusteredServiceContainer(
+            new AeronicClusteredServiceContainer.Configuration()
+                .clusteredService(service)
+                .registerIngressSubscriber(SimpleEvents.class, clusterIngressSimpleEventsImpl)
+                .registerEgressPublisher(SampleEvents.class));
 
         final SampleEvents clusterEgressSampleEventsPublisher = clusteredService1.getPublisherFor(SampleEvents.class);
 
@@ -111,8 +111,8 @@ public class ClusterResilienceTest
             .timeout(Duration.ofSeconds(1))
             .until(() ->
                 simpleEvents.value == 101L &&
-                sampleEvents.value == 202L &&
-                clusterIngressSimpleEventsImpl.value == 303L);
+                    sampleEvents.value == 202L &&
+                    clusterIngressSimpleEventsImpl.value == 303L);
     }
 
 

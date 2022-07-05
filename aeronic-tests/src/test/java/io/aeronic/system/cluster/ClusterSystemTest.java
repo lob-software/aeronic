@@ -27,6 +27,14 @@ public class ClusterSystemTest
         .endpoint("localhost:40457")
         .build();
 
+    private static final String MDC_CAST_CHANNEL = new ChannelUriStringBuilder()
+        .media("udp")
+        .reliable(true)
+        .controlEndpoint("localhost:40458")
+        .controlMode("dynamic")
+        .endpoint("localhost:40459")
+        .build();
+
     private AeronicWizard aeronic;
     private Aeron aeron;
     private MediaDriver mediaDriver;
@@ -69,11 +77,12 @@ public class ClusterSystemTest
     {
         final TestClusterNode.Service service = new TestClusterNode.Service();
 
-        clusteredService = AeronicClusteredServiceContainer.configure()
-            .clusteredService(service)
-            .registerIngressSubscriber(SimpleEvents.class, simpleEvents)
-            .registerIngressSubscriber(SampleEvents.class, sampleEvents)
-            .create();
+        clusteredService = new AeronicClusteredServiceContainer(
+            new AeronicClusteredServiceContainer.Configuration()
+                .clusteredService(service)
+                .registerIngressSubscriber(SimpleEvents.class, simpleEvents)
+                .registerIngressSubscriber(SampleEvents.class, sampleEvents)
+        );
 
         clusterNode = new TestClusterNode(clusteredService, true);
 
@@ -99,7 +108,7 @@ public class ClusterSystemTest
     {
         final TestClusterNode.Service service = new TestClusterNode.Service();
 
-        final AeronicClusteredServiceContainer.Configuration configuration = AeronicClusteredServiceContainer.configure()
+        final AeronicClusteredServiceContainer.Configuration configuration = new AeronicClusteredServiceContainer.Configuration()
             .clusteredService(service)
             .registerEgressPublisher(SimpleEvents.class)
             .registerEgressPublisher(SampleEvents.class);
@@ -107,7 +116,7 @@ public class ClusterSystemTest
         final SimpleEvents simpleEventsPublisher = configuration.registry().getPublisherFor(SimpleEvents.class);
         final SampleEvents sampleEventsPublisher = configuration.registry().getPublisherFor(SampleEvents.class);
 
-        clusteredService = configuration.create();
+        clusteredService = new AeronicClusteredServiceContainer(configuration);
 
         clusterNode = new TestClusterNode(clusteredService, true);
 
@@ -135,13 +144,13 @@ public class ClusterSystemTest
 
         final TestClusterNode.Service service = new TestClusterNode.Service();
 
-        clusteredService = AeronicClusteredServiceContainer.configure()
-            .clusteredService(service)
-            .registerIngressSubscriber(SimpleEvents.class, clusterIngressSimpleEventsImpl)
-            .registerIngressSubscriber(SampleEvents.class, clusterIngressSampleEventsImpl)
-            .registerEgressPublisher(SimpleEvents.class)
-            .registerEgressPublisher(SampleEvents.class)
-            .create();
+        clusteredService = new AeronicClusteredServiceContainer(
+            new AeronicClusteredServiceContainer.Configuration()
+                .clusteredService(service)
+                .registerIngressSubscriber(SimpleEvents.class, clusterIngressSimpleEventsImpl)
+                .registerIngressSubscriber(SampleEvents.class, clusterIngressSampleEventsImpl)
+                .registerEgressPublisher(SimpleEvents.class)
+                .registerEgressPublisher(SampleEvents.class));
 
         final SimpleEvents clusterEgressSimpleEventsPublisher = clusteredService.getPublisherFor(SimpleEvents.class);
         final SampleEvents clusterEgressSampleEventsPublisher = clusteredService.getPublisherFor(SampleEvents.class);
@@ -177,9 +186,9 @@ public class ClusterSystemTest
     {
         final TestClusterNode.Service service = new TestClusterNode.Service();
 
-        final AeronicClusteredServiceContainer aeronicClusteredService = AeronicClusteredServiceContainer.configure()
-            .clusteredService(service)
-            .create();
+        final AeronicClusteredServiceContainer aeronicClusteredService = new AeronicClusteredServiceContainer(
+            new AeronicClusteredServiceContainer.Configuration()
+                .clusteredService(service));
 
         clusterNode = new TestClusterNode(aeronicClusteredService, true);
 
@@ -202,10 +211,10 @@ public class ClusterSystemTest
     {
         final TestClusterNode.Service service = new TestClusterNode.Service();
 
-        clusteredService = AeronicClusteredServiceContainer.configure()
-            .clusteredService(service)
-            .registerIngressSubscriber(SimpleEvents.class, simpleEvents)
-            .create();
+        clusteredService = new AeronicClusteredServiceContainer(
+            new AeronicClusteredServiceContainer.Configuration()
+                .clusteredService(service)
+                .registerIngressSubscriber(SimpleEvents.class, simpleEvents));
 
         clusterNode = new TestClusterNode(clusteredService, true);
 
@@ -226,10 +235,10 @@ public class ClusterSystemTest
     {
         final TestClusterNode.Service service = new TestClusterNode.Service();
 
-        clusteredService = AeronicClusteredServiceContainer.configure()
-            .clusteredService(service)
-            .registerEgressPublisher(SimpleEvents.class)
-            .create();
+        clusteredService = new AeronicClusteredServiceContainer(
+            new AeronicClusteredServiceContainer.Configuration()
+                .clusteredService(service)
+                .registerEgressPublisher(SimpleEvents.class));
 
         final SimpleEvents clusterEgressSimpleEventsPublisher = clusteredService.getPublisherFor(SimpleEvents.class);
 
@@ -260,10 +269,10 @@ public class ClusterSystemTest
         final String egressChannel = "aeron:udp?endpoint=224.0.1.1:44444|reliable=true";
         final TestClusterNode.Service service = new TestClusterNode.Service();
 
-        clusteredService = AeronicClusteredServiceContainer.configure()
-            .clusteredService(service)
-            .registerEgressPublisher(SimpleEvents.class)
-            .create();
+        clusteredService = new AeronicClusteredServiceContainer(
+            new AeronicClusteredServiceContainer.Configuration()
+                .clusteredService(service)
+                .registerEgressPublisher(SimpleEvents.class));
 
         final SimpleEvents clusterEgressSimpleEventsPublisher = clusteredService.getPublisherFor(SimpleEvents.class);
 
@@ -297,45 +306,36 @@ public class ClusterSystemTest
     }
 
     @Test
-    @Disabled("WIP: find out how MDC egress works")
     public void sameEgressChannelPublishingMDCCast()
     {
-        // UDP multicast
-        final String egressChannel = "aeron:udp?endpoint=224.0.1.1:44444|reliable=true";
+        final int streamId = 101;
         final TestClusterNode.Service service = new TestClusterNode.Service();
 
-        clusteredService = AeronicClusteredServiceContainer.configure()
-            .clusteredService(service)
-            .registerEgressPublisher(SimpleEvents.class)
-            .create();
+        clusteredService = new AeronicClusteredServiceContainer(
+            new AeronicClusteredServiceContainer.Configuration()
+                .clusteredService(service)
+                .registerMultiplexingEgressPublisher(SimpleEvents.class, MDC_CAST_CHANNEL, streamId));
 
-        final SimpleEvents clusterEgressSimpleEventsPublisher = clusteredService.getPublisherFor(SimpleEvents.class);
 
         clusterNode = new TestClusterNode(clusteredService, true);
 
         final SimpleEventsImpl sub1 = new SimpleEventsImpl();
         final SimpleEventsImpl sub2 = new SimpleEventsImpl();
 
-        aeronic.registerClusterEgressSubscriber(SimpleEvents.class, sub1, new AeronCluster.Context()
-            .aeronDirectoryName(aeron.context().aeronDirectoryName())
-            .errorHandler(Throwable::printStackTrace)
-            .ingressChannel(INGRESS_CHANNEL)
-            .egressChannel(egressChannel));
+        // register as normal (non-cluster) subs
+        this.aeronic.registerSubscriber(SimpleEvents.class, sub1, MDC_CAST_CHANNEL, streamId);
+        this.aeronic.registerSubscriber(SimpleEvents.class, sub2, MDC_CAST_CHANNEL, streamId);
 
-        aeronic.registerClusterEgressSubscriber(SimpleEvents.class, sub2, new AeronCluster.Context()
-            .aeronDirectoryName(aeron.context().aeronDirectoryName())
-            .errorHandler(Throwable::printStackTrace)
-            .ingressChannel(INGRESS_CHANNEL)
-            .egressChannel(egressChannel));
-
-        aeronic.start();
-        aeronic.awaitUntilPubsAndSubsConnect();
+        this.aeronic.start();
+        this.aeronic.awaitUntilPubsAndSubsConnect();
         assertEventuallyTrue(clusteredService::egressConnected);
 
-        clusterEgressSimpleEventsPublisher.onEvent(101L);
+        final SimpleEvents mdcPublisher = clusteredService.getMultiplexingPublisherFor(SimpleEvents.class);
+
+        mdcPublisher.onEvent(101L);
         assertEventuallyTrue(() -> sub1.value == 101L && sub2.value == 101L);
 
-        clusterEgressSimpleEventsPublisher.onEvent(201L);
+        mdcPublisher.onEvent(201L);
         assertEventuallyTrue(() -> sub1.value == 201L && sub2.value == 201L);
     }
 

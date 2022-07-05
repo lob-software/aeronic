@@ -1,6 +1,7 @@
 package io.aeronic;
 
 import io.aeron.Aeron;
+import io.aeron.Publication;
 import io.aeron.Subscription;
 import io.aeron.cluster.client.AeronCluster;
 import io.aeronic.cluster.AeronClusterPublication;
@@ -14,12 +15,15 @@ import org.agrona.concurrent.BusySpinIdleStrategy;
 import org.agrona.concurrent.CompositeAgent;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AeronicWizard
 {
     private final Aeron aeron;
     private final List<AeronicPublication> publications = new ArrayList<>();
+    private final Map<String, Publication> rawPublications = new HashMap<>();
     private final List<Subscription> subscriptions = new ArrayList<>();
     private final List<Agent> agents = new ArrayList<>();
     private AgentRunner compositeAgentRunner;
@@ -31,9 +35,16 @@ public class AeronicWizard
 
     public <T> T createPublisher(final Class<T> clazz, final String channel, final int streamId)
     {
-        final AeronicPublication publication = new SimplePublication(aeron.addPublication(channel, streamId));
+        final Publication rawPublication = aeron.addPublication(channel, streamId);
+        final AeronicPublication publication = new SimplePublication(rawPublication);
+        rawPublications.put(clazz.getName(), rawPublication);
         publications.add(publication);
         return createPublisher(clazz, publication);
+    }
+
+    public Publication getPublicationFor(final Class<?> clazz)
+    {
+        return rawPublications.get(clazz.getName());
     }
 
     public <T> T createClusterIngressPublisher(final Class<T> clazz, final String ingressChannel)
