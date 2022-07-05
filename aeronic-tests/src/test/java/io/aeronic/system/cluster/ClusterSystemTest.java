@@ -267,7 +267,7 @@ public class ClusterSystemTest
     }
 
     @Test
-    public void sameEgressChannelPublishingUDPMulticast()
+    public void udpMulticastEgressPublishing()
     {
         final int streamId = 101;
         final TestClusterNode.Service service = new TestClusterNode.Service();
@@ -300,7 +300,7 @@ public class ClusterSystemTest
     }
 
     @Test
-    public void sameEgressChannelPublishingMDCCast()
+    public void mdcCastEgressPublishing()
     {
         final int streamId = 101;
         final TestClusterNode.Service service = new TestClusterNode.Service();
