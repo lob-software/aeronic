@@ -13,7 +13,6 @@ import org.agrona.ExpandableArrayBuffer;
 import org.agrona.concurrent.BusySpinIdleStrategy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static io.aeronic.Assertions.assertEventuallyTrue;
@@ -33,6 +32,12 @@ public class ClusterSystemTest
         .controlEndpoint("localhost:40458")
         .controlMode("dynamic")
         .endpoint("localhost:40459")
+        .build();
+
+    private static final String UDP_MULTICAST_CHANNEL = new ChannelUriStringBuilder()
+        .media("udp")
+        .reliable(true)
+        .endpoint("224.0.1.1:40457")
         .build();
 
     private AeronicWizard aeronic;
@@ -262,46 +267,35 @@ public class ClusterSystemTest
     }
 
     @Test
-    @Disabled("WIP: find out how UDP multicast egress works")
     public void sameEgressChannelPublishingUDPMulticast()
     {
-        // UDP multicast
-        final String egressChannel = "aeron:udp?endpoint=224.0.1.1:44444|reliable=true";
+        final int streamId = 101;
         final TestClusterNode.Service service = new TestClusterNode.Service();
 
         clusteredService = new AeronicClusteredServiceContainer(
             new AeronicClusteredServiceContainer.Configuration()
                 .clusteredService(service)
-                .registerEgressPublisher(SimpleEvents.class));
-
-        final SimpleEvents clusterEgressSimpleEventsPublisher = clusteredService.getPublisherFor(SimpleEvents.class);
+                .registerMultiplexingEgressPublisher(SimpleEvents.class, UDP_MULTICAST_CHANNEL, streamId));
 
         clusterNode = new TestClusterNode(clusteredService, true);
 
         final SimpleEventsImpl sub1 = new SimpleEventsImpl();
         final SimpleEventsImpl sub2 = new SimpleEventsImpl();
 
-        aeronic.registerClusterEgressSubscriber(SimpleEvents.class, sub1, new AeronCluster.Context()
-            .aeronDirectoryName(aeron.context().aeronDirectoryName())
-            .errorHandler(Throwable::printStackTrace)
-            .ingressChannel(INGRESS_CHANNEL)
-            .egressChannel(egressChannel));
-
-        aeronic.registerClusterEgressSubscriber(SimpleEvents.class, sub2, new AeronCluster.Context()
-            .aeronDirectoryName(aeron.context().aeronDirectoryName())
-            .errorHandler(Throwable::printStackTrace)
-            .ingressChannel(INGRESS_CHANNEL)
-            .egressChannel(egressChannel));
+        // register as normal (non-cluster) subs
+        aeronic.registerSubscriber(SimpleEvents.class, sub1, UDP_MULTICAST_CHANNEL, streamId);
+        aeronic.registerSubscriber(SimpleEvents.class, sub2, UDP_MULTICAST_CHANNEL, streamId);
 
         aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
         assertEventuallyTrue(clusteredService::egressConnected);
 
-        // expectation: publishing to just one ClientSession publishes to both egress subscribers
-        clusterEgressSimpleEventsPublisher.onEvent(101L);
+        final SimpleEvents udpMulticastPublisher = clusteredService.getMultiplexingPublisherFor(SimpleEvents.class);
+
+        udpMulticastPublisher.onEvent(101L);
         assertEventuallyTrue(() -> sub1.value == 101L && sub2.value == 101L);
 
-        clusterEgressSimpleEventsPublisher.onEvent(201L);
+        udpMulticastPublisher.onEvent(201L);
         assertEventuallyTrue(() -> sub1.value == 201L && sub2.value == 201L);
     }
 
@@ -316,18 +310,17 @@ public class ClusterSystemTest
                 .clusteredService(service)
                 .registerMultiplexingEgressPublisher(SimpleEvents.class, MDC_CAST_CHANNEL, streamId));
 
-
         clusterNode = new TestClusterNode(clusteredService, true);
 
         final SimpleEventsImpl sub1 = new SimpleEventsImpl();
         final SimpleEventsImpl sub2 = new SimpleEventsImpl();
 
         // register as normal (non-cluster) subs
-        this.aeronic.registerSubscriber(SimpleEvents.class, sub1, MDC_CAST_CHANNEL, streamId);
-        this.aeronic.registerSubscriber(SimpleEvents.class, sub2, MDC_CAST_CHANNEL, streamId);
+        aeronic.registerSubscriber(SimpleEvents.class, sub1, MDC_CAST_CHANNEL, streamId);
+        aeronic.registerSubscriber(SimpleEvents.class, sub2, MDC_CAST_CHANNEL, streamId);
 
-        this.aeronic.start();
-        this.aeronic.awaitUntilPubsAndSubsConnect();
+        aeronic.start();
+        aeronic.awaitUntilPubsAndSubsConnect();
         assertEventuallyTrue(clusteredService::egressConnected);
 
         final SimpleEvents mdcPublisher = clusteredService.getMultiplexingPublisherFor(SimpleEvents.class);
