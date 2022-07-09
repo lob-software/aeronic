@@ -14,16 +14,16 @@ import org.agrona.concurrent.AgentRunner;
 import org.agrona.concurrent.BusySpinIdleStrategy;
 import org.agrona.concurrent.CompositeAgent;
 
+import java.time.Duration;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import static org.awaitility.Awaitility.await;
 
 public class AeronicWizard
 {
     private final Aeron aeron;
     private final List<AeronicPublication> publications = new ArrayList<>();
-    private final Map<String, Publication> rawPublications = new HashMap<>();
     private final List<Subscription> subscriptions = new ArrayList<>();
     private final List<Agent> agents = new ArrayList<>();
     private AgentRunner compositeAgentRunner;
@@ -37,14 +37,8 @@ public class AeronicWizard
     {
         final Publication rawPublication = aeron.addPublication(channel, streamId);
         final AeronicPublication publication = new SimplePublication(rawPublication);
-        rawPublications.put(clazz.getName(), rawPublication);
         publications.add(publication);
         return createPublisher(clazz, publication);
-    }
-
-    public Publication getPublicationFor(final Class<?> clazz)
-    {
-        return rawPublications.get(clazz.getName());
     }
 
     public <T> T createClusterIngressPublisher(final Class<T> clazz, final String ingressChannel)
@@ -176,9 +170,12 @@ public class AeronicWizard
 
     public void awaitUntilPubsAndSubsConnect()
     {
-        while (!allConnected())
-        {
-            aeron.context().idleStrategy().idle();
-        }
+        await()
+            .timeout(Duration.ofSeconds(5))
+            .until(() -> {
+                final boolean allConnected = allConnected();
+                aeron.context().idleStrategy().idle();
+                return allConnected;
+            });
     }
 }

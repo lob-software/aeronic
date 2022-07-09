@@ -1,6 +1,6 @@
 package io.aeronic.cluster;
 
-import io.aeron.Publication;
+import io.aeron.Aeron;
 import io.aeron.cluster.service.ClientSession;
 import io.aeron.cluster.service.Cluster;
 import io.aeronic.AeronicWizard;
@@ -27,24 +27,31 @@ public class AeronicClusteredServiceRegistry
         clientSessionPublicationByName.put(clientSessionPublication.getName(), clientSessionPublication);
     }
 
-    public <T> void registerRoleAwareEgressPublisher(final AeronicWizard aeronic, final Class<T> clazz, final String egressChannel, final int streamId)
+    public <T> void registerRoleAwareEgressPublisher(
+        final Aeron aeron,
+        final Class<T> clazz,
+        final String egressChannel,
+        final int streamId
+    )
     {
-        final T publisher = aeronic.createPublisher(clazz, egressChannel, streamId);
-        final Publication publication = aeronic.getPublicationFor(clazz);
         final String publisherName = clazz.getName() + "__EgressPublisher";
-        multiplexingClientSessionPublicationByName.put(publisherName, new MultiplexingAeronicPublication<>(publisherName, publisher, publication));
+        final MultiplexingAeronicPublication<T> publication = new MultiplexingAeronicPublication<>(() -> aeron.addPublication(egressChannel, streamId));
+        final T publisher = AeronicWizard.createPublisher(clazz, publication);
+        publication.bindPublisher(publisher);
+        multiplexingClientSessionPublicationByName.put(publisherName, publication);
     }
 
     public void onRoleChange(final Cluster.Role newRole)
     {
-        if (newRole != Cluster.Role.LEADER)
+        // TODO this should be the process for all types of pulblications, not just multiplex ones
+        if (newRole == Cluster.Role.LEADER)
         {
-            // TODO test in failover
-//            multiplexingClientSessionPublicationByName.values().forEach(MultiplexingAeronicPublication::toggleOff);
+            multiplexingClientSessionPublicationByName.values().forEach(MultiplexingAeronicPublication::activate);
         }
         else
         {
-//            multiplexingClientSessionPublicationByName.values().forEach(MultiplexingAeronicPublication::toggleOn);
+            // TODO test in failover
+//            multiplexingClientSessionPublicationByName.values().forEach(MultiplexingAeronicPublication::toggleOff);
         }
     }
 

@@ -22,6 +22,7 @@ public class SubscriberInvokerGeneratorTest
             import io.aeronic.MyEnum;
             import io.aeronic.Composite;
             import java.util.List;
+            import java.util.ArrayList;
                         
                     
             public class TestEventsInvoker extends AbstractSubscriberInvoker<TestEvents>

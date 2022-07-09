@@ -1,5 +1,6 @@
 package io.aeronic.cluster;
 
+import io.aeron.Aeron;
 import io.aeron.ExclusivePublication;
 import io.aeron.Image;
 import io.aeron.cluster.codecs.CloseReason;
@@ -19,15 +20,16 @@ public class AeronicClusteredServiceContainer implements ClusteredService
 {
     private final ClusteredService clusteredService;
     private final AeronicClusteredServiceRegistry registry;
-    private final AtomicReference<AeronicWizard> aeronicRef;
+    private final AtomicReference<Aeron> aeronRef;
     private final List<Runnable> onStartJobs;
+    private Cluster.Role role;
 
     public AeronicClusteredServiceContainer(final Configuration configuration)
     {
         this.clusteredService = configuration.clusteredService;
         this.registry = configuration.registry;
         this.onStartJobs = configuration.onStartJobs;
-        this.aeronicRef = configuration.aeronicRef;
+        this.aeronRef = configuration.aeronRef;
     }
 
     public <T> T getPublisherFor(final Class<T> clazz)
@@ -54,7 +56,7 @@ public class AeronicClusteredServiceContainer implements ClusteredService
     public void onStart(final Cluster cluster, final Image snapshotImage)
     {
         clusteredService.onStart(cluster, snapshotImage);
-        aeronicRef.set(new AeronicWizard(cluster.aeron()));
+        aeronRef.set(cluster.aeron());
         onStartJobs.forEach(Runnable::run);
     }
 
@@ -100,6 +102,7 @@ public class AeronicClusteredServiceContainer implements ClusteredService
     @Override
     public void onRoleChange(final Cluster.Role newRole)
     {
+        role = newRole;
         registry.onRoleChange(newRole);
         clusteredService.onRoleChange(newRole);
     }
@@ -134,12 +137,17 @@ public class AeronicClusteredServiceContainer implements ClusteredService
         );
     }
 
+    public Cluster.Role getRole()
+    {
+        return role;
+    }
+
     public static class Configuration
     {
         private ClusteredService clusteredService;
         private final AeronicClusteredServiceRegistry registry = new AeronicClusteredServiceRegistry();
         private final List<Runnable> onStartJobs = new ArrayList<>();
-        private final AtomicReference<AeronicWizard> aeronicRef = new AtomicReference<>();
+        private final AtomicReference<Aeron> aeronRef = new AtomicReference<>();
 
         public Configuration clusteredService(final ClusteredService clusteredService)
         {
@@ -162,8 +170,8 @@ public class AeronicClusteredServiceContainer implements ClusteredService
         public <T> Configuration registerMultiplexingEgressPublisher(final Class<T> clazz, final String egressChannel, final int streamId)
         {
             onStartJobs.add(() -> {
-                final AeronicWizard aeronic = aeronicRef.get();
-                registry.registerRoleAwareEgressPublisher(aeronic, clazz, egressChannel, streamId);
+                final Aeron aeron = aeronRef.get();
+                registry.registerRoleAwareEgressPublisher(aeron, clazz, egressChannel, streamId);
             });
 
             return this;

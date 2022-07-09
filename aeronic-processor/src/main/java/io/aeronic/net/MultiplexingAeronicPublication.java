@@ -3,29 +3,30 @@ package io.aeronic.net;
 import io.aeron.Publication;
 import org.agrona.DirectBuffer;
 
+import java.util.function.Supplier;
+
 public class MultiplexingAeronicPublication<T> implements AeronicPublication
 {
-    private final String publisherName;
+    private final Supplier<Publication> publicationSupplier;
+    private Publication publication;
+    private boolean active = false;
     private T publisher;
-    private final Publication publication;
-    private volatile boolean active = false;
 
-    public MultiplexingAeronicPublication(final String publisherName, final T publisher, final Publication publication)
+    public MultiplexingAeronicPublication(final Supplier<Publication> publicationSupplier)
     {
-        this.publisherName = publisherName;
-        this.publisher = publisher;
-        this.publication = publication;
+        this.publicationSupplier = publicationSupplier;
     }
 
     @Override
     public boolean isConnected()
     {
-        return publication.isConnected();
+        return active && publication.isConnected();
     }
 
     @Override
     public void offer(final DirectBuffer buffer)
     {
+        publication.offer(buffer);
     }
 
     @Override
@@ -33,19 +34,24 @@ public class MultiplexingAeronicPublication<T> implements AeronicPublication
     {
     }
 
-    public void toggleOff()
+    public void deactivate()
     {
-        active = false;
+
     }
 
-
-    public void toggleOn()
+    public void activate()
     {
         active = true;
+        publication = publicationSupplier.get();
     }
 
     public T getPublisher()
     {
         return publisher;
+    }
+
+    public void bindPublisher(final T publisher)
+    {
+        this.publisher = publisher;
     }
 }

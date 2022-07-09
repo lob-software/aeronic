@@ -1,12 +1,10 @@
 package io.aeronic.system.cluster;
 
 
-import io.aeron.ChannelUriStringBuilder;
-import io.aeron.CommonContext;
-import io.aeron.ExclusivePublication;
-import io.aeron.Image;
+import io.aeron.*;
 import io.aeron.archive.Archive;
 import io.aeron.archive.ArchiveThreadingMode;
+import io.aeron.archive.client.AeronArchive;
 import io.aeron.cluster.ClusteredMediaDriver;
 import io.aeron.cluster.ConsensusModule;
 import io.aeron.cluster.codecs.CloseReason;
@@ -23,20 +21,31 @@ import org.agrona.CloseHelper;
 import org.agrona.DirectBuffer;
 import org.agrona.ErrorHandler;
 import org.agrona.concurrent.IdleStrategy;
+import org.agrona.concurrent.NoOpLock;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import static io.aeronic.system.cluster.ClusterUtil.archiveControlRequestChannel;
+import static io.aeronic.system.cluster.ClusterUtil.clusterMembers;
+
 
 public final class TestClusterNode implements AutoCloseable
 {
-    private static final String INGRESS_CHANNEL = new ChannelUriStringBuilder()
+    private static final long CATALOG_CAPACITY = 128 * 1024;
+    private static final String ARCHIVE_LOCAL_CONTROL_CHANNEL = "aeron:ipc";
+    private static final long STARTUP_CANVASS_TIMEOUT_NS = TimeUnit.SECONDS.toNanos(5);
+    public static final String INGRESS_CHANNEL = new ChannelUriStringBuilder()
         .media("udp")
         .reliable(true)
         .endpoint("localhost:40457")
         .build();
+
+    private static final String LOG_CHANNEL = "aeron:udp?term-length=512k";
+    private static final String ARCHIVE_CONTROL_RESPONSE_CHANNEL = "aeron:udp?endpoint=localhost:0";
 
     private static final String REPLICATION_CHANNEL = new ChannelUriStringBuilder()
         .media("udp")
@@ -44,45 +53,63 @@ public final class TestClusterNode implements AutoCloseable
         .endpoint("localhost:40458")
         .build();
 
+    public static final String LOCALHOST = "localhost";
+
     private final ClusteredMediaDriver clusteredMediaDriver;
     private final ClusteredServiceContainer container;
 
-    public TestClusterNode(final ClusteredService clusteredService, final boolean isCleanStart)
+    public TestClusterNode(final int nodeId, final int nodeCount, final ClusteredService clusteredService)
     {
-        final String aeronDirectoryName = CommonContext.getAeronDirectoryName() + "-node";
+        final String aeronDirName = CommonContext.getAeronDirectoryName() + "-" + nodeId + "-driver";
+        final String baseDirName = CommonContext.getAeronDirectoryName() + "-" + nodeId;
 
         final MediaDriver.Context mediaDriverContext = new MediaDriver.Context();
         final ConsensusModule.Context consensusModuleContext = new ConsensusModule.Context();
         final Archive.Context archiveContext = new Archive.Context();
+        final AeronArchive.Context aeronArchiveContext = new AeronArchive.Context();
         final ClusteredServiceContainer.Context serviceContainerContext = new ClusteredServiceContainer.Context();
 
+        aeronArchiveContext
+            .lock(NoOpLock.INSTANCE)
+            .controlRequestChannel(archiveControlRequestChannel(nodeId))
+            .controlResponseChannel(ARCHIVE_CONTROL_RESPONSE_CHANNEL)
+            .aeronDirectoryName(aeronDirName);
+
         mediaDriverContext
-            .aeronDirectoryName(aeronDirectoryName)
+            .aeronDirectoryName(aeronDirName)
             .threadingMode(ThreadingMode.SHARED)
-            .errorHandler(Throwable::printStackTrace)
+            .termBufferSparseFile(true)
             .dirDeleteOnShutdown(true)
             .dirDeleteOnStart(true);
 
         archiveContext
-            .archiveDirectoryName(aeronDirectoryName + "-archive")
-            .deleteArchiveOnStart(isCleanStart)
+            .catalogCapacity(CATALOG_CAPACITY)
+            .archiveDir(new File(baseDirName, "archive"))
+            .controlChannel(aeronArchiveContext.controlRequestChannel())
+            .localControlChannel(ARCHIVE_LOCAL_CONTROL_CHANNEL)
             .recordingEventsEnabled(false)
-            .threadingMode(ArchiveThreadingMode.SHARED);
-
-        final String clusterDirectoryName = aeronDirectoryName + "-cluster";
+            .recordingEventsEnabled(false)
+            .threadingMode(ArchiveThreadingMode.SHARED)
+            .deleteArchiveOnStart(true);
 
         consensusModuleContext
-            .authenticatorSupplier(SimpleAuthenticator::new)
-            .clusterDirectoryName(clusterDirectoryName)
-            .aeronDirectoryName(aeronDirectoryName)
+            .clusterMemberId(nodeId)
+            .clusterMembers(clusterMembers(0, nodeCount))
+            .startupCanvassTimeoutNs(STARTUP_CANVASS_TIMEOUT_NS)
+            .appointedLeaderId(Aeron.NULL_VALUE)
+            .clusterDir(new File(baseDirName, "consensus-module"))
             .ingressChannel(INGRESS_CHANNEL)
+            .logChannel(LOG_CHANNEL)
             .replicationChannel(REPLICATION_CHANNEL)
-            .errorHandler(Throwable::printStackTrace)
-            .deleteDirOnStart(isCleanStart);
+            .archiveContext(aeronArchiveContext.clone()
+                .controlRequestChannel(ARCHIVE_LOCAL_CONTROL_CHANNEL)
+                .controlResponseChannel(ARCHIVE_LOCAL_CONTROL_CHANNEL))
+            .sessionTimeoutNs(TimeUnit.SECONDS.toNanos(10))
+            .authenticatorSupplier(SimpleAuthenticator::new)
+            .deleteDirOnStart(true);
 
         serviceContainerContext
-            .clusterDirectoryName(clusterDirectoryName)
-            .aeronDirectoryName(aeronDirectoryName)
+            .aeronDirectoryName(aeronDirName)
             .clusteredService(clusteredService)
             .errorHandler(Throwable::printStackTrace);
 

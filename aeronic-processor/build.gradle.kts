@@ -13,6 +13,7 @@ dependencies {
     annotationProcessor("com.google.auto.service:auto-service:1.0.1")
     implementation("com.google.auto.service:auto-service:1.0.1")
     implementation("io.aeron:aeron-all:1.38.1")
+    implementation("org.awaitility:awaitility:4.2.0")
     testImplementation("org.jooq:joor:0.9.14")
     testImplementation(project(":aeronic-tests"))
     testImplementation("org.assertj:assertj-core:3.23.1")

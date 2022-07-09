@@ -2,50 +2,43 @@ package io.aeronic.system.cluster;
 
 import io.aeron.Aeron;
 import io.aeron.ChannelUriStringBuilder;
+import io.aeron.cluster.service.Cluster;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
 import io.aeronic.AeronicWizard;
-import io.aeronic.SampleEvents;
 import io.aeronic.SimpleEvents;
 import io.aeronic.cluster.AeronicClusteredServiceContainer;
 import org.agrona.concurrent.BusySpinIdleStrategy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
 
+import static io.aeronic.Assertions.assertEventuallyTrue;
+import static io.aeronic.system.cluster.TestClusterNode.Service;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-@Disabled("WIP. AeronClusterPublication::pollCluster must be necessary during failover")
 public class ClusterResilienceTest
 {
+    private static final int STREAM_ID = 101;
 
-    private static final String INGRESS_CHANNEL = new ChannelUriStringBuilder()
+    private static final String MDC_CAST_CHANNEL = new ChannelUriStringBuilder()
         .media("udp")
         .reliable(true)
-        .endpoint("localhost:40457")
+        .controlEndpoint("localhost:40458")
+        .controlMode("dynamic")
+        .endpoint("localhost:40459")
         .build();
 
     private AeronicWizard aeronic;
     private Aeron aeron;
     private MediaDriver mediaDriver;
-
-    // node1
-    private TestClusterNode clusterNode1;
-    private AeronicClusteredServiceContainer clusteredService1;
-
-    // node2
-    private TestClusterNode clusterNode2;
-    private AeronicClusteredServiceContainer clusteredService2;
-
-    // node3
-    private TestClusterNode clusterNode3;
-    private AeronicClusteredServiceContainer clusteredService3;
-
-    private SimpleEventsImpl simpleEvents;
-    private SampleEventsImpl sampleEvents;
+    private final TestCluster testCluster = new TestCluster();
 
     @BeforeEach
     void setUp()
@@ -63,8 +56,9 @@ public class ClusterResilienceTest
         aeron = Aeron.connect(aeronCtx);
         aeronic = new AeronicWizard(aeron);
 
-        simpleEvents = new SimpleEventsImpl();
-        sampleEvents = new SampleEventsImpl();
+        testCluster.registerNode(0, 3);
+        testCluster.registerNode(1, 3);
+        testCluster.registerNode(2, 3);
     }
 
     @AfterEach
@@ -73,48 +67,36 @@ public class ClusterResilienceTest
         aeronic.close();
         aeron.close();
         mediaDriver.close();
-        clusterNode1.close();
-        clusteredService1.close();
+        testCluster.close();
     }
 
     @Test
-    public void clusterIngressAndEgress()
+    public void onlyLeaderCanPublish()
     {
-        final SimpleEventsImpl clusterIngressSimpleEventsImpl = new SimpleEventsImpl();
+        final SimpleEventsImpl sub1 = new SimpleEventsImpl();
+        final SimpleEventsImpl sub2 = new SimpleEventsImpl();
 
-        final TestClusterNode.Service service = new TestClusterNode.Service();
+        // register as normal (non-testCluster) subs
+        aeronic.registerSubscriber(SimpleEvents.class, sub1, MDC_CAST_CHANNEL, STREAM_ID);
+        aeronic.registerSubscriber(SimpleEvents.class, sub2, MDC_CAST_CHANNEL, STREAM_ID);
 
-        clusteredService1 = new AeronicClusteredServiceContainer(
-            new AeronicClusteredServiceContainer.Configuration()
-                .clusteredService(service)
-                .registerIngressSubscriber(SimpleEvents.class, clusterIngressSimpleEventsImpl)
-                .registerEgressPublisher(SampleEvents.class));
-
-        final SampleEvents clusterEgressSampleEventsPublisher = clusteredService1.getPublisherFor(SampleEvents.class);
-
-        clusterNode1 = new TestClusterNode(clusteredService1, true);
-
-        final SimpleEvents clusterIngressSimpleEventsPublisher = aeronic.createClusterIngressPublisher(SimpleEvents.class, INGRESS_CHANNEL);
-
-        aeronic.registerClusterEgressSubscriber(SampleEvents.class, sampleEvents, INGRESS_CHANNEL);
         aeronic.start();
-        aeronic.awaitUntilPubsAndSubsConnect();
-        await().timeout(Duration.ofSeconds(1)).until(clusteredService1::egressConnected);
 
-        // cluster -> client
-        clusterEgressSampleEventsPublisher.onEvent(202L);
+        // wait for leader, publish from it and assert that only leaders messages get published
+        final AeronicClusteredServiceContainer leaderClusteredService = testCluster.waitForLeader();
+        final SimpleEvents leaderPublisher = leaderClusteredService.getMultiplexingPublisherFor(SimpleEvents.class);
+        assertEventuallyTrue(leaderClusteredService::egressConnected);
+        testCluster.forEachNonLeaderNode(node -> assertFalse(node.egressConnected()));
 
-        // client -> cluster
-        clusterIngressSimpleEventsPublisher.onEvent(303L);
+        leaderPublisher.onEvent(101L);
+        testCluster.forEachNonLeaderNode(node -> {
+            final SimpleEvents publisher = node.getMultiplexingPublisherFor(SimpleEvents.class);
+            publisher.onEvent(303L);
+        });
 
-        await()
-            .timeout(Duration.ofSeconds(1))
-            .until(() ->
-                simpleEvents.value == 101L &&
-                    sampleEvents.value == 202L &&
-                    clusterIngressSimpleEventsImpl.value == 303L);
+        // follower egress publish should be noop
+        assertEventuallyTrue(() -> sub1.value == 101L && sub2.value == 101L);
     }
-
 
     public static class SimpleEventsImpl implements SimpleEvents
     {
@@ -128,15 +110,49 @@ public class ClusterResilienceTest
         }
     }
 
-    public static class SampleEventsImpl implements SampleEvents
+    private static class TestCluster
     {
+        private final List<AeronicClusteredServiceContainer> clusteredServices = new ArrayList<>();
+        private final List<TestClusterNode> clusterNodes = new ArrayList<>();
 
-        private volatile long value;
-
-        @Override
-        public void onEvent(final long value)
+        public void registerNode(final int nodeIdx, final int nodeCount)
         {
-            this.value = value;
+            final AeronicClusteredServiceContainer clusteredServiceContainer = new AeronicClusteredServiceContainer(
+                new AeronicClusteredServiceContainer.Configuration()
+                    .clusteredService(new Service())
+                    .registerMultiplexingEgressPublisher(SimpleEvents.class, MDC_CAST_CHANNEL, STREAM_ID)
+            );
+
+            final TestClusterNode clusterNode = new TestClusterNode(nodeIdx, nodeCount, clusteredServiceContainer);
+
+            clusteredServices.add(clusteredServiceContainer);
+            clusterNodes.add(clusterNode);
+        }
+
+        public AeronicClusteredServiceContainer waitForLeader()
+        {
+            final Optional<AeronicClusteredServiceContainer> leaderMaybe = await()
+                .until(
+                    () -> clusteredServices.stream()
+                        .filter(e -> e.getRole() == Cluster.Role.LEADER)
+                        .findFirst(),
+                    Optional::isPresent
+                );
+
+            return leaderMaybe.orElse(null);
+        }
+
+        public void forEachNonLeaderNode(final Consumer<? super AeronicClusteredServiceContainer> consumer)
+        {
+            clusteredServices.stream()
+                .filter(e -> e.getRole() != Cluster.Role.LEADER)
+                .forEach(consumer);
+        }
+
+        public void close()
+        {
+            clusterNodes.forEach(TestClusterNode::close);
+            clusteredServices.forEach(AeronicClusteredServiceContainer::close);
         }
     }
 }
