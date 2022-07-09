@@ -167,11 +167,18 @@ public class AeronicClusteredServiceContainer implements ClusteredService
             return this;
         }
 
-        public <T> Configuration registerMultiplexingEgressPublisher(final Class<T> clazz, final String egressChannel, final int streamId)
+        /**
+         * Registers toggled publisher on the clustered service. Toggled publisher is activated / deactivated on cluster node role change
+         * in order to avoid non-leader nodes from publishing.
+         * @param egressChannel channel to publish to
+         * @param streamId stream ID of the publication
+         * @param <T> publisher class
+         */
+        public <T> Configuration registerToggledEgressPublisher(final Class<T> clazz, final String egressChannel, final int streamId)
         {
             onStartJobs.add(() -> {
                 final Aeron aeron = aeronRef.get();
-                registry.registerRoleAwareEgressPublisher(aeron, clazz, egressChannel, streamId);
+                registry.registerToggledEgressPublisher(aeron, clazz, egressChannel, streamId);
             });
 
             return this;

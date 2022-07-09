@@ -5,8 +5,8 @@ import io.aeron.cluster.service.ClientSession;
 import io.aeron.cluster.service.Cluster;
 import io.aeronic.AeronicWizard;
 import io.aeronic.net.AbstractSubscriberInvoker;
-import io.aeronic.net.MultiplexingAeronicPublication;
 import io.aeronic.net.NullSubscriberInvokerImpl;
+import io.aeronic.net.ToggledAeronicPublication;
 import org.agrona.DirectBuffer;
 
 import java.util.Arrays;
@@ -20,14 +20,14 @@ public class AeronicClusteredServiceRegistry
 
     // TODO enforce a publication to be only in one of these at a time
     private final Map<String, ClientSessionPublication<?>> clientSessionPublicationByName = new HashMap<>();
-    private final Map<String, MultiplexingAeronicPublication<?>> multiplexingClientSessionPublicationByName = new HashMap<>();
+    private final Map<String, ToggledAeronicPublication<?>> multiplexPublicationByName = new HashMap<>();
 
     public void registerEgressPublisher(final ClientSessionPublication<?> clientSessionPublication)
     {
         clientSessionPublicationByName.put(clientSessionPublication.getName(), clientSessionPublication);
     }
 
-    public <T> void registerRoleAwareEgressPublisher(
+    public <T> void registerToggledEgressPublisher(
         final Aeron aeron,
         final Class<T> clazz,
         final String egressChannel,
@@ -35,10 +35,10 @@ public class AeronicClusteredServiceRegistry
     )
     {
         final String publisherName = clazz.getName() + "__EgressPublisher";
-        final MultiplexingAeronicPublication<T> publication = new MultiplexingAeronicPublication<>(() -> aeron.addPublication(egressChannel, streamId));
+        final ToggledAeronicPublication<T> publication = new ToggledAeronicPublication<>(() -> aeron.addPublication(egressChannel, streamId));
         final T publisher = AeronicWizard.createPublisher(clazz, publication);
         publication.bindPublisher(publisher);
-        multiplexingClientSessionPublicationByName.put(publisherName, publication);
+        multiplexPublicationByName.put(publisherName, publication);
     }
 
     public void onRoleChange(final Cluster.Role newRole)
@@ -46,12 +46,12 @@ public class AeronicClusteredServiceRegistry
         // TODO this should be the process for all types of pulblications, not just multiplex ones
         if (newRole == Cluster.Role.LEADER)
         {
-            multiplexingClientSessionPublicationByName.values().forEach(MultiplexingAeronicPublication::activate);
+            multiplexPublicationByName.values().forEach(ToggledAeronicPublication::activate);
         }
         else
         {
             // TODO test in failover
-//            multiplexingClientSessionPublicationByName.values().forEach(MultiplexingAeronicPublication::toggleOff);
+//            multiplexPublicationByName.values().forEach(ToggledAeronicPublication::toggleOff);
         }
     }
 
@@ -73,7 +73,7 @@ public class AeronicClusteredServiceRegistry
     {
         try
         {
-            return (T)multiplexingClientSessionPublicationByName.get(clazz.getName() + "__EgressPublisher").getPublisher();
+            return (T)multiplexPublicationByName.get(clazz.getName() + "__EgressPublisher").getPublisher();
         }
         catch (final Exception e)
         {
@@ -91,7 +91,7 @@ public class AeronicClusteredServiceRegistry
     public boolean egressConnected()
     {
         return clientSessionPublicationByName.values().stream().allMatch(ClientSessionPublication::isConnected)
-            && multiplexingClientSessionPublicationByName.values().stream().allMatch(MultiplexingAeronicPublication::isConnected);
+            && multiplexPublicationByName.values().stream().allMatch(ToggledAeronicPublication::isConnected);
     }
 
     public void close()

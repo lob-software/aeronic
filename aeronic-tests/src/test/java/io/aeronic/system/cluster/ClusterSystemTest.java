@@ -268,7 +268,7 @@ public class ClusterSystemTest
         clusteredService = new AeronicClusteredServiceContainer(
             new AeronicClusteredServiceContainer.Configuration()
                 .clusteredService(service)
-                .registerMultiplexingEgressPublisher(SimpleEvents.class, UDP_MULTICAST_CHANNEL, streamId));
+                .registerToggledEgressPublisher(SimpleEvents.class, UDP_MULTICAST_CHANNEL, streamId));
 
         clusterNode = new TestClusterNode(0, 1, clusteredService);
 
@@ -301,7 +301,7 @@ public class ClusterSystemTest
         clusteredService = new AeronicClusteredServiceContainer(
             new AeronicClusteredServiceContainer.Configuration()
                 .clusteredService(service)
-                .registerMultiplexingEgressPublisher(SimpleEvents.class, MDC_CAST_CHANNEL, streamId));
+                .registerToggledEgressPublisher(SimpleEvents.class, MDC_CAST_CHANNEL, streamId));
 
         clusterNode = new TestClusterNode(0, 1, clusteredService);
 

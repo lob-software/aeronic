@@ -5,14 +5,14 @@ import org.agrona.DirectBuffer;
 
 import java.util.function.Supplier;
 
-public class MultiplexingAeronicPublication<T> implements AeronicPublication
+public class ToggledAeronicPublication<T> implements AeronicPublication
 {
     private final Supplier<Publication> publicationSupplier;
     private Publication publication;
     private boolean active = false;
     private T publisher;
 
-    public MultiplexingAeronicPublication(final Supplier<Publication> publicationSupplier)
+    public ToggledAeronicPublication(final Supplier<Publication> publicationSupplier)
     {
         this.publicationSupplier = publicationSupplier;
     }
@@ -32,6 +32,7 @@ public class MultiplexingAeronicPublication<T> implements AeronicPublication
     @Override
     public void close()
     {
+        publication.close();
     }
 
     public void deactivate()

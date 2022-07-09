@@ -23,7 +23,7 @@ import static io.aeronic.system.cluster.TestClusterNode.Service;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class ClusterResilienceTest
+public class MultiNodeClusterSystemTest
 {
     private static final int STREAM_ID = 101;
 
@@ -120,7 +120,7 @@ public class ClusterResilienceTest
             final AeronicClusteredServiceContainer clusteredServiceContainer = new AeronicClusteredServiceContainer(
                 new AeronicClusteredServiceContainer.Configuration()
                     .clusteredService(new Service())
-                    .registerMultiplexingEgressPublisher(SimpleEvents.class, MDC_CAST_CHANNEL, STREAM_ID)
+                    .registerToggledEgressPublisher(SimpleEvents.class, MDC_CAST_CHANNEL, STREAM_ID)
             );
 
             final TestClusterNode clusterNode = new TestClusterNode(nodeIdx, nodeCount, clusteredServiceContainer);
