@@ -183,11 +183,6 @@ public class AeronicClusteredServiceContainer implements ClusteredService
 
             return this;
         }
-
-        public AeronicClusteredServiceRegistry registry()
-        {
-            return registry;
-        }
     }
 }
 

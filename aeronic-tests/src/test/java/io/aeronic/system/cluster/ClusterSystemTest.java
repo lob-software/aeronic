@@ -112,11 +112,11 @@ public class ClusterSystemTest
             .registerEgressPublisher(SimpleEvents.class)
             .registerEgressPublisher(SampleEvents.class);
 
-        final SimpleEvents simpleEventsPublisher = configuration.registry().getPublisherFor(SimpleEvents.class);
-        final SampleEvents sampleEventsPublisher = configuration.registry().getPublisherFor(SampleEvents.class);
-
         clusteredService = new AeronicClusteredServiceContainer(configuration);
         clusterNode = new TestClusterNode(0, 1, clusteredService);
+
+        final SimpleEvents simpleEventsPublisher = clusteredService.getPublisherFor(SimpleEvents.class);
+        final SampleEvents sampleEventsPublisher = clusteredService.getPublisherFor(SampleEvents.class);
 
         aeronic.registerClusterEgressSubscriber(SimpleEvents.class, simpleEvents, new AeronCluster.Context()
             .aeronDirectoryName(aeron.context().aeronDirectoryName())
