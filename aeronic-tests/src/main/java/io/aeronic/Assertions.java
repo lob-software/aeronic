@@ -69,13 +69,13 @@ public class Assertions
 
     public static void assertEventuallyTrue(final BooleanSupplier assertion)
     {
-        assertEventuallyTrue(assertion, 1000L);
+        assertEventuallyTrue(assertion, 2000L);
     }
 
     public static void assertEventually(final ThrowingRunnable runnable)
     {
         await()
-            .pollInterval(Duration.ofMillis(100))
+            .pollInterval(Duration.ofMillis(50))
             .atMost(Duration.ofSeconds(1))
             .untilAsserted(runnable);
     }

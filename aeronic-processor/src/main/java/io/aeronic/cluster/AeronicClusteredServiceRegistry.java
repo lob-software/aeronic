@@ -18,7 +18,6 @@ public class AeronicClusteredServiceRegistry
     private final Map<Long, AbstractSubscriberInvoker<?>> invokersBySessionId = new HashMap<>();
     private final Map<String, AbstractSubscriberInvoker<?>> invokerByName = new HashMap<>();
 
-    // TODO enforce a publication to be only in one of these at a time
     private final Map<String, ClientSessionPublication<?>> clientSessionPublicationByName = new HashMap<>();
     private final Map<String, ToggledAeronicPublication<?>> multiplexPublicationByName = new HashMap<>();
 
@@ -43,15 +42,13 @@ public class AeronicClusteredServiceRegistry
 
     public void onRoleChange(final Cluster.Role newRole)
     {
-        // TODO this should be the process for all types of pulblications, not just multiplex ones
         if (newRole == Cluster.Role.LEADER)
         {
             multiplexPublicationByName.values().forEach(ToggledAeronicPublication::activate);
         }
         else
         {
-            // TODO test in failover
-//            multiplexPublicationByName.values().forEach(ToggledAeronicPublication::toggleOff);
+//            multiplexPublicationByName.values().forEach(ToggledAeronicPublication::deactivate);
         }
     }
 
@@ -97,6 +94,7 @@ public class AeronicClusteredServiceRegistry
     public void close()
     {
         clientSessionPublicationByName.values().forEach(ClientSessionPublication::close);
+        multiplexPublicationByName.values().forEach(ToggledAeronicPublication::close);
     }
 
     public void onSessionOpen(final ClientSession session)

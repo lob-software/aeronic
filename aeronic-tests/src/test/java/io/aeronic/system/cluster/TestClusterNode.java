@@ -57,11 +57,13 @@ public final class TestClusterNode implements AutoCloseable
 
     private final ClusteredMediaDriver clusteredMediaDriver;
     private final ClusteredServiceContainer container;
+    private final File clusterDir;
 
     public TestClusterNode(final int nodeId, final int nodeCount, final ClusteredService clusteredService)
     {
         final String aeronDirName = CommonContext.getAeronDirectoryName() + "-" + nodeId + "-driver";
         final String baseDirName = CommonContext.getAeronDirectoryName() + "-" + nodeId;
+        clusterDir = new File(baseDirName, "consensus-module");
 
         final MediaDriver.Context mediaDriverContext = new MediaDriver.Context();
         final ConsensusModule.Context consensusModuleContext = new ConsensusModule.Context();
@@ -97,7 +99,7 @@ public final class TestClusterNode implements AutoCloseable
             .clusterMembers(clusterMembers(0, nodeCount))
             .startupCanvassTimeoutNs(STARTUP_CANVASS_TIMEOUT_NS)
             .appointedLeaderId(Aeron.NULL_VALUE)
-            .clusterDir(new File(baseDirName, "consensus-module"))
+            .clusterDir(clusterDir)
             .ingressChannel(INGRESS_CHANNEL)
             .logChannel(LOG_CHANNEL)
             .replicationChannel(REPLICATION_CHANNEL)
@@ -120,6 +122,11 @@ public final class TestClusterNode implements AutoCloseable
         );
 
         container = ClusteredServiceContainer.launch(serviceContainerContext);
+    }
+
+    public File clusterDir()
+    {
+        return clusterDir;
     }
 
     static class Service implements ClusteredService
@@ -174,7 +181,7 @@ public final class TestClusterNode implements AutoCloseable
 
         public void onRoleChange(final Cluster.Role newRole)
         {
-            System.out.println("onRoleChange " + newRole);
+            System.out.println("Node ID: " + cluster.memberId() + " onRoleChange " + newRole);
         }
 
         public void onTerminate(final Cluster cluster)
@@ -207,7 +214,6 @@ public final class TestClusterNode implements AutoCloseable
     private static class SimpleAuthenticator implements Authenticator
     {
         private final Map<Long, String> credentials = new HashMap<>();
-
         public void onConnectRequest(final long sessionId, final byte[] encodedCredentials, final long nowMs)
         {
             final String credentialsString = new String(encodedCredentials, StandardCharsets.US_ASCII);

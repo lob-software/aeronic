@@ -20,7 +20,7 @@ public class AeronicClusteredServiceContainer implements ClusteredService
 {
     private final ClusteredService clusteredService;
     private final AeronicClusteredServiceRegistry registry;
-    private final AtomicReference<Aeron> aeronRef;
+    private final AtomicReference<Cluster> clusterRef;
     private final List<Runnable> onStartJobs;
     private Cluster.Role role;
 
@@ -29,7 +29,7 @@ public class AeronicClusteredServiceContainer implements ClusteredService
         this.clusteredService = configuration.clusteredService;
         this.registry = configuration.registry;
         this.onStartJobs = configuration.onStartJobs;
-        this.aeronRef = configuration.aeronRef;
+        this.clusterRef = configuration.clusterRef;
     }
 
     public <T> T getPublisherFor(final Class<T> clazz)
@@ -56,7 +56,7 @@ public class AeronicClusteredServiceContainer implements ClusteredService
     public void onStart(final Cluster cluster, final Image snapshotImage)
     {
         clusteredService.onStart(cluster, snapshotImage);
-        aeronRef.set(cluster.aeron());
+        clusterRef.set(cluster);
         onStartJobs.forEach(Runnable::run);
     }
 
@@ -147,7 +147,7 @@ public class AeronicClusteredServiceContainer implements ClusteredService
         private ClusteredService clusteredService;
         private final AeronicClusteredServiceRegistry registry = new AeronicClusteredServiceRegistry();
         private final List<Runnable> onStartJobs = new ArrayList<>();
-        private final AtomicReference<Aeron> aeronRef = new AtomicReference<>();
+        private final AtomicReference<Cluster> clusterRef = new AtomicReference<>();
 
         public Configuration clusteredService(final ClusteredService clusteredService)
         {
@@ -177,7 +177,7 @@ public class AeronicClusteredServiceContainer implements ClusteredService
         public <T> Configuration registerToggledEgressPublisher(final Class<T> clazz, final String egressChannel, final int streamId)
         {
             onStartJobs.add(() -> {
-                final Aeron aeron = aeronRef.get();
+                final Aeron aeron = clusterRef.get().aeron();
                 registry.registerToggledEgressPublisher(aeron, clazz, egressChannel, streamId);
             });
 

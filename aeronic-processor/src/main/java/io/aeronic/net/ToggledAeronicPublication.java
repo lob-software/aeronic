@@ -9,7 +9,6 @@ public class ToggledAeronicPublication<T> implements AeronicPublication
 {
     private final Supplier<Publication> publicationSupplier;
     private Publication publication;
-    private boolean active = false;
     private T publisher;
 
     public ToggledAeronicPublication(final Supplier<Publication> publicationSupplier)
@@ -20,7 +19,7 @@ public class ToggledAeronicPublication<T> implements AeronicPublication
     @Override
     public boolean isConnected()
     {
-        return active && publication.isConnected();
+        return publication != null && publication.isConnected();
     }
 
     @Override
@@ -32,18 +31,17 @@ public class ToggledAeronicPublication<T> implements AeronicPublication
     @Override
     public void close()
     {
-        publication.close();
-    }
-
-    public void deactivate()
-    {
-
+        if (publication != null)
+        {
+            publication.close();
+        }
     }
 
     public void activate()
     {
-        active = true;
         publication = publicationSupplier.get();
+        // TODO: what if there is a long GC pause, leader becomes follower, and then his publication stays active...
+        // how can this be tested?
     }
 
     public T getPublisher()
