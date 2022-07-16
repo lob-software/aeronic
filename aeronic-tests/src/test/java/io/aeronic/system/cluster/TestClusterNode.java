@@ -63,6 +63,8 @@ public final class TestClusterNode implements AutoCloseable
     {
         final String aeronDirName = CommonContext.getAeronDirectoryName() + "-" + nodeId + "-driver";
         final String baseDirName = CommonContext.getAeronDirectoryName() + "-" + nodeId;
+        final String clusterDirectoryName = aeronDirName + "-cluster-" + nodeId;
+
         clusterDir = new File(baseDirName, "consensus-module");
 
         final MediaDriver.Context mediaDriverContext = new MediaDriver.Context();
@@ -95,6 +97,7 @@ public final class TestClusterNode implements AutoCloseable
             .deleteArchiveOnStart(true);
 
         consensusModuleContext
+            .errorHandler(Throwable::printStackTrace)
             .clusterMemberId(nodeId)
             .clusterMembers(clusterMembers(0, nodeCount))
             .startupCanvassTimeoutNs(STARTUP_CANVASS_TIMEOUT_NS)
@@ -112,6 +115,7 @@ public final class TestClusterNode implements AutoCloseable
 
         serviceContainerContext
             .aeronDirectoryName(aeronDirName)
+            .clusterDirectoryName(clusterDirectoryName)
             .clusteredService(clusteredService)
             .errorHandler(Throwable::printStackTrace);
 
