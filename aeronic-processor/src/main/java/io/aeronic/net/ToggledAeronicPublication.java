@@ -40,8 +40,11 @@ public class ToggledAeronicPublication<T> implements AeronicPublication
     public void activate()
     {
         publication = publicationSupplier.get();
-        // TODO: what if there is a long GC pause, leader becomes follower, and then his publication stays active...
-        // how can this be tested?
+    }
+
+    public void deactivate()
+    {
+        publication = null;
     }
 
     public T getPublisher()

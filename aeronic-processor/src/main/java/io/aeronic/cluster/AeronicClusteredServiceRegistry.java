@@ -48,7 +48,7 @@ public class AeronicClusteredServiceRegistry
         }
         else
         {
-//            multiplexPublicationByName.values().forEach(ToggledAeronicPublication::deactivate);
+            multiplexPublicationByName.values().forEach(ToggledAeronicPublication::deactivate);
         }
     }
 
