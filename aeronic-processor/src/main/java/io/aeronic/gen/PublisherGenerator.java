@@ -1,18 +1,28 @@
 package io.aeronic.gen;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static io.aeronic.gen.TypeUtil.isPrimitive;
 
 public class PublisherGenerator
 {
+    private final List<String> imports = new ArrayList<>();
+
+    private void addImport(final String importStatement)
+    {
+        if (!imports.contains(importStatement))
+        {
+            imports.add(importStatement);
+        }
+    }
+
     public String generate(final String packageName, final String interfaceName, final List<MethodInfo> methods)
     {
-        final StringBuilder classImports = new StringBuilder();
-        final String generatedMethods = generateMethods(methods, classImports);
+        final String generatedMethods = generateMethods(methods);
 
         return new StringBuilder()
-            .append(generatePackageAndImports(classImports, packageName))
+            .append(generatePackageAndImports(packageName))
             .append(generateClassDeclaration(interfaceName))
             .append("\n").append("{").append("\n")
             .append(generateConstructor(interfaceName))
@@ -21,7 +31,7 @@ public class PublisherGenerator
             .toString();
     }
 
-    private String generateMethods(final List<MethodInfo> methods, final StringBuilder packageAndImports)
+    private String generateMethods(final List<MethodInfo> methods)
     {
         final StringBuilder methodsBuilder = new StringBuilder();
         for (int i = 0; i < methods.size(); i++)
@@ -40,7 +50,7 @@ public class PublisherGenerator
 
             for (int j = 0; j < parameters.size(); j++)
             {
-                writeParameter(methodsBuilder, methodBodyBuilder, parameters.get(j), packageAndImports);
+                writeParameter(methodsBuilder, methodBodyBuilder, parameters.get(j));
 
                 if (j < parameters.size() - 1)
                 {
@@ -79,8 +89,7 @@ public class PublisherGenerator
     private void writeParameter(
         final StringBuilder methodsBuilder,
         final StringBuilder methodBodyBuilder,
-        final ParameterInfo parameter,
-        final StringBuilder packageAndImports
+        final ParameterInfo parameter
     )
     {
         final String parameterType = parameter.getType();
@@ -134,8 +143,8 @@ public class PublisherGenerator
                         bufferEncoder.encode(%s);
                 """.formatted(parameterName));
 
-            packageAndImports.append("import %s;\n".formatted(genericParameter));
-            packageAndImports.append("import %s;\n".formatted(fullyQualifiedType));
+            addImport("import %s;".formatted(genericParameter));
+            addImport("import %s;".formatted(fullyQualifiedType));
 
             return;
         }
@@ -145,7 +154,7 @@ public class PublisherGenerator
         methodBodyBuilder.append("""
                     %s.encode(bufferEncoder);
             """.formatted(parameterName));
-        packageAndImports.append("import %s;\n".formatted(parameterType));
+        addImport("import %s;".formatted(parameterType));
     }
 
     private String generateConstructor(final String interfaceName)
@@ -165,17 +174,18 @@ public class PublisherGenerator
         return "public class %sPublisher extends AbstractPublisher implements %s".formatted(interfaceName, interfaceName);
     }
 
-    private String generatePackageAndImports(final StringBuilder classImports, final String packageName)
+    private String generatePackageAndImports(final String packageName)
     {
+        final String importsString = imports.stream().reduce("", (e, n) -> e + "\n" + n);
         return """
             package %s;
                     
             import io.aeron.Publication;
             import io.aeronic.net.AbstractPublisher;
             import io.aeronic.net.AeronicPublication;
-            import org.agrona.BitUtil;
-            %s
+            import org.agrona.BitUtil;%s
+
                         
-            """.formatted(packageName, classImports);
+            """.formatted(packageName, importsString);
     }
 }

@@ -1,5 +1,6 @@
 package io.aeronic.gen;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static io.aeronic.gen.StringUtil.capitalize;
@@ -7,13 +8,22 @@ import static io.aeronic.gen.TypeUtil.isPrimitive;
 
 public class SubscriberInvokerGenerator
 {
+    private final List<String> imports = new ArrayList<>();
+
+    private void addImport(final String importStatement)
+    {
+        if (!imports.contains(importStatement))
+        {
+            imports.add(importStatement);
+        }
+    }
+
     public String generate(final String packageName, final String interfaceName, final List<MethodInfo> methods)
     {
-        final StringBuilder classImports = new StringBuilder();
-        final String handleMethod = generateHandleMethod(methods, classImports);
+        final String handleMethod = generateHandleMethod(methods);
 
         return new StringBuilder()
-            .append(generatePackageAndImports(packageName, interfaceName, classImports))
+            .append(generatePackageAndImports(packageName, interfaceName))
             .append(generateClassDeclaration(interfaceName))
             .append("\n").append("{").append("\n")
             .append(generateConstructor(interfaceName))
@@ -22,7 +32,7 @@ public class SubscriberInvokerGenerator
             .toString();
     }
 
-    private String generateHandleMethod(final List<MethodInfo> methods, final StringBuilder classImports)
+    private String generateHandleMethod(final List<MethodInfo> methods)
     {
         final StringBuilder handleMethodBuilder = new StringBuilder("""
                 public void handle(final BufferDecoder bufferDecoder, final int offset)
@@ -34,7 +44,7 @@ public class SubscriberInvokerGenerator
 
         for (final MethodInfo interfaceMethod : methods)
         {
-            writeMethodCase(handleMethodBuilder, interfaceMethod, classImports);
+            writeMethodCase(handleMethodBuilder, interfaceMethod);
         }
 
         handleMethodBuilder.append("""
@@ -45,7 +55,7 @@ public class SubscriberInvokerGenerator
         return handleMethodBuilder.toString();
     }
 
-    private void writeMethodCase(final StringBuilder handleMethodBuilder, final MethodInfo interfaceMethod, final StringBuilder classImports)
+    private void writeMethodCase(final StringBuilder handleMethodBuilder, final MethodInfo interfaceMethod)
     {
         final String methodName = interfaceMethod.getName();
         final List<ParameterInfo> parameters = interfaceMethod.getParameters();
@@ -58,7 +68,7 @@ public class SubscriberInvokerGenerator
 
         for (int i = 0; i < parameters.size(); i++)
         {
-            writeParameter(handleMethodBuilder, subscriberInvocation, parameters.get(i), classImports);
+            writeParameter(handleMethodBuilder, subscriberInvocation, parameters.get(i));
 
             if (i < parameters.size() - 1)
             {
@@ -80,8 +90,7 @@ public class SubscriberInvokerGenerator
     private void writeParameter(
         final StringBuilder handleMethodBuilder,
         final StringBuilder subscriberInvocation,
-        final ParameterInfo parameter,
-        final StringBuilder classImports
+        final ParameterInfo parameter
     )
     {
         final String parameterName = parameter.getName();
@@ -139,9 +148,9 @@ public class SubscriberInvokerGenerator
                 """.formatted(className, genericParameterClassName, parameterName, genericParameterClassName));
             subscriberInvocation.append("                    %s".formatted(parameterName));
 
-            classImports.append("import %s;\n".formatted(genericParameter));
-            classImports.append("import %s;\n".formatted(fullyQualifiedType));
-            classImports.append("import java.util.ArrayList;\n");
+            addImport("import %s;".formatted(genericParameter));
+            addImport("import %s;".formatted(fullyQualifiedType));
+            addImport("import java.util.ArrayList;");
             return;
         }
 
@@ -150,7 +159,7 @@ public class SubscriberInvokerGenerator
                             final %s %s = %s.decode(bufferDecoder);
             """.formatted(className, parameterName, className));
         subscriberInvocation.append("                    %s".formatted(parameterName));
-        classImports.append("import %s;\n".formatted(parameterType));
+        addImport("import %s;".formatted(parameterType));
     }
 
     private String generateConstructor(final String interfaceName)
@@ -170,8 +179,9 @@ public class SubscriberInvokerGenerator
         return "public class %sInvoker extends AbstractSubscriberInvoker<%s>".formatted(interfaceName, interfaceName);
     }
 
-    private String generatePackageAndImports(final String packageName, final String interfaceName, final StringBuilder classImports)
+    private String generatePackageAndImports(final String packageName, final String interfaceName)
     {
+        final String importsString = imports.stream().reduce("", (e, n) -> e + "\n" + n);
         return """
             package %s;
                     
@@ -180,9 +190,9 @@ public class SubscriberInvokerGenerator
             import io.aeronic.net.AbstractSubscriberInvoker;
             import io.aeronic.codec.BufferDecoder;
             import org.agrona.BitUtil;
-            import org.agrona.DirectBuffer;
-            %s
+            import org.agrona.DirectBuffer;%s
+            
                     
-            """.formatted(packageName, packageName, interfaceName, classImports);
+            """.formatted(packageName, packageName, interfaceName, importsString);
     }
 }
