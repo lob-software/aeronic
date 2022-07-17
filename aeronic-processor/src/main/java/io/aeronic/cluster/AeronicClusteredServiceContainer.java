@@ -149,6 +149,11 @@ public class AeronicClusteredServiceContainer implements ClusteredService
         private final List<Runnable> onStartJobs = new ArrayList<>();
         private final AtomicReference<Cluster> clusterRef = new AtomicReference<>();
 
+        public AeronicClusteredServiceRegistry registry()
+        {
+            return registry;
+        }
+
         public Configuration clusteredService(final ClusteredService clusteredService)
         {
             this.clusteredService = clusteredService;
