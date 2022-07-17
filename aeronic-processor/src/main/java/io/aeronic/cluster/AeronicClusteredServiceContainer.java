@@ -1,6 +1,5 @@
 package io.aeronic.cluster;
 
-import io.aeron.Aeron;
 import io.aeron.ExclusivePublication;
 import io.aeron.Image;
 import io.aeron.cluster.codecs.CloseReason;
@@ -11,8 +10,6 @@ import io.aeron.logbuffer.Header;
 import io.aeronic.AeronicWizard;
 import org.agrona.DirectBuffer;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -21,14 +18,12 @@ public class AeronicClusteredServiceContainer implements ClusteredService
     private final ClusteredService clusteredService;
     private final AeronicClusteredServiceRegistry registry;
     private final AtomicReference<Cluster> clusterRef;
-    private final List<Runnable> onStartJobs;
     private Cluster.Role role;
 
     public AeronicClusteredServiceContainer(final Configuration configuration)
     {
         this.clusteredService = configuration.clusteredService;
         this.registry = configuration.registry;
-        this.onStartJobs = configuration.onStartJobs;
         this.clusterRef = configuration.clusterRef;
     }
 
@@ -57,7 +52,6 @@ public class AeronicClusteredServiceContainer implements ClusteredService
     {
         clusteredService.onStart(cluster, snapshotImage);
         clusterRef.set(cluster);
-        onStartJobs.forEach(Runnable::run);
     }
 
     @Override
@@ -146,7 +140,6 @@ public class AeronicClusteredServiceContainer implements ClusteredService
     {
         private ClusteredService clusteredService;
         private final AeronicClusteredServiceRegistry registry = new AeronicClusteredServiceRegistry();
-        private final List<Runnable> onStartJobs = new ArrayList<>();
         private final AtomicReference<Cluster> clusterRef = new AtomicReference<>();
 
         public AeronicClusteredServiceRegistry registry()
@@ -175,17 +168,14 @@ public class AeronicClusteredServiceContainer implements ClusteredService
         /**
          * Registers toggled publisher on the clustered service. Toggled publisher is activated / deactivated on cluster node role change
          * in order to avoid non-leader nodes from publishing.
+         *
          * @param egressChannel channel to publish to
-         * @param streamId stream ID of the publication
-         * @param <T> publisher class
+         * @param streamId      stream ID of the publication
+         * @param <T>           publisher class
          */
         public <T> Configuration registerToggledEgressPublisher(final Class<T> clazz, final String egressChannel, final int streamId)
         {
-            onStartJobs.add(() -> {
-                final Aeron aeron = clusterRef.get().aeron();
-                registry.registerToggledEgressPublisher(aeron, clazz, egressChannel, streamId);
-            });
-
+            registry.registerToggledEgressPublisher(() -> clusterRef.get().aeron(), clazz, egressChannel, streamId);
             return this;
         }
     }

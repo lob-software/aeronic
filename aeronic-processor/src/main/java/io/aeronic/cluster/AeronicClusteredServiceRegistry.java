@@ -12,6 +12,7 @@ import org.agrona.DirectBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class AeronicClusteredServiceRegistry
 {
@@ -27,14 +28,14 @@ public class AeronicClusteredServiceRegistry
     }
 
     public <T> void registerToggledEgressPublisher(
-        final Aeron aeron,
+        final Supplier<Aeron> aeron,
         final Class<T> clazz,
         final String egressChannel,
         final int streamId
     )
     {
         final String publisherName = clazz.getName() + "__EgressPublisher";
-        final ToggledAeronicPublication<T> publication = new ToggledAeronicPublication<>(() -> aeron.addPublication(egressChannel, streamId));
+        final ToggledAeronicPublication<T> publication = new ToggledAeronicPublication<>(() -> aeron.get().addPublication(egressChannel, streamId));
         final T publisher = AeronicWizard.createPublisher(clazz, publication);
         publication.bindPublisher(publisher);
         multiplexPublicationByName.put(publisherName, publication);
