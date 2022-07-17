@@ -1,7 +1,10 @@
 package io.aeronic.system.cluster;
 
 
-import io.aeron.*;
+import io.aeron.Aeron;
+import io.aeron.CommonContext;
+import io.aeron.ExclusivePublication;
+import io.aeron.Image;
 import io.aeron.archive.Archive;
 import io.aeron.archive.ArchiveThreadingMode;
 import io.aeron.archive.client.AeronArchive;
@@ -19,7 +22,7 @@ import io.aeron.security.Authenticator;
 import io.aeron.security.SessionProxy;
 import org.agrona.CloseHelper;
 import org.agrona.DirectBuffer;
-import org.agrona.ErrorHandler;
+import org.agrona.IoUtil;
 import org.agrona.concurrent.IdleStrategy;
 import org.agrona.concurrent.NoOpLock;
 
@@ -38,34 +41,95 @@ public final class TestClusterNode implements AutoCloseable
     private static final long CATALOG_CAPACITY = 128 * 1024;
     private static final String ARCHIVE_LOCAL_CONTROL_CHANNEL = "aeron:ipc";
     private static final long STARTUP_CANVASS_TIMEOUT_NS = TimeUnit.SECONDS.toNanos(5);
-    public static final String INGRESS_CHANNEL = new ChannelUriStringBuilder()
-        .media("udp")
-        .reliable(true)
-        .endpoint("localhost:40457")
-        .build();
+    public static final String INGRESS_CHANNEL = "aeron:udp?term-length=128k|alias=ingress";
 
     private static final String LOG_CHANNEL = "aeron:udp?term-length=512k";
     private static final String ARCHIVE_CONTROL_RESPONSE_CHANNEL = "aeron:udp?endpoint=localhost:0";
-
-    private static final String REPLICATION_CHANNEL = new ChannelUriStringBuilder()
-        .media("udp")
-        .reliable(true)
-        .endpoint("localhost:40458")
-        .build();
+    private static final String REPLICATION_CHANNEL = "aeron:udp?endpoint=localhost:0";
 
     public static final String LOCALHOST = "localhost";
 
     private final ClusteredMediaDriver clusteredMediaDriver;
     private final ClusteredServiceContainer container;
-    private final File clusterDir;
+    private final String aeronDirName;
+    private final String baseDirName;
+    private final String clusterDirectoryName;
+
+    public static class Context
+    {
+        private int nodeId;
+        private int nodeCount;
+        private String ingressChannel;
+        private ClusteredService clusteredService;
+        private boolean deleteDirs;
+
+        public Context nodeId(final int nodeId)
+        {
+            this.nodeId = nodeId;
+            return this;
+        }
+
+        public Context nodeCount(final int nodeCount)
+        {
+            this.nodeCount = nodeCount;
+            return this;
+        }
+
+        public Context ingressChannel(final String ingressChannel)
+        {
+            this.ingressChannel = ingressChannel;
+            return this;
+        }
+
+        public Context clusteredService(final ClusteredService clusteredService)
+        {
+            this.clusteredService = clusteredService;
+            return this;
+        }
+
+        public Context deleteDirs(final boolean deleteDirs)
+        {
+            this.deleteDirs = deleteDirs;
+            return this;
+        }
+    }
+
+    public static TestClusterNode startNodeOnIngressChannel(
+        final int nodeId,
+        final int nodeCount,
+        final ClusteredService clusteredService,
+        final String ingressChannel
+    )
+    {
+        return new TestClusterNode(
+            new Context()
+                .nodeId(nodeId)
+                .nodeCount(nodeCount)
+                .clusteredService(clusteredService)
+                .ingressChannel(ingressChannel)
+                .deleteDirs(true));
+    }
 
     public TestClusterNode(final int nodeId, final int nodeCount, final ClusteredService clusteredService)
     {
-        final String aeronDirName = CommonContext.getAeronDirectoryName() + "-" + nodeId + "-driver";
-        final String baseDirName = CommonContext.getAeronDirectoryName() + "-" + nodeId;
-        final String clusterDirectoryName = aeronDirName + "-cluster-" + nodeId;
+        this(
+            new Context()
+                .nodeId(nodeId)
+                .nodeCount(nodeCount)
+                .clusteredService(clusteredService)
+                .ingressChannel(INGRESS_CHANNEL)
+                .deleteDirs(true));
+    }
 
-        clusterDir = new File(baseDirName, "consensus-module");
+    public TestClusterNode(final Context ctx)
+    {
+        final int nodeId = ctx.nodeId;
+        final int nodeCount = ctx.nodeCount;
+        final boolean deleteDirs = ctx.deleteDirs;
+
+        this.aeronDirName = CommonContext.getAeronDirectoryName() + "-" + nodeId + "-driver";
+        this.baseDirName = CommonContext.getAeronDirectoryName() + "-" + nodeId;
+        this.clusterDirectoryName = aeronDirName + "-cluster-" + nodeId;
 
         final MediaDriver.Context mediaDriverContext = new MediaDriver.Context();
         final ConsensusModule.Context consensusModuleContext = new ConsensusModule.Context();
@@ -83,8 +147,8 @@ public final class TestClusterNode implements AutoCloseable
             .aeronDirectoryName(aeronDirName)
             .threadingMode(ThreadingMode.SHARED)
             .termBufferSparseFile(true)
-            .dirDeleteOnShutdown(true)
-            .dirDeleteOnStart(true);
+            .dirDeleteOnShutdown(deleteDirs)
+            .dirDeleteOnStart(deleteDirs);
 
         archiveContext
             .catalogCapacity(CATALOG_CAPACITY)
@@ -94,7 +158,7 @@ public final class TestClusterNode implements AutoCloseable
             .recordingEventsEnabled(false)
             .recordingEventsEnabled(false)
             .threadingMode(ArchiveThreadingMode.SHARED)
-            .deleteArchiveOnStart(true);
+            .deleteArchiveOnStart(deleteDirs);
 
         consensusModuleContext
             .errorHandler(Throwable::printStackTrace)
@@ -102,8 +166,8 @@ public final class TestClusterNode implements AutoCloseable
             .clusterMembers(clusterMembers(0, nodeCount))
             .startupCanvassTimeoutNs(STARTUP_CANVASS_TIMEOUT_NS)
             .appointedLeaderId(Aeron.NULL_VALUE)
-            .clusterDir(clusterDir)
-            .ingressChannel(INGRESS_CHANNEL)
+            .clusterDir(new File(baseDirName, "consensus-module"))
+            .ingressChannel(ctx.ingressChannel)
             .logChannel(LOG_CHANNEL)
             .replicationChannel(REPLICATION_CHANNEL)
             .archiveContext(aeronArchiveContext.clone()
@@ -111,12 +175,12 @@ public final class TestClusterNode implements AutoCloseable
                 .controlResponseChannel(ARCHIVE_LOCAL_CONTROL_CHANNEL))
             .sessionTimeoutNs(TimeUnit.SECONDS.toNanos(10))
             .authenticatorSupplier(SimpleAuthenticator::new)
-            .deleteDirOnStart(true);
+            .deleteDirOnStart(deleteDirs);
 
         serviceContainerContext
             .aeronDirectoryName(aeronDirName)
             .clusterDirectoryName(clusterDirectoryName)
-            .clusteredService(clusteredService)
+            .clusteredService(ctx.clusteredService)
             .errorHandler(Throwable::printStackTrace);
 
         clusteredMediaDriver = ClusteredMediaDriver.launch(
@@ -126,11 +190,6 @@ public final class TestClusterNode implements AutoCloseable
         );
 
         container = ClusteredServiceContainer.launch(serviceContainerContext);
-    }
-
-    public File clusterDir()
-    {
-        return clusterDir;
     }
 
     static class Service implements ClusteredService
@@ -148,6 +207,7 @@ public final class TestClusterNode implements AutoCloseable
         {
             this.cluster = cluster;
             this.idleStrategy = cluster.idleStrategy();
+            System.out.println("Node ID: " + cluster.memberId() + " onStart " + cluster.role());
         }
 
         public void onSessionOpen(final ClientSession session, final long timestamp)
@@ -190,6 +250,7 @@ public final class TestClusterNode implements AutoCloseable
 
         public void onTerminate(final Cluster cluster)
         {
+            System.out.println("Node ID: " + cluster.memberId() + " onTerminate ");
         }
 
         public void onNewLeadershipTermEvent(
@@ -203,21 +264,31 @@ public final class TestClusterNode implements AutoCloseable
             final int appVersion
         )
         {
-            System.out.println("onNewLeadershipTermEvent");
+            System.out.println("Node ID: " + cluster.memberId() + " onNewLeadershipTermEvent. I am: " + cluster.role() + " Log position: " + logPosition);
         }
     }
 
     public void close()
     {
-        final ErrorHandler errorHandler = clusteredMediaDriver.mediaDriver().context().errorHandler();
-        CloseHelper.close(errorHandler, clusteredMediaDriver.consensusModule());
-        CloseHelper.close(errorHandler, container);
-        CloseHelper.close(clusteredMediaDriver); // ErrorHandler will be closed during that call so can't use it
+        CloseHelper.closeAll(
+            clusteredMediaDriver.consensusModule(),
+            container,
+            clusteredMediaDriver.archive(),
+            clusteredMediaDriver
+        );
+    }
+
+    public void deleteDirs()
+    {
+        IoUtil.delete(new File(aeronDirName), true);
+        IoUtil.delete(new File(baseDirName), true);
+        IoUtil.delete(new File(clusterDirectoryName), true);
     }
 
     private static class SimpleAuthenticator implements Authenticator
     {
         private final Map<Long, String> credentials = new HashMap<>();
+
         public void onConnectRequest(final long sessionId, final byte[] encodedCredentials, final long nowMs)
         {
             final String credentialsString = new String(encodedCredentials, StandardCharsets.US_ASCII);

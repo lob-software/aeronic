@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.aeronic.Assertions.assertEventuallyTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 
 public abstract class MultiNodeClusterSystemTestBase
 {
@@ -41,23 +42,18 @@ public abstract class MultiNodeClusterSystemTestBase
         aeron = Aeron.connect(aeronCtx);
         aeronic = new AeronicWizard(aeron);
 
-        testCluster.registerNode(0, 3, new AeronicClusteredServiceContainer(
-            new AeronicClusteredServiceContainer.Configuration()
-                .clusteredService(new TestClusterNode.Service())
-                .registerToggledEgressPublisher(SimpleEvents.class, egressChannel(), STREAM_ID)
-        ));
+        testCluster.registerNode(0, 3, newClusteredServiceContainer());
+        testCluster.registerNode(1, 3, newClusteredServiceContainer());
+        testCluster.registerNode(2, 3, newClusteredServiceContainer());
+    }
 
-        testCluster.registerNode(1, 3, new AeronicClusteredServiceContainer(
+    private AeronicClusteredServiceContainer newClusteredServiceContainer()
+    {
+        return new AeronicClusteredServiceContainer(
             new AeronicClusteredServiceContainer.Configuration()
                 .clusteredService(new TestClusterNode.Service())
                 .registerToggledEgressPublisher(SimpleEvents.class, egressChannel(), STREAM_ID)
-        ));
-
-        testCluster.registerNode(2, 3, new AeronicClusteredServiceContainer(
-            new AeronicClusteredServiceContainer.Configuration()
-                .clusteredService(new TestClusterNode.Service())
-                .registerToggledEgressPublisher(SimpleEvents.class, egressChannel(), STREAM_ID)
-        ));
+        );
     }
 
     @AfterEach
@@ -112,18 +108,47 @@ public abstract class MultiNodeClusterSystemTestBase
         final AeronicClusteredServiceContainer leaderClusteredService = testCluster.waitForLeader();
         assertEventuallyTrue(leaderClusteredService::egressConnected);
 
-        testCluster.removeLeader();
+        final AeronicClusteredServiceContainer newLeader = testCluster.shutdownLeader();
+        assertNotSame(leaderClusteredService, newLeader);
 
-        final AeronicClusteredServiceContainer newLeaderClusteredService = testCluster.waitForLeader();
-
-        final SimpleEvents newLeaderPublisher = newLeaderClusteredService.getMultiplexingPublisherFor(SimpleEvents.class);
-        assertEventuallyTrue(newLeaderClusteredService::egressConnected);
+        final SimpleEvents newLeaderPublisher = newLeader.getMultiplexingPublisherFor(SimpleEvents.class);
+        assertEventuallyTrue(newLeader::egressConnected);
 
         newLeaderPublisher.onEvent(101L);
         testCluster.forEachNonLeaderNode(node -> {
             final SimpleEvents publisher = node.getMultiplexingPublisherFor(SimpleEvents.class);
             publisher.onEvent(303L);
         });
+
+        assertEventuallyTrue(() -> sub1.value == 101L && sub2.value == 101L, 5000);
+    }
+
+    @Test
+    public void leaderRestartedAsFollowerCannotPublish()
+    {
+        final SimpleEventsImpl sub1 = new SimpleEventsImpl();
+        final SimpleEventsImpl sub2 = new SimpleEventsImpl();
+
+        // register as normal (non-cluster) aeron subs
+        aeronic.registerSubscriber(SimpleEvents.class, sub1, egressChannel(), STREAM_ID);
+        aeronic.registerSubscriber(SimpleEvents.class, sub2, egressChannel(), STREAM_ID);
+
+        aeronic.start();
+
+        final AeronicClusteredServiceContainer leaderClusteredService = testCluster.waitForLeader();
+        final int leaderIdx = testCluster.getNodeIdx(leaderClusteredService);
+        assertEventuallyTrue(leaderClusteredService::egressConnected);
+
+        final AeronicClusteredServiceContainer newLeader = testCluster.shutdownLeader();
+        final SimpleEvents newLeaderPublisher = newLeader.getMultiplexingPublisherFor(SimpleEvents.class);
+        assertEventuallyTrue(newLeader::egressConnected);
+
+        // reintroduce node, starting it from existing logs
+        final AeronicClusteredServiceContainer oldLeader = testCluster.restartNode(leaderIdx, 3);
+        final SimpleEvents oldLeaderPublisher = oldLeader.getMultiplexingPublisherFor(SimpleEvents.class);
+
+        newLeaderPublisher.onEvent(101L);
+        oldLeaderPublisher.onEvent(202L);
 
         assertEventuallyTrue(() -> sub1.value == 101L && sub2.value == 101L, 5000);
     }
@@ -139,5 +164,4 @@ public abstract class MultiNodeClusterSystemTestBase
             this.value = value;
         }
     }
-
 }

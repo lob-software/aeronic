@@ -16,10 +16,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static io.aeronic.Assertions.assertEventuallyTrue;
-import static io.aeronic.system.cluster.TestClusterNode.INGRESS_CHANNEL;
+import static io.aeronic.system.cluster.TestClusterNode.startNodeOnIngressChannel;
 
 public class ClusterSystemTest
 {
+    private static final String INGRESS_CHANNEL = new ChannelUriStringBuilder()
+        .media("udp")
+        .reliable(true)
+        .endpoint("localhost:40457")
+        .build();
+
     private static final String MDC_CAST_CHANNEL = new ChannelUriStringBuilder()
         .media("udp")
         .reliable(true)
@@ -83,7 +89,7 @@ public class ClusterSystemTest
                 .registerIngressSubscriber(SampleEvents.class, sampleEvents)
         );
 
-        clusterNode = new TestClusterNode(0, 1, clusteredService);
+        clusterNode = startNodeOnIngressChannel(0, 1, clusteredService, INGRESS_CHANNEL);
 
         final SimpleEvents simpleEventsPublisher = aeronic.createClusterIngressPublisher(SimpleEvents.class, INGRESS_CHANNEL);
         final SampleEvents sampleEventsPublisher = aeronic.createClusterIngressPublisher(
@@ -113,7 +119,7 @@ public class ClusterSystemTest
             .registerEgressPublisher(SampleEvents.class);
 
         clusteredService = new AeronicClusteredServiceContainer(configuration);
-        clusterNode = new TestClusterNode(0, 1, clusteredService);
+        clusterNode = startNodeOnIngressChannel(0, 1, clusteredService, INGRESS_CHANNEL);
 
         final SimpleEvents simpleEventsPublisher = clusteredService.getPublisherFor(SimpleEvents.class);
         final SampleEvents sampleEventsPublisher = clusteredService.getPublisherFor(SampleEvents.class);
@@ -153,7 +159,7 @@ public class ClusterSystemTest
         final SimpleEvents clusterEgressSimpleEventsPublisher = clusteredService.getPublisherFor(SimpleEvents.class);
         final SampleEvents clusterEgressSampleEventsPublisher = clusteredService.getPublisherFor(SampleEvents.class);
 
-        clusterNode = new TestClusterNode(0, 1, clusteredService);
+        clusterNode = startNodeOnIngressChannel(0, 1, clusteredService, INGRESS_CHANNEL);
 
         final SimpleEvents clusterIngressSimpleEventsPublisher = aeronic.createClusterIngressPublisher(SimpleEvents.class, INGRESS_CHANNEL);
         final SampleEvents clusterIngressSampleEventsPublisher = aeronic.createClusterIngressPublisher(SampleEvents.class, INGRESS_CHANNEL);
@@ -188,7 +194,7 @@ public class ClusterSystemTest
             new AeronicClusteredServiceContainer.Configuration()
                 .clusteredService(service));
 
-        clusterNode = new TestClusterNode(0, 1, clusteredService);
+        clusterNode = startNodeOnIngressChannel(0, 1, clusteredService, INGRESS_CHANNEL);
 
         final AeronCluster anotherClient = AeronCluster.connect(
             new AeronCluster.Context()
@@ -214,7 +220,7 @@ public class ClusterSystemTest
                 .clusteredService(service)
                 .registerIngressSubscriber(SimpleEvents.class, simpleEvents));
 
-        clusterNode = new TestClusterNode(0, 1, clusteredService);
+        clusterNode = startNodeOnIngressChannel(0, 1, clusteredService, INGRESS_CHANNEL);
 
         final SimpleEvents simpleEventsPublisher1 = aeronic.createClusterIngressPublisher(SimpleEvents.class, INGRESS_CHANNEL);
         final SimpleEvents simpleEventsPublisher2 = aeronic.createClusterIngressPublisher(SimpleEvents.class, INGRESS_CHANNEL);
@@ -240,7 +246,7 @@ public class ClusterSystemTest
 
         final SimpleEvents clusterEgressSimpleEventsPublisher = clusteredService.getPublisherFor(SimpleEvents.class);
 
-        clusterNode = new TestClusterNode(0, 1, clusteredService);
+        clusterNode = startNodeOnIngressChannel(0, 1, clusteredService, INGRESS_CHANNEL);
 
         final SimpleEventsImpl sub1 = new SimpleEventsImpl();
         final SimpleEventsImpl sub2 = new SimpleEventsImpl();
@@ -270,7 +276,7 @@ public class ClusterSystemTest
                 .clusteredService(service)
                 .registerToggledEgressPublisher(SimpleEvents.class, UDP_MULTICAST_CHANNEL, streamId));
 
-        clusterNode = new TestClusterNode(0, 1, clusteredService);
+        clusterNode = startNodeOnIngressChannel(0, 1, clusteredService, INGRESS_CHANNEL);
 
         final SimpleEventsImpl sub1 = new SimpleEventsImpl();
         final SimpleEventsImpl sub2 = new SimpleEventsImpl();
@@ -303,7 +309,7 @@ public class ClusterSystemTest
                 .clusteredService(service)
                 .registerToggledEgressPublisher(SimpleEvents.class, MDC_CAST_CHANNEL, streamId));
 
-        clusterNode = new TestClusterNode(0, 1, clusteredService);
+        clusterNode = startNodeOnIngressChannel(0, 1, clusteredService, INGRESS_CHANNEL);
 
         final SimpleEventsImpl sub1 = new SimpleEventsImpl();
         final SimpleEventsImpl sub2 = new SimpleEventsImpl();

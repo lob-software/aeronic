@@ -63,6 +63,7 @@ public class Assertions
     public static void assertEventuallyTrue(final BooleanSupplier assertion, final long timeoutInMillis)
     {
         await()
+            .pollInterval(Duration.ofMillis(50))
             .timeout(Duration.ofMillis(timeoutInMillis))
             .until(assertion::getAsBoolean);
     }

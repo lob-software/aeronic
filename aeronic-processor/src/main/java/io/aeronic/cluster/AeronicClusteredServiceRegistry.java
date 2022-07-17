@@ -46,10 +46,6 @@ public class AeronicClusteredServiceRegistry
         {
             multiplexPublicationByName.values().forEach(ToggledAeronicPublication::activate);
         }
-        else
-        {
-            multiplexPublicationByName.values().forEach(ToggledAeronicPublication::deactivate);
-        }
     }
 
     @SuppressWarnings("unchecked")
