@@ -54,6 +54,7 @@ public final class TestClusterNode implements AutoCloseable
     private final String aeronDirName;
     private final String baseDirName;
     private final String clusterDirectoryName;
+    private final File clusterDir;
 
     public static class Context
     {
@@ -160,13 +161,15 @@ public final class TestClusterNode implements AutoCloseable
             .threadingMode(ArchiveThreadingMode.SHARED)
             .deleteArchiveOnStart(deleteDirs);
 
+        clusterDir = new File(baseDirName, "consensus-module");
+
         consensusModuleContext
             .errorHandler(Throwable::printStackTrace)
             .clusterMemberId(nodeId)
             .clusterMembers(clusterMembers(0, nodeCount))
             .startupCanvassTimeoutNs(STARTUP_CANVASS_TIMEOUT_NS)
             .appointedLeaderId(Aeron.NULL_VALUE)
-            .clusterDir(new File(baseDirName, "consensus-module"))
+            .clusterDir(clusterDir)
             .ingressChannel(ctx.ingressChannel)
             .logChannel(LOG_CHANNEL)
             .replicationChannel(REPLICATION_CHANNEL)
@@ -190,6 +193,11 @@ public final class TestClusterNode implements AutoCloseable
         );
 
         container = ClusteredServiceContainer.launch(serviceContainerContext);
+    }
+
+    public File clusterDir()
+    {
+        return clusterDir;
     }
 
     static class Service implements ClusteredService

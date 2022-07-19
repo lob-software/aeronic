@@ -9,6 +9,7 @@ import io.aeronic.cluster.AeronicClusteredServiceContainer;
 import org.agrona.concurrent.BusySpinIdleStrategy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static io.aeronic.Assertions.assertEventuallyTrue;
@@ -149,6 +150,34 @@ public abstract class MultiNodeClusterSystemTestBase
 
         newLeaderPublisher.onEvent(101L);
         oldLeaderPublisher.onEvent(202L);
+
+        assertEventuallyTrue(() -> sub1.value == 101L && sub2.value == 101L, 5000);
+    }
+
+    @Test
+    @Disabled("find a way to simulate zombie node scenario")
+    public void zombieLeaderCannotPublishAfterItIsRecovered()
+    {
+        final SimpleEventsImpl sub1 = new SimpleEventsImpl();
+        final SimpleEventsImpl sub2 = new SimpleEventsImpl();
+
+        // register as normal (non-cluster) aeron subs
+        aeronic.registerSubscriber(SimpleEvents.class, sub1, egressChannel(), STREAM_ID);
+        aeronic.registerSubscriber(SimpleEvents.class, sub2, egressChannel(), STREAM_ID);
+
+        aeronic.start();
+
+        final AeronicClusteredServiceContainer leader = testCluster.waitForLeader();
+        final SimpleEvents leaderPublisher = leader.getMultiplexingPublisherFor(SimpleEvents.class);
+        assertEventuallyTrue(leader::egressConnected);
+
+        // suspend and resume leader node, making sure it is not a leader when it recovers
+        final AeronicClusteredServiceContainer newLeader = testCluster.suspendLeader();
+        final SimpleEvents newLeaderPublisher = newLeader.getMultiplexingPublisherFor(SimpleEvents.class);
+        assertEventuallyTrue(newLeader::egressConnected);
+
+        newLeaderPublisher.onEvent(101L);
+        leaderPublisher.onEvent(202L);
 
         assertEventuallyTrue(() -> sub1.value == 101L && sub2.value == 101L, 5000);
     }

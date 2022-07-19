@@ -47,6 +47,11 @@ public class AeronicClusteredServiceRegistry
         {
             multiplexPublicationByName.values().forEach(ToggledAeronicPublication::activate);
         }
+        else
+        {
+            // TODO: the following line is not tested in the corner case of a zombie leader
+            multiplexPublicationByName.values().forEach(ToggledAeronicPublication::deactivate);
+        }
     }
 
     @SuppressWarnings("unchecked")
