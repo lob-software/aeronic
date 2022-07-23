@@ -9,6 +9,7 @@ public class AeronicUdpMulticastTransportTest extends AeronicTransportTestBase
         .media("udp")
         .reliable(true)
         .endpoint("224.0.1.1:40457")
+        .networkInterface("localhost")
         .build();
 
     @Override

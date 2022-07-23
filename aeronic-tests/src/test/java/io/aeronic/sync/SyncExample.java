@@ -19,10 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SyncExample
 {
-    private static final String MULTICAST_CHANNEL = new ChannelUriStringBuilder()
+    private static final String CHANNEL = new ChannelUriStringBuilder()
         .media("udp")
         .reliable(true)
-        .endpoint("224.0.1.1:40457")
+        .endpoint("localhost:40457")
         .build();
 
     private AeronicWizard aeronic;
@@ -59,13 +59,13 @@ public class SyncExample
     @Test
     public void sync()
     {
-        final SyncEvents syncEventsPublisher = aeronic.createPublisher(SyncEvents.class, MULTICAST_CHANNEL, 15);
+        final SyncEvents syncEventsPublisher = aeronic.createPublisher(SyncEvents.class, CHANNEL, 15);
         final SyncEventsController syncEventsController = new SyncEventsController(syncEventsPublisher);
-        final SyncEventsResponse syncEventsResponsePublisher = aeronic.createPublisher(SyncEventsResponse.class, MULTICAST_CHANNEL, 16);
+        final SyncEventsResponse syncEventsResponsePublisher = aeronic.createPublisher(SyncEventsResponse.class, CHANNEL, 16);
         final SyncEventsImpl syncEventsSubscriber = new SyncEventsImpl(syncEventsResponsePublisher);
 
-        aeronic.registerSubscriber(SyncEvents.class, syncEventsSubscriber, MULTICAST_CHANNEL, 15);
-        aeronic.registerSubscriber(SyncEventsResponse.class, syncEventsController, MULTICAST_CHANNEL, 16);
+        aeronic.registerSubscriber(SyncEvents.class, syncEventsSubscriber, CHANNEL, 15);
+        aeronic.registerSubscriber(SyncEventsResponse.class, syncEventsController, CHANNEL, 16);
         aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
 
