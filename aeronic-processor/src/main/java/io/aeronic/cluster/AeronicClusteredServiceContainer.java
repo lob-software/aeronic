@@ -32,9 +32,9 @@ public class AeronicClusteredServiceContainer implements ClusteredService
         return registry.getPublisherFor(clazz);
     }
 
-    public <T> T getMultiplexingPublisherFor(final Class<T> clazz)
+    public <T> T getToggledPublisherFor(final Class<T> clazz)
     {
-        return registry.getMultiplexingPublisherFor(clazz);
+        return registry.getToggledPublisherFor(clazz);
     }
 
     public boolean egressConnected()

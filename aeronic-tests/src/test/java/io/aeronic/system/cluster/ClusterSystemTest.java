@@ -290,7 +290,7 @@ public class ClusterSystemTest
         aeronic.awaitUntilPubsAndSubsConnect();
         assertEventuallyTrue(clusteredService::egressConnected);
 
-        final SimpleEvents udpMulticastPublisher = clusteredService.getMultiplexingPublisherFor(SimpleEvents.class);
+        final SimpleEvents udpMulticastPublisher = clusteredService.getToggledPublisherFor(SimpleEvents.class);
 
         udpMulticastPublisher.onEvent(101L);
         assertEventuallyTrue(() -> sub1.value == 101L && sub2.value == 101L);
@@ -323,7 +323,7 @@ public class ClusterSystemTest
         aeronic.awaitUntilPubsAndSubsConnect();
         assertEventuallyTrue(clusteredService::egressConnected);
 
-        final SimpleEvents mdcPublisher = clusteredService.getMultiplexingPublisherFor(SimpleEvents.class);
+        final SimpleEvents mdcPublisher = clusteredService.getToggledPublisherFor(SimpleEvents.class);
 
         mdcPublisher.onEvent(101L);
         assertEventuallyTrue(() -> sub1.value == 101L && sub2.value == 101L);

@@ -29,4 +29,18 @@ public class ClusterUtil
         return "aeron:udp?endpoint=localhost:801" + memberId;
     }
 
+    public static String ingressEndpoints(final int clusterId, final int memberCount)
+    {
+        final StringBuilder builder = new StringBuilder();
+
+        for (int i = 0; i < memberCount; i++)
+        {
+            builder.append(i).append('=').append(LOCALHOST).append(":2").append(clusterId).append("11")
+                .append(i).append(',');
+        }
+
+        builder.setLength(builder.length() - 1);
+
+        return builder.toString();
+    }
 }

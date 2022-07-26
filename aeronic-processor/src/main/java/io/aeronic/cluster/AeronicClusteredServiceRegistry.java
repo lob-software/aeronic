@@ -8,6 +8,7 @@ import io.aeronic.net.AbstractSubscriberInvoker;
 import io.aeronic.net.NullSubscriberInvokerImpl;
 import io.aeronic.net.ToggledAeronicPublication;
 import org.agrona.DirectBuffer;
+import org.agrona.collections.Long2ObjectHashMap;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,11 +17,11 @@ import java.util.function.Supplier;
 
 public class AeronicClusteredServiceRegistry
 {
-    private final Map<Long, AbstractSubscriberInvoker<?>> invokersBySessionId = new HashMap<>();
+    private final Map<Long, AbstractSubscriberInvoker<?>> invokersBySessionId = new Long2ObjectHashMap<>();
     private final Map<String, AbstractSubscriberInvoker<?>> invokerByName = new HashMap<>();
 
     private final Map<String, ClientSessionPublication<?>> clientSessionPublicationByName = new HashMap<>();
-    private final Map<String, ToggledAeronicPublication<?>> multiplexPublicationByName = new HashMap<>();
+    private final Map<String, ToggledAeronicPublication<?>> toggledPublicationByName = new HashMap<>();
 
     public void registerEgressPublisher(final ClientSessionPublication<?> clientSessionPublication)
     {
@@ -38,19 +39,18 @@ public class AeronicClusteredServiceRegistry
         final ToggledAeronicPublication<T> publication = new ToggledAeronicPublication<>(() -> aeron.get().addPublication(egressChannel, streamId));
         final T publisher = AeronicWizard.createPublisher(clazz, publication);
         publication.bindPublisher(publisher);
-        multiplexPublicationByName.put(publisherName, publication);
+        toggledPublicationByName.put(publisherName, publication);
     }
 
     public void onRoleChange(final Cluster.Role newRole)
     {
         if (newRole == Cluster.Role.LEADER)
         {
-            multiplexPublicationByName.values().forEach(ToggledAeronicPublication::activate);
+            toggledPublicationByName.values().forEach(ToggledAeronicPublication::activate);
         }
         else
         {
-            // TODO: the following line is not tested in the corner case of a zombie leader
-            multiplexPublicationByName.values().forEach(ToggledAeronicPublication::deactivate);
+            toggledPublicationByName.values().forEach(ToggledAeronicPublication::deactivate);
         }
     }
 
@@ -68,11 +68,11 @@ public class AeronicClusteredServiceRegistry
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T getMultiplexingPublisherFor(final Class<T> clazz)
+    public <T> T getToggledPublisherFor(final Class<T> clazz)
     {
         try
         {
-            return (T)multiplexPublicationByName.get(clazz.getName() + "__EgressPublisher").getPublisher();
+            return (T)toggledPublicationByName.get(clazz.getName() + "__EgressPublisher").getPublisher();
         }
         catch (final Exception e)
         {
@@ -90,13 +90,13 @@ public class AeronicClusteredServiceRegistry
     public boolean egressConnected()
     {
         return clientSessionPublicationByName.values().stream().allMatch(ClientSessionPublication::isConnected)
-            && multiplexPublicationByName.values().stream().allMatch(ToggledAeronicPublication::isConnected);
+            && toggledPublicationByName.values().stream().allMatch(ToggledAeronicPublication::isConnected);
     }
 
     public void close()
     {
         clientSessionPublicationByName.values().forEach(ClientSessionPublication::close);
-        multiplexPublicationByName.values().forEach(ToggledAeronicPublication::close);
+        toggledPublicationByName.values().forEach(ToggledAeronicPublication::close);
     }
 
     public void onSessionOpen(final ClientSession session)

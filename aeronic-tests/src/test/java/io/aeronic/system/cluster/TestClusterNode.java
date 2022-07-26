@@ -157,7 +157,6 @@ public final class TestClusterNode implements AutoCloseable
             .controlChannel(aeronArchiveContext.controlRequestChannel())
             .localControlChannel(ARCHIVE_LOCAL_CONTROL_CHANNEL)
             .recordingEventsEnabled(false)
-            .recordingEventsEnabled(false)
             .threadingMode(ArchiveThreadingMode.SHARED)
             .deleteArchiveOnStart(deleteDirs);
 
@@ -177,6 +176,8 @@ public final class TestClusterNode implements AutoCloseable
                 .controlRequestChannel(ARCHIVE_LOCAL_CONTROL_CHANNEL)
                 .controlResponseChannel(ARCHIVE_LOCAL_CONTROL_CHANNEL))
             .sessionTimeoutNs(TimeUnit.SECONDS.toNanos(10))
+            .leaderHeartbeatIntervalNs(TimeUnit.SECONDS.toNanos(1))
+            .leaderHeartbeatTimeoutNs(TimeUnit.SECONDS.toNanos(2))
             .authenticatorSupplier(SimpleAuthenticator::new)
             .deleteDirOnStart(deleteDirs);
 

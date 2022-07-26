@@ -1,6 +1,5 @@
 package io.aeronic.system.cluster;
 
-import io.aeron.cluster.ClusterTool;
 import io.aeron.cluster.service.Cluster;
 import io.aeronic.cluster.AeronicClusteredServiceContainer;
 
@@ -13,7 +12,6 @@ import java.util.function.Consumer;
 
 import static io.aeronic.system.cluster.TestClusterNode.INGRESS_CHANNEL;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestCluster
 {
@@ -101,17 +99,6 @@ public class TestCluster
         final TestClusterNode leaderNode = clusterNodes.get(leaderIdx);
 
         leaderNode.close();
-
-        return waitForLeader(leaderIdx, 20_000L);
-    }
-
-    public AeronicClusteredServiceContainer suspendLeader()
-    {
-        final AeronicClusteredServiceContainer leader = waitForLeader();
-        final int leaderIdx = clusteredServices.indexOf(leader);
-        final TestClusterNode leaderNode = clusterNodes.get(leaderIdx);
-
-        assertTrue(ClusterTool.shutdown(leaderNode.clusterDir(), System.out));
 
         return waitForLeader(leaderIdx, 20_000L);
     }
