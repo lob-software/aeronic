@@ -8,4 +8,5 @@
 /aeronic-tests/out/test/classes/
 **/generated
 **/generated_tests
-/.idea
+**/build/
+**/.gradle/

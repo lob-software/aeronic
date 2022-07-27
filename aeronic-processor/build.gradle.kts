@@ -12,13 +12,13 @@ repositories {
 dependencies {
     annotationProcessor("com.google.auto.service:auto-service:1.0.1")
     implementation("com.google.auto.service:auto-service:1.0.1")
-    implementation("io.aeron:aeron-all:1.38.1")
-    implementation("org.awaitility:awaitility:4.2.0")
+    implementation(Dependencies.aeron)
+    implementation(Dependencies.awaitility)
     testImplementation("org.jooq:joor:0.9.14")
     testImplementation(project(":aeronic-tests"))
-    testImplementation("org.assertj:assertj-core:3.23.1")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+    testImplementation(Dependencies.assertJ)
+    testImplementation(Dependencies.junitApi)
+    testRuntimeOnly(Dependencies.junitEngine)
 }
 
 tasks.getByName<Test>("test") {
