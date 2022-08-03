@@ -20,7 +20,7 @@ dependencies {
 
 ## Quickstart
 
-Aeronic allows for flexible usage of [Aeron](https://github.com/real-logic/simple-binary-encoding) by way of proxy generation for 
+Aeronic allows for flexible usage of [Aeron](https://github.com/real-logic/aeron) by way of proxy generation for 
 subscriptions and publications. Use `@Aeronic` to make the compiler generate subscriber and publisher proxies:
 
 ```java
