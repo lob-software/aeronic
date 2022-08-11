@@ -9,10 +9,7 @@ import io.aeronic.cluster.AeronClusterPublicationAgent;
 import io.aeronic.cluster.AeronicCredentialsSupplier;
 import io.aeronic.cluster.ClientSessionPublication;
 import io.aeronic.net.*;
-import org.agrona.concurrent.Agent;
-import org.agrona.concurrent.AgentRunner;
-import org.agrona.concurrent.BusySpinIdleStrategy;
-import org.agrona.concurrent.CompositeAgent;
+import org.agrona.concurrent.*;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -23,14 +20,21 @@ import static org.awaitility.Awaitility.await;
 public class AeronicWizard
 {
     private final Aeron aeron;
+    private final IdleStrategy idleStrategy;
     private final List<AeronicPublication> publications = new ArrayList<>();
     private final List<Subscription> subscriptions = new ArrayList<>();
     private final List<Agent> agents = new ArrayList<>();
     private AgentRunner compositeAgentRunner;
 
-    public AeronicWizard(final Aeron aeron)
+    public AeronicWizard(final Aeron aeron, final IdleStrategy idleStrategy)
     {
         this.aeron = aeron;
+        this.idleStrategy = idleStrategy;
+    }
+
+    public AeronicWizard(final Aeron aeron)
+    {
+        this(aeron, NoOpIdleStrategy.INSTANCE);
     }
 
     public <T> T createPublisher(final Class<T> clazz, final String channel, final int streamId)
@@ -144,7 +148,7 @@ public class AeronicWizard
     public void start()
     {
         compositeAgentRunner = new AgentRunner(
-            BusySpinIdleStrategy.INSTANCE,
+            idleStrategy,
             Throwable::printStackTrace,
             null,
             new CompositeAgent(agents)
