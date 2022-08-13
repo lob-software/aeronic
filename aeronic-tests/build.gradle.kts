@@ -12,13 +12,13 @@ repositories {
 dependencies {
     testAnnotationProcessor(project(":aeronic-processor"))
     implementation(project(":aeronic-processor"))
-    implementation(Dependencies.aeron)
-    implementation(Dependencies.awaitility)
+    implementation(Versions.aeron)
+    implementation(Versions.awaitility)
     testImplementation("net.bytebuddy:byte-buddy:1.12.12")
     testImplementation("net.bytebuddy:byte-buddy-agent:1.12.12")
-    testImplementation(Dependencies.junitApi)
-    testRuntimeOnly(Dependencies.junitEngine)
-    implementation(Dependencies.assertJ)
+    testImplementation(Versions.junitApi)
+    testRuntimeOnly(Versions.junitEngine)
+    implementation(Versions.assertJ)
 }
 
 tasks.getByName<Test>("test") {
