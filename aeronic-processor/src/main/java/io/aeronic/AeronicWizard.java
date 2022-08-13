@@ -9,11 +9,14 @@ import io.aeronic.cluster.AeronClusterPublicationAgent;
 import io.aeronic.cluster.AeronicCredentialsSupplier;
 import io.aeronic.cluster.ClientSessionPublication;
 import io.aeronic.net.*;
+import org.agrona.ErrorHandler;
 import org.agrona.concurrent.*;
+import org.agrona.concurrent.status.AtomicCounter;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import static org.awaitility.Awaitility.await;
 
@@ -21,20 +24,73 @@ public class AeronicWizard
 {
     private final Aeron aeron;
     private final IdleStrategy idleStrategy;
+    private final ErrorHandler errorHandler;
+    private final AtomicCounter errorCounter;
+    private final Function<List<Agent>, Agent> agentSupplier;
+
     private final List<AeronicPublication> publications = new ArrayList<>();
     private final List<Subscription> subscriptions = new ArrayList<>();
     private final List<Agent> agents = new ArrayList<>();
     private AgentRunner compositeAgentRunner;
 
-    public AeronicWizard(final Aeron aeron, final IdleStrategy idleStrategy)
-    {
-        this.aeron = aeron;
-        this.idleStrategy = idleStrategy;
-    }
-
     public AeronicWizard(final Aeron aeron)
     {
-        this(aeron, NoOpIdleStrategy.INSTANCE);
+        this(
+            new Context()
+                .aeron(aeron)
+                .idleStrategy(NoOpIdleStrategy.INSTANCE)
+                .errorHandler(Throwable::printStackTrace)
+                .atomicCounter(null)
+                .agentSupplier(CompositeAgent::new)
+        );
+    }
+
+    public AeronicWizard(final Context ctx)
+    {
+        this.aeron = ctx.aeron;
+        this.idleStrategy = ctx.idleStrategy;
+        this.errorHandler = ctx.errorHandler;
+        this.errorCounter = ctx.atomicCounter;
+        this.agentSupplier = ctx.agentSupplier;
+    }
+
+    public static class Context
+    {
+        private Aeron aeron;
+        private IdleStrategy idleStrategy;
+        private ErrorHandler errorHandler;
+        private AtomicCounter atomicCounter;
+        private Function<List<Agent>, Agent> agentSupplier;
+
+        public Context aeron(final Aeron aeron)
+        {
+            this.aeron = aeron;
+            return this;
+        }
+
+        public Context idleStrategy(final IdleStrategy idleStrategy)
+        {
+            this.idleStrategy = idleStrategy;
+            return this;
+        }
+
+        public Context errorHandler(final ErrorHandler errorHandler)
+        {
+            this.errorHandler = errorHandler;
+            return this;
+        }
+
+        public Context atomicCounter(final AtomicCounter atomicCounter)
+        {
+            this.atomicCounter = atomicCounter;
+            return this;
+        }
+
+        public Context agentSupplier(final Function<List<Agent>, Agent> agentSupplier)
+        {
+            this.agentSupplier = agentSupplier;
+            return this;
+        }
     }
 
     public <T> T createPublisher(final Class<T> clazz, final String channel, final int streamId)
@@ -149,9 +205,9 @@ public class AeronicWizard
     {
         compositeAgentRunner = new AgentRunner(
             idleStrategy,
-            Throwable::printStackTrace,
-            null,
-            new CompositeAgent(agents)
+            errorHandler,
+            errorCounter,
+            agentSupplier.apply(agents)
         );
 
         AgentRunner.startOnThread(compositeAgentRunner);
