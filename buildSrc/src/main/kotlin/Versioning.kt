@@ -1,4 +1,4 @@
-const val VERSION = "0.0.17"
+const val VERSION = "0.0.18"
 
 object Versions
 {
