@@ -20,7 +20,7 @@ import java.util.function.Function;
 
 import static org.awaitility.Awaitility.await;
 
-public class AeronicWizard
+public class AeronicWizard implements AutoCloseable
 {
     private final Aeron aeron;
     private final IdleStrategy idleStrategy;
@@ -213,6 +213,7 @@ public class AeronicWizard
         AgentRunner.startOnThread(compositeAgentRunner);
     }
 
+    @Override
     public void close()
     {
         if (compositeAgentRunner != null)
