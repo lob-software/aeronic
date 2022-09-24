@@ -3,12 +3,15 @@ package io.aeronic.system.transport;
 import io.aeron.Aeron;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
+import io.aeron.driver.status.PublisherLimit;
 import io.aeronic.AeronicWizard;
 import io.aeronic.SampleEvents;
 import io.aeronic.SimpleEvents;
 import org.agrona.concurrent.BusySpinIdleStrategy;
+import org.agrona.concurrent.status.CountersManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -20,6 +23,7 @@ public abstract class AeronicTransportTestBase
     private AeronicWizard aeronic;
     private Aeron aeron;
     private MediaDriver mediaDriver;
+    private Aeron.Context aeronCtx;
 
     @BeforeEach
     void setUp()
@@ -32,10 +36,7 @@ public abstract class AeronicTransportTestBase
             .dirDeleteOnShutdown(true);
 
         mediaDriver = MediaDriver.launchEmbedded(mediaDriverCtx);
-
-        final Aeron.Context aeronCtx = new Aeron.Context()
-            .aeronDirectoryName(mediaDriver.aeronDirectoryName());
-
+        aeronCtx = new Aeron.Context().aeronDirectoryName(mediaDriver.aeronDirectoryName());
         aeron = Aeron.connect(aeronCtx);
         aeronic = new AeronicWizard(aeron);
     }
@@ -144,6 +145,40 @@ public abstract class AeronicTransportTestBase
         await()
             .timeout(Duration.ofSeconds(1))
             .until(() -> sampleEventsSubscriber1.value == 456L && sampleEventsSubscriber2.value == 456L);
+    }
+
+    @Test
+    @Disabled("FIXME: handle Publication::offer failure")
+    public void offerFailure()
+    {
+        final SampleEvents publisher = aeronic.createPublisher(SampleEvents.class, getPublicationChannel(), 10);
+        final SampleEventsImpl subscriberImpl = new SampleEventsImpl();
+        aeronic.registerSubscriber(SampleEvents.class, subscriberImpl, getSubscriptionChannel(), 10);
+        aeronic.start();
+        aeronic.awaitUntilPubsAndSubsConnect();
+
+        // shrink position limit counter to simulate BACKPRESSURE
+        setPublisherLimit(8);
+
+        publisher.onEvent(123L);
+        publisher.onEvent(321L);
+
+        await()
+            .timeout(Duration.ofSeconds(1))
+            .until(() -> subscriberImpl.value == 321);
+    }
+
+    private void setPublisherLimit(final int value)
+    {
+        final CountersManager countersManager = new CountersManager(aeronCtx.countersMetaDataBuffer(), aeronCtx.countersValuesBuffer());
+
+        countersManager.forEach((l, i, s) ->
+        {
+            if (s.contains(PublisherLimit.NAME))
+            {
+                countersManager.setCounterValue(i, value);
+            }
+        });
     }
 
     private static class SampleEventsImpl implements SampleEvents
