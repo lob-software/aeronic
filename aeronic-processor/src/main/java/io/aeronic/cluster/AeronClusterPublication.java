@@ -23,9 +23,9 @@ public class AeronClusterPublication implements AeronicPublication
     }
 
     @Override
-    public void offer(final DirectBuffer buffer)
+    public long offer(final DirectBuffer buffer)
     {
-        aeronCluster.offer(buffer, 0, buffer.capacity());
+        return aeronCluster.offer(buffer, 0, buffer.capacity());
     }
 
     @Override

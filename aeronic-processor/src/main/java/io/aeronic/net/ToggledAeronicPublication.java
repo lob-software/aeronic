@@ -23,9 +23,9 @@ public class ToggledAeronicPublication<T> implements AeronicPublication
     }
 
     @Override
-    public void offer(final DirectBuffer buffer)
+    public long offer(final DirectBuffer buffer)
     {
-        publication.offer(buffer);
+        return publication.offer(buffer);
     }
 
     @Override

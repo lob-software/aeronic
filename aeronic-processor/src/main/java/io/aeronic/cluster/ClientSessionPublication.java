@@ -26,9 +26,11 @@ public class ClientSessionPublication<T> implements AeronicPublication
     }
 
     @Override
-    public void offer(final DirectBuffer buffer)
+    public long offer(final DirectBuffer buffer)
     {
         clientSessions.forEach(s -> s.offer(buffer, 0, buffer.capacity()));
+        // FIXME: how should offer results be aggregated?
+        return 0;
     }
 
     @Override

@@ -5,6 +5,10 @@ import org.agrona.DirectBuffer;
 public interface AeronicPublication
 {
     boolean isConnected();
-    void offer(DirectBuffer buffer);
+    long offer(DirectBuffer buffer);
     void close();
+    default void onOfferFailure(long offerResult)
+    {
+
+    }
 }

@@ -21,7 +21,21 @@ public abstract class AbstractPublisher
     {
         if (publication.isConnected())
         {
-            publication.offer(buffer);
+            long offerResult = publication.offer(buffer);
+            if (offerResult < 0)
+            {
+                int remainingOfferAttempts = 100;
+                while (offerResult < 0)
+                {
+                    publication.onOfferFailure(offerResult);
+                    offerResult = publication.offer(buffer);
+                    remainingOfferAttempts--;
+                    if (remainingOfferAttempts == 0)
+                    {
+                        break;
+                    }
+                }
+            }
         }
 
         bufferEncoder.reset();

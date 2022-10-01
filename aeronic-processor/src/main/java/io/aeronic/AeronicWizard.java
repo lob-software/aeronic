@@ -17,6 +17,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.LongConsumer;
 
 import static org.awaitility.Awaitility.await;
 
@@ -31,7 +32,8 @@ public class AeronicWizard implements AutoCloseable
     private final List<AeronicPublication> publications = new ArrayList<>();
     private final List<Subscription> subscriptions = new ArrayList<>();
     private final List<Agent> agents = new ArrayList<>();
-    private AgentRunner compositeAgentRunner;
+    private final LongConsumer offerFailureHandler;
+    private AgentRunner agentRunner;
 
     public AeronicWizard(final Aeron aeron)
     {
@@ -52,6 +54,7 @@ public class AeronicWizard implements AutoCloseable
         this.errorHandler = ctx.errorHandler;
         this.errorCounter = ctx.atomicCounter;
         this.multipleAgentsTransformer = ctx.agentSupplier;
+        this.offerFailureHandler = ctx.offerFailureHandler;
     }
 
     public static class Context
@@ -61,6 +64,7 @@ public class AeronicWizard implements AutoCloseable
         private ErrorHandler errorHandler;
         private AtomicCounter atomicCounter;
         private Function<List<Agent>, Agent> agentSupplier;
+        private LongConsumer offerFailureHandler;
 
         public Context aeron(final Aeron aeron)
         {
@@ -91,12 +95,18 @@ public class AeronicWizard implements AutoCloseable
             this.agentSupplier = agentSupplier;
             return this;
         }
+
+        public Context offerFailureHandler(final LongConsumer offerFailureHandler)
+        {
+            this.offerFailureHandler = offerFailureHandler;
+            return this;
+        }
     }
 
     public <T> T createPublisher(final Class<T> clazz, final String channel, final int streamId)
     {
         final Publication rawPublication = aeron.addPublication(channel, streamId);
-        final AeronicPublication publication = new SimplePublication(rawPublication);
+        final AeronicPublication publication = new SimplePublication(rawPublication, offerFailureHandler);
         publications.add(publication);
         return createPublisher(clazz, publication);
     }
@@ -198,22 +208,22 @@ public class AeronicWizard implements AutoCloseable
 
     public void start()
     {
-        compositeAgentRunner = new AgentRunner(
+        agentRunner = new AgentRunner(
             idleStrategy,
             errorHandler,
             errorCounter,
             multipleAgentsTransformer.apply(agents)
         );
 
-        AgentRunner.startOnThread(compositeAgentRunner);
+        AgentRunner.startOnThread(agentRunner);
     }
 
     @Override
     public void close()
     {
-        if (compositeAgentRunner != null)
+        if (agentRunner != null)
         {
-            compositeAgentRunner.close();
+            agentRunner.close();
         }
         publications.forEach(AeronicPublication::close);
     }

@@ -8,10 +8,11 @@ import io.aeronic.AeronicWizard;
 import io.aeronic.SampleEvents;
 import io.aeronic.SimpleEvents;
 import org.agrona.concurrent.BusySpinIdleStrategy;
+import org.agrona.concurrent.CompositeAgent;
+import org.agrona.concurrent.NoOpIdleStrategy;
 import org.agrona.concurrent.status.CountersManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -38,7 +39,14 @@ public abstract class AeronicTransportTestBase
         mediaDriver = MediaDriver.launchEmbedded(mediaDriverCtx);
         aeronCtx = new Aeron.Context().aeronDirectoryName(mediaDriver.aeronDirectoryName());
         aeron = Aeron.connect(aeronCtx);
-        aeronic = new AeronicWizard(aeron);
+        aeronic = new AeronicWizard(
+            new AeronicWizard.Context()
+                .aeron(aeron)
+                .idleStrategy(NoOpIdleStrategy.INSTANCE)
+                .errorHandler(Throwable::printStackTrace)
+                .atomicCounter(null)
+                .offerFailureHandler(r -> setPublisherLimit(Long.MAX_VALUE))
+                .agentSupplier(CompositeAgent::new));
     }
 
     @AfterEach
@@ -62,11 +70,15 @@ public abstract class AeronicTransportTestBase
         aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
 
+        final CountersManager countersManager = new CountersManager(aeronCtx.countersMetaDataBuffer(), aeronCtx.countersValuesBuffer());
+        countersManager.setCounterValue(29, 8);
+
         publisher.onEvent(123L);
+        publisher.onEvent(321L);
 
         await()
             .timeout(Duration.ofSeconds(1))
-            .until(() -> subscriberImpl.value == 123L);
+            .until(() -> subscriberImpl.value == 321);
     }
 
     @Test
@@ -148,7 +160,6 @@ public abstract class AeronicTransportTestBase
     }
 
     @Test
-    @Disabled("FIXME: handle Publication::offer failure")
     public void offerFailure()
     {
         final SampleEvents publisher = aeronic.createPublisher(SampleEvents.class, getPublicationChannel(), 10);
@@ -157,18 +168,21 @@ public abstract class AeronicTransportTestBase
         aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
 
+        publisher.onEvent(123L);
+        await()
+            .timeout(Duration.ofSeconds(1))
+            .until(() -> subscriberImpl.value == 123L);
+
         // shrink position limit counter to simulate BACKPRESSURE
         setPublisherLimit(8);
-
-        publisher.onEvent(123L);
         publisher.onEvent(321L);
 
         await()
             .timeout(Duration.ofSeconds(1))
-            .until(() -> subscriberImpl.value == 321);
+            .until(() -> subscriberImpl.value == 321L);
     }
 
-    private void setPublisherLimit(final int value)
+    private void setPublisherLimit(final long value)
     {
         final CountersManager countersManager = new CountersManager(aeronCtx.countersMetaDataBuffer(), aeronCtx.countersValuesBuffer());
 
