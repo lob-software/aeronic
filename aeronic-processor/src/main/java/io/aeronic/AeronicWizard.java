@@ -101,22 +101,6 @@ public class AeronicWizard implements AutoCloseable
         return createPublisher(clazz, publication);
     }
 
-    public <T> T createClusterIngressPublisher(final Class<T> clazz, final String ingressChannel)
-    {
-        final String publisherName = clazz.getName() + "__IngressPublisher";
-        final AeronClusterPublication publication = new AeronClusterPublication(
-            publisherName,
-            new AeronCluster.Context()
-                .errorHandler(Throwable::printStackTrace)
-                .ingressChannel(ingressChannel)
-                .aeronDirectoryName(aeron.context().aeronDirectoryName())
-        );
-
-        agents.add(new AeronClusterPublicationAgent(publication, publisherName));
-        publications.add(publication);
-        return createPublisher(clazz, publication);
-    }
-
     public <T> T createClusterIngressPublisher(final Class<T> clazz, final AeronCluster.Context aeronClusterCtx)
     {
         final String publisherName = clazz.getName() + "__IngressPublisher";
@@ -125,6 +109,17 @@ public class AeronicWizard implements AutoCloseable
         agents.add(new AeronClusterPublicationAgent(publication, publisherName));
         publications.add(publication);
         return createPublisher(clazz, publication);
+    }
+
+    public <T> T createClusterIngressPublisher(final Class<T> clazz, final String ingressChannel)
+    {
+        return createClusterIngressPublisher(
+            clazz,
+            new AeronCluster.Context()
+                .errorHandler(Throwable::printStackTrace)
+                .ingressChannel(ingressChannel)
+                .aeronDirectoryName(aeron.context().aeronDirectoryName())
+        );
     }
 
     public static <T> ClientSessionPublication<T> createClusterEgressPublisher(final Class<T> clazz)
