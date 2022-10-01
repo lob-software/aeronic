@@ -26,7 +26,7 @@ public class AeronicWizard implements AutoCloseable
     private final IdleStrategy idleStrategy;
     private final ErrorHandler errorHandler;
     private final AtomicCounter errorCounter;
-    private final Function<List<Agent>, Agent> agentSupplier;
+    private final Function<List<Agent>, Agent> multipleAgentsTransformer;
 
     private final List<AeronicPublication> publications = new ArrayList<>();
     private final List<Subscription> subscriptions = new ArrayList<>();
@@ -51,7 +51,7 @@ public class AeronicWizard implements AutoCloseable
         this.idleStrategy = ctx.idleStrategy;
         this.errorHandler = ctx.errorHandler;
         this.errorCounter = ctx.atomicCounter;
-        this.agentSupplier = ctx.agentSupplier;
+        this.multipleAgentsTransformer = ctx.agentSupplier;
     }
 
     public static class Context
@@ -207,7 +207,7 @@ public class AeronicWizard implements AutoCloseable
             idleStrategy,
             errorHandler,
             errorCounter,
-            agentSupplier.apply(agents)
+            multipleAgentsTransformer.apply(agents)
         );
 
         AgentRunner.startOnThread(compositeAgentRunner);
