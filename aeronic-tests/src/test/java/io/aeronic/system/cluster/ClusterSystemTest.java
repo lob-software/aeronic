@@ -209,6 +209,8 @@ public class ClusterSystemTest
         anotherClient.offer(buffer, 0, buffer.capacity());
 
         assertEventuallyTrue(() -> service.getMessageCount() == 1);
+
+        anotherClient.close();
     }
 
     @Test
