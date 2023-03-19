@@ -104,6 +104,7 @@ public class ZombieLeaderClusterSystemTest
         assertEventuallyTrue(newLeader::egressConnected);
 
         newLeaderPublisher.onEvent(101L);
+        // publishing from old leader should have no effect, as it is now a follower
         leaderPublisher.onEvent(202L);
 
         assertEventuallyTrue(() -> sub1.value == 101L && sub2.value == 101L, 5000);
