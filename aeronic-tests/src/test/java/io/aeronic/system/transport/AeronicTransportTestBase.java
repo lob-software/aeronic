@@ -70,9 +70,6 @@ public abstract class AeronicTransportTestBase
         aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
 
-        final CountersManager countersManager = new CountersManager(aeronCtx.countersMetaDataBuffer(), aeronCtx.countersValuesBuffer());
-        countersManager.setCounterValue(29, 8);
-
         publisher.onEvent(123L);
         publisher.onEvent(321L);
 
