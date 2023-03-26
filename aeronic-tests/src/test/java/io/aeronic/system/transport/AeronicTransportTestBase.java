@@ -100,25 +100,21 @@ public abstract class AeronicTransportTestBase
     public void oneToManyOfDifferentTopics()
     {
         final SampleEvents sampleEventsPublisher = aeronic.createPublisher(SampleEvents.class, getPublicationChannel(), 10);
-
         final SampleEventsImpl sampleEventsSubscriber1 = new SampleEventsImpl();
         final SampleEventsImpl sampleEventsSubscriber2 = new SampleEventsImpl();
         aeronic.registerSubscriber(SampleEvents.class, sampleEventsSubscriber1, getSubscriptionChannel(), 10);
         aeronic.registerSubscriber(SampleEvents.class, sampleEventsSubscriber2, getSubscriptionChannel(), 10);
-        aeronic.start();
-        aeronic.awaitUntilPubsAndSubsConnect();
-
-        sampleEventsPublisher.onEvent(123L);
 
         final SimpleEvents simpleEventsPublisher = aeronic.createPublisher(SimpleEvents.class, getPublicationChannel(), 11);
-
         final SimpleEventsImpl simpleEventsSubscriber1 = new SimpleEventsImpl();
         final SimpleEventsImpl simpleEventsSubscriber2 = new SimpleEventsImpl();
         aeronic.registerSubscriber(SimpleEvents.class, simpleEventsSubscriber1, getSubscriptionChannel(), 11);
         aeronic.registerSubscriber(SimpleEvents.class, simpleEventsSubscriber2, getSubscriptionChannel(), 11);
-        aeronic.start();
-        aeronic.awaitUntilPubsAndSubsConnect();
 
+        aeronic.awaitUntilPubsAndSubsConnect();
+        aeronic.start();
+
+        sampleEventsPublisher.onEvent(123L);
         simpleEventsPublisher.onEvent(456L);
 
         await()
