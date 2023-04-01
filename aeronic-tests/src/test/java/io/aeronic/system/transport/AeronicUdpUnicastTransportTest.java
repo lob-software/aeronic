@@ -5,8 +5,6 @@ import io.aeron.ChannelUriStringBuilder;
 public class AeronicUdpUnicastTransportTest extends AeronicTransportTestBase
 {
 
-    // some test cases do not make sense in the real world but pass by virtue of being run locally
-
     private static final String UNICAST_CHANNEL = new ChannelUriStringBuilder()
         .media("udp")
         .reliable(true)
