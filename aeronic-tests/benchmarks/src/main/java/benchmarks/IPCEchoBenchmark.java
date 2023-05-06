@@ -170,7 +170,7 @@ public class IPCEchoBenchmark
         System.out.println("Warm up complete, running the benchmark...");
 
         // run
-        profiler.start(Events.CPU, 500);
+        profiler.start(Events.ALLOC, 64);
 
         benchmark.run();
         benchmark.awaitCompletion();

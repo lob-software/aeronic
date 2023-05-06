@@ -1,6 +1,7 @@
 package io.aeronic.net;
 
 import io.aeron.Subscription;
+import io.aeron.logbuffer.FragmentHandler;
 import io.aeron.logbuffer.Header;
 import org.agrona.DirectBuffer;
 import org.agrona.concurrent.Agent;
@@ -9,6 +10,15 @@ public class SubscriptionAgent<T> implements Agent
 {
     private final Subscription subscription;
     protected final AbstractSubscriberInvoker<T> invoker;
+
+    private final FragmentHandler fragmentHandler = new FragmentHandler()
+    {
+        @Override
+        public void onFragment(final DirectBuffer buffer, final int offset, final int length, final Header header)
+        {
+            invoker.handle(buffer, offset);
+        }
+    };
 
     public SubscriptionAgent(final Subscription subscription, final AbstractSubscriberInvoker<T> invoker)
     {
@@ -19,17 +29,12 @@ public class SubscriptionAgent<T> implements Agent
     @Override
     public int doWork()
     {
-        return subscription.poll(this::handle, Integer.MAX_VALUE);
+        return subscription.poll(fragmentHandler, 1024);
     }
 
     @Override
     public String roleName()
     {
         return invoker.getSubscriber().getClass().getSimpleName();
-    }
-
-    public void handle(final DirectBuffer buffer, final int offset, final int length, final Header header)
-    {
-        invoker.handle(buffer, offset);
     }
 }
