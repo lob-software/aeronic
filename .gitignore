@@ -10,3 +10,4 @@
 **/generated_tests
 **/build/
 **/.gradle/
+/.idea/
