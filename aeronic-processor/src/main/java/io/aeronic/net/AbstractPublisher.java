@@ -24,7 +24,7 @@ public abstract class AbstractPublisher
             long offerResult = publication.offer(buffer);
             if (offerResult < 0)
             {
-                int remainingOfferAttempts = 100;
+                int remainingOfferAttempts = 10000;
                 while (offerResult < 0)
                 {
                     publication.onOfferFailure(offerResult);

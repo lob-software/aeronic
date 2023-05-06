@@ -7,6 +7,13 @@ subprojects {
             ))))
         }
 
+        withType<JavaExec> {
+            jvmArgs(listOf(
+                "--add-opens",
+                "java.base/sun.nio.ch=ALL-UNNAMED",
+            ))
+        }
+
         withType<Test> {
             ignoreFailures = true // needed to continue tests after first failure occurs
             jvmArgs(listOf(

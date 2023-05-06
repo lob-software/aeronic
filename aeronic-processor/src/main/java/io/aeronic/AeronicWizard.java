@@ -64,7 +64,7 @@ public class AeronicWizard implements AutoCloseable
         private ErrorHandler errorHandler;
         private AtomicCounter atomicCounter;
         private Function<List<Agent>, Agent> agentSupplier;
-        private LongConsumer offerFailureHandler;
+        private LongConsumer offerFailureHandler = f -> {};
 
         public Context aeron(final Aeron aeron)
         {
