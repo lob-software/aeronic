@@ -45,7 +45,7 @@ public class SyncExample
             .aeronDirectoryName(mediaDriver.aeronDirectoryName());
 
         aeron = Aeron.connect(aeronCtx);
-        aeronic = new AeronicWizard(aeron);
+        aeronic = AeronicWizard.launch(new AeronicWizard.Context().aeron(aeron));
     }
 
     @AfterEach
@@ -66,7 +66,6 @@ public class SyncExample
 
         aeronic.registerSubscriber(SyncEvents.class, syncEventsSubscriber, CHANNEL, 15);
         aeronic.registerSubscriber(SyncEventsResponse.class, syncEventsController, CHANNEL, 16);
-        aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
 
         final long expectedValue = 645;

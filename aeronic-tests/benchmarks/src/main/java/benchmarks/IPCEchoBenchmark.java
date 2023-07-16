@@ -7,7 +7,6 @@ import io.aeronic.AeronicWizard;
 import one.profiler.AsyncProfiler;
 import one.profiler.Events;
 import org.HdrHistogram.Histogram;
-import org.agrona.concurrent.CompositeAgent;
 import org.agrona.concurrent.NoOpIdleStrategy;
 
 import java.io.FileNotFoundException;
@@ -49,14 +48,13 @@ public class IPCEchoBenchmark
 
         aeron = Aeron.connect(aeronCtx);
 
-        aeronic = new AeronicWizard(
+        aeronic = AeronicWizard.launch(
             new AeronicWizard.Context()
                 .aeron(aeron)
                 .offerFailureHandler(l -> LockSupport.parkNanos(1))
                 .idleStrategy(NoOpIdleStrategy.INSTANCE)
                 .errorHandler(Throwable::printStackTrace)
-                .atomicCounter(null)
-                .agentSupplier(CompositeAgent::new));
+                .atomicCounter(null));
     }
 
     private void setUp()
@@ -71,7 +69,6 @@ public class IPCEchoBenchmark
         final EchoService echoService = new EchoService(echoResponseProxy);
         aeronic.registerSubscriber(Echo.class, echoService, IPC_CHANNEL, 101);
 
-        aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
     }
 

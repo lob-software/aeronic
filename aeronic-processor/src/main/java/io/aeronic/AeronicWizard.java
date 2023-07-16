@@ -1,8 +1,10 @@
 package io.aeronic;
 
-import io.aeron.Aeron;
-import io.aeron.Publication;
-import io.aeron.Subscription;
+import io.aeron.*;
+import io.aeron.archive.client.AeronArchive;
+import io.aeron.archive.client.ReplayMerge;
+import io.aeron.archive.codecs.SourceLocation;
+import io.aeron.archive.status.RecordingPos;
 import io.aeron.cluster.client.AeronCluster;
 import io.aeronic.cluster.AeronClusterPublication;
 import io.aeronic.cluster.AeronClusterPublicationAgent;
@@ -10,65 +12,72 @@ import io.aeronic.cluster.AeronicCredentialsSupplier;
 import io.aeronic.cluster.ClientSessionPublication;
 import io.aeronic.net.*;
 import org.agrona.ErrorHandler;
-import org.agrona.concurrent.*;
+import org.agrona.collections.MutableLong;
+import org.agrona.concurrent.AgentRunner;
+import org.agrona.concurrent.DynamicCompositeAgent;
+import org.agrona.concurrent.IdleStrategy;
+import org.agrona.concurrent.NoOpIdleStrategy;
 import org.agrona.concurrent.status.AtomicCounter;
+import org.agrona.concurrent.status.CountersReader;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
+import java.util.concurrent.locks.LockSupport;
 import java.util.function.LongConsumer;
 
+import static io.aeron.Aeron.NULL_VALUE;
 import static org.awaitility.Awaitility.await;
 
 public class AeronicWizard implements AutoCloseable
 {
     private final Aeron aeron;
+    private final AeronArchive aeronArchive;
     private final IdleStrategy idleStrategy;
     private final ErrorHandler errorHandler;
     private final AtomicCounter errorCounter;
-    private final Function<List<Agent>, Agent> multipleAgentsTransformer;
 
     private final List<AeronicPublication> publications = new ArrayList<>();
     private final List<Subscription> subscriptions = new ArrayList<>();
-    private final List<Agent> agents = new ArrayList<>();
+    private final DynamicCompositeAgent dynamicCompositeAgent = new DynamicCompositeAgent("aeronic-composite");
     private final LongConsumer offerFailureHandler;
     private AgentRunner agentRunner;
 
-    public AeronicWizard(final Aeron aeron)
-    {
-        this(
-            new Context()
-                .aeron(aeron)
-                .idleStrategy(NoOpIdleStrategy.INSTANCE)
-                .errorHandler(Throwable::printStackTrace)
-                .atomicCounter(null)
-                .agentSupplier(CompositeAgent::new)
-        );
-    }
-
-    public AeronicWizard(final Context ctx)
+    private AeronicWizard(final AeronicWizard.Context ctx)
     {
         this.aeron = ctx.aeron;
+        this.aeronArchive = ctx.aeronArchive;
         this.idleStrategy = ctx.idleStrategy;
         this.errorHandler = ctx.errorHandler;
         this.errorCounter = ctx.atomicCounter;
-        this.multipleAgentsTransformer = ctx.agentSupplier;
         this.offerFailureHandler = ctx.offerFailureHandler;
+    }
+
+    public static AeronicWizard launch(final Context ctx)
+    {
+        final AeronicWizard aeronic = new AeronicWizard(ctx);
+        aeronic.start();
+        return aeronic;
     }
 
     public static class Context
     {
         private Aeron aeron;
-        private IdleStrategy idleStrategy;
-        private ErrorHandler errorHandler;
+        private AeronArchive aeronArchive;
+        private IdleStrategy idleStrategy = NoOpIdleStrategy.INSTANCE;
+        private ErrorHandler errorHandler = Throwable::printStackTrace;
         private AtomicCounter atomicCounter;
-        private Function<List<Agent>, Agent> agentSupplier;
         private LongConsumer offerFailureHandler = f -> {};
 
         public Context aeron(final Aeron aeron)
         {
             this.aeron = aeron;
+            return this;
+        }
+
+        public Context aeronArchive(final AeronArchive aeronArchive)
+        {
+            this.aeronArchive = aeronArchive;
             return this;
         }
 
@@ -90,12 +99,6 @@ public class AeronicWizard implements AutoCloseable
             return this;
         }
 
-        public Context agentSupplier(final Function<List<Agent>, Agent> agentSupplier)
-        {
-            this.agentSupplier = agentSupplier;
-            return this;
-        }
-
         public Context offerFailureHandler(final LongConsumer offerFailureHandler)
         {
             this.offerFailureHandler = offerFailureHandler;
@@ -111,12 +114,33 @@ public class AeronicWizard implements AutoCloseable
         return createPublisher(clazz, publication);
     }
 
+    public <T> T createPersistentPublisher(final Class<T> clazz, final String channel, final int streamId)
+    {
+        final Publication rawPublication = aeron.addPublication(channel, streamId);
+        final AeronicPublication publication = new SimplePublication(rawPublication, offerFailureHandler);
+        publications.add(publication);
+
+        aeronArchive.startRecording(channel, streamId, SourceLocation.REMOTE);
+        final CountersReader counters = aeron.countersReader();
+        awaitRecordingCounterId(counters, rawPublication.sessionId());
+
+        return createPublisher(clazz, publication);
+    }
+
+    public void awaitRecordingCounterId(final CountersReader counters, final int sessionId)
+    {
+        while (NULL_VALUE == RecordingPos.findCounterIdBySession(counters, sessionId))
+        {
+            LockSupport.parkNanos(1000);
+        }
+    }
+
     public <T> T createClusterIngressPublisher(final Class<T> clazz, final AeronCluster.Context aeronClusterCtx)
     {
         final String publisherName = clazz.getName() + "__IngressPublisher";
         final AeronClusterPublication publication = new AeronClusterPublication(publisherName, aeronClusterCtx);
 
-        agents.add(new AeronClusterPublicationAgent(publication, publisherName));
+        dynamicCompositeAgent.tryAdd(new AeronClusterPublicationAgent(publication, publisherName));
         publications.add(publication);
         return createPublisher(clazz, publication);
     }
@@ -160,7 +184,7 @@ public class AeronicWizard implements AutoCloseable
         subscriptions.add(subscription);
 
         final AbstractSubscriberInvoker<T> invoker = createSubscriberInvoker(clazz, subscriberImplementation);
-        agents.add(new SubscriptionAgent<>(subscription, invoker));
+        dynamicCompositeAgent.tryAdd(new SubscriptionAgent<>(subscription, invoker));
     }
 
     public <T> void registerClusterEgressSubscriber(final Class<T> clazz, final T subscriberImplementation, final String ingressChannel)
@@ -176,7 +200,7 @@ public class AeronicWizard implements AutoCloseable
                 .errorHandler(Throwable::printStackTrace)
                 .aeronDirectoryName(aeron.context().aeronDirectoryName()));
 
-        agents.add(new AeronClusterAgent(aeronCluster, subscriberName));
+        dynamicCompositeAgent.tryAdd(new AeronClusterAgent(aeronCluster, subscriberName));
     }
 
     public <T> void registerClusterEgressSubscriber(final Class<T> clazz, final T subscriberImplementation, final AeronCluster.Context aeronClusterCtx)
@@ -188,7 +212,73 @@ public class AeronicWizard implements AutoCloseable
                 .credentialsSupplier(new AeronicCredentialsSupplier(subscriberName))
                 .egressListener((clusterSessionId, timestamp, buffer, offset, length, header) -> invoker.handle(buffer, offset))
         );
-        agents.add(new AeronClusterAgent(aeronCluster, subscriberName));
+        dynamicCompositeAgent.tryAdd(new AeronClusterAgent(aeronCluster, subscriberName));
+    }
+
+    public <T> void registerPersistentSubscriber(
+        final Class<T> clazz,
+        final T subscriberImplementation,
+        final String livePublicationAlias,
+        final int streamId
+    )
+    {
+        final String subscriptionChannel = new ChannelUriStringBuilder()
+            .media(CommonContext.UDP_MEDIA)
+            .controlMode(CommonContext.MDC_CONTROL_MODE_MANUAL)
+            .build();
+
+        final String replayChannel = new ChannelUriStringBuilder()
+            .media(CommonContext.UDP_MEDIA)
+            .build();
+
+        final String replayDestination = new ChannelUriStringBuilder()
+            .media(CommonContext.UDP_MEDIA)
+            .endpoint("localhost:0")
+            .build();
+
+        final String liveDestination = new ChannelUriStringBuilder()
+            .media(CommonContext.UDP_MEDIA)
+            .endpoint("localhost:23267")
+            .controlEndpoint("localhost:23265")
+            .build();
+
+        final long recordingId = fetchRecordingId(livePublicationAlias);
+
+        final Subscription subscription = aeron.addSubscription(subscriptionChannel, streamId);
+
+        final ReplayMerge replayMerge = new ReplayMerge(
+            subscription,
+            aeronArchive,
+            replayChannel,
+            replayDestination,
+            liveDestination,
+            recordingId,
+            AeronArchive.NULL_POSITION
+        );
+
+        final AbstractSubscriberInvoker<T> invoker = createSubscriberInvoker(clazz, subscriberImplementation);
+
+        dynamicCompositeAgent.tryAdd(new ReplayMergeAgent<>(replayMerge, invoker));
+    }
+
+    private long fetchRecordingId(final String liveChannelAlias)
+    {
+        final MutableLong recordingIdRef = new MutableLong();
+
+        aeronArchive.listRecordings(
+            0, 10,
+            (
+                controlSessionId, correlationId, recordingId, startTimestamp, stopTimestamp, startPosition, stopPosition, initialTermId,
+                segmentFileLength, termBufferLength, mtuLength, sessionId, streamId, strippedChannel, originalChannel, sourceIdentity
+            ) -> {
+                if (originalChannel.contains(liveChannelAlias))
+                {
+                    recordingIdRef.set(recordingId);
+                }
+            }
+        );
+
+        return recordingIdRef.get();
     }
 
     @SuppressWarnings("unchecked")
@@ -206,13 +296,13 @@ public class AeronicWizard implements AutoCloseable
         }
     }
 
-    public void start()
+    private void start()
     {
         agentRunner = new AgentRunner(
             idleStrategy,
             errorHandler,
             errorCounter,
-            multipleAgentsTransformer.apply(agents)
+            dynamicCompositeAgent
         );
 
         AgentRunner.startOnThread(agentRunner);

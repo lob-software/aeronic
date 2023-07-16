@@ -54,7 +54,7 @@ public class ZombieLeaderClusterSystemTest
             .aeronDirectoryName(mediaDriver.aeronDirectoryName());
 
         aeron = Aeron.connect(aeronCtx);
-        aeronic = new AeronicWizard(aeron);
+        aeronic = AeronicWizard.launch(new AeronicWizard.Context().aeron(aeron));
 
         testCluster.registerNode(0, 3, newClusteredServiceContainer());
         testCluster.registerNode(1, 3, newClusteredServiceContainer());
@@ -88,7 +88,6 @@ public class ZombieLeaderClusterSystemTest
         // register as normal (non-cluster) aeron subs
         aeronic.registerSubscriber(SimpleEvents.class, sub1, UDP_MULTICAST_CHANNEL, STREAM_ID);
         aeronic.registerSubscriber(SimpleEvents.class, sub2, UDP_MULTICAST_CHANNEL, STREAM_ID);
-        aeronic.start();
 
         final AeronicClusteredServiceContainer leader = testCluster.waitForLeader();
         final SimpleEvents leaderPublisher = leader.getToggledPublisherFor(SimpleEvents.class);

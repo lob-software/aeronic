@@ -8,7 +8,6 @@ import io.aeronic.AeronicWizard;
 import io.aeronic.SampleEvents;
 import io.aeronic.SimpleEvents;
 import org.agrona.concurrent.BusySpinIdleStrategy;
-import org.agrona.concurrent.CompositeAgent;
 import org.agrona.concurrent.NoOpIdleStrategy;
 import org.agrona.concurrent.status.CountersManager;
 import org.junit.jupiter.api.AfterEach;
@@ -39,14 +38,13 @@ public abstract class AeronicTransportTestBase
         mediaDriver = MediaDriver.launchEmbedded(mediaDriverCtx);
         aeronCtx = new Aeron.Context().aeronDirectoryName(mediaDriver.aeronDirectoryName());
         aeron = Aeron.connect(aeronCtx);
-        aeronic = new AeronicWizard(
+        aeronic = AeronicWizard.launch(
             new AeronicWizard.Context()
                 .aeron(aeron)
                 .idleStrategy(NoOpIdleStrategy.INSTANCE)
                 .errorHandler(Throwable::printStackTrace)
                 .atomicCounter(null)
-                .offerFailureHandler(r -> setPublisherLimit(Long.MAX_VALUE))
-                .agentSupplier(CompositeAgent::new));
+                .offerFailureHandler(r -> setPublisherLimit(Long.MAX_VALUE)));
     }
 
     @AfterEach
@@ -67,7 +65,6 @@ public abstract class AeronicTransportTestBase
         final SampleEvents publisher = aeronic.createPublisher(SampleEvents.class, getPublicationChannel(), 10);
         final SampleEventsImpl subscriberImpl = new SampleEventsImpl();
         aeronic.registerSubscriber(SampleEvents.class, subscriberImpl, getSubscriptionChannel(), 10);
-        aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
 
         publisher.onEvent(123L);
@@ -86,7 +83,6 @@ public abstract class AeronicTransportTestBase
         final SampleEventsImpl subscriberImpl2 = new SampleEventsImpl();
         aeronic.registerSubscriber(SampleEvents.class, subscriberImpl1, getSubscriptionChannel(), 10);
         aeronic.registerSubscriber(SampleEvents.class, subscriberImpl2, getSubscriptionChannel(), 10);
-        aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
 
         publisher.onEvent(123L);
@@ -112,7 +108,6 @@ public abstract class AeronicTransportTestBase
         aeronic.registerSubscriber(SimpleEvents.class, simpleEventsSubscriber2, getSubscriptionChannel(), 11);
 
         aeronic.awaitUntilPubsAndSubsConnect();
-        aeronic.start();
 
         sampleEventsPublisher.onEvent(123L);
         simpleEventsPublisher.onEvent(456L);
@@ -136,7 +131,6 @@ public abstract class AeronicTransportTestBase
         final SampleEventsImpl sampleEventsSubscriber2 = new SampleEventsImpl();
         aeronic.registerSubscriber(SampleEvents.class, sampleEventsSubscriber1, getSubscriptionChannel(), 10);
         aeronic.registerSubscriber(SampleEvents.class, sampleEventsSubscriber2, getSubscriptionChannel(), 10);
-        aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
 
         sampleEventsPublisher1.onEvent(123L);
@@ -158,7 +152,6 @@ public abstract class AeronicTransportTestBase
         final SampleEvents publisher = aeronic.createPublisher(SampleEvents.class, getPublicationChannel(), 10);
         final SampleEventsImpl subscriberImpl = new SampleEventsImpl();
         aeronic.registerSubscriber(SampleEvents.class, subscriberImpl, getSubscriptionChannel(), 10);
-        aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
 
         publisher.onEvent(123L);

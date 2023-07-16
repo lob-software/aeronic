@@ -40,7 +40,7 @@ public class AeronicMultiParamTest
             .aeronDirectoryName(mediaDriver.aeronDirectoryName());
 
         aeron = Aeron.connect(aeronCtx);
-        aeronic = new AeronicWizard(aeron);
+        aeronic = AeronicWizard.launch(new AeronicWizard.Context().aeron(aeron));
     }
 
     @AfterEach
@@ -57,7 +57,6 @@ public class AeronicMultiParamTest
         final MultiParamEvents publisher = aeronic.createPublisher(MultiParamEvents.class, IPC, 10);
         final MultiParamEventsImpl subscriberImpl = new MultiParamEventsImpl();
         aeronic.registerSubscriber(MultiParamEvents.class, subscriberImpl, IPC, 10);
-        aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
 
         final long longValue = 2312312341324L;

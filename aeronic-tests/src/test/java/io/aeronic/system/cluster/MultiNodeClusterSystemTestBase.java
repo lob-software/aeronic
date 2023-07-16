@@ -40,7 +40,7 @@ public abstract class MultiNodeClusterSystemTestBase
             .aeronDirectoryName(mediaDriver.aeronDirectoryName());
 
         aeron = Aeron.connect(aeronCtx);
-        aeronic = new AeronicWizard(aeron);
+        aeronic = AeronicWizard.launch(new AeronicWizard.Context().aeron(aeron));
 
         testCluster.registerNode(0, 3, newClusteredServiceContainer());
         testCluster.registerNode(1, 3, newClusteredServiceContainer());
@@ -75,8 +75,6 @@ public abstract class MultiNodeClusterSystemTestBase
         aeronic.registerSubscriber(SimpleEvents.class, sub1, egressChannel(), STREAM_ID);
         aeronic.registerSubscriber(SimpleEvents.class, sub2, egressChannel(), STREAM_ID);
 
-        aeronic.start();
-
         // wait for leader, publish from it and assert that only leaders messages get published
         final AeronicClusteredServiceContainer leaderClusteredService = testCluster.waitForLeader();
         final SimpleEvents leaderPublisher = leaderClusteredService.getToggledPublisherFor(SimpleEvents.class);
@@ -102,8 +100,6 @@ public abstract class MultiNodeClusterSystemTestBase
         // register as normal (non-cluster) aeron subs
         aeronic.registerSubscriber(SimpleEvents.class, sub1, egressChannel(), STREAM_ID);
         aeronic.registerSubscriber(SimpleEvents.class, sub2, egressChannel(), STREAM_ID);
-
-        aeronic.start();
 
         final AeronicClusteredServiceContainer leaderClusteredService = testCluster.waitForLeader();
         assertEventuallyTrue(leaderClusteredService::egressConnected);
@@ -132,8 +128,6 @@ public abstract class MultiNodeClusterSystemTestBase
         // register as normal (non-cluster) aeron subs
         aeronic.registerSubscriber(SimpleEvents.class, sub1, egressChannel(), STREAM_ID);
         aeronic.registerSubscriber(SimpleEvents.class, sub2, egressChannel(), STREAM_ID);
-
-        aeronic.start();
 
         final AeronicClusteredServiceContainer leaderClusteredService = testCluster.waitForLeader();
         final int leaderIdx = testCluster.getNodeIdx(leaderClusteredService);

@@ -152,6 +152,7 @@ public final class TestClusterNode implements AutoCloseable
             .dirDeleteOnStart(deleteDirs);
 
         archiveContext
+            .replicationChannel("aeron:ipc")
             .catalogCapacity(CATALOG_CAPACITY)
             .archiveDir(new File(baseDirName, "archive"))
             .controlChannel(aeronArchiveContext.controlRequestChannel())
@@ -194,11 +195,6 @@ public final class TestClusterNode implements AutoCloseable
         );
 
         container = ClusteredServiceContainer.launch(serviceContainerContext);
-    }
-
-    public File clusterDir()
-    {
-        return clusterDir;
     }
 
     static class Service implements ClusteredService

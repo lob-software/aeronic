@@ -64,7 +64,7 @@ public class Assertions
     {
         await()
             .pollInterval(Duration.ofMillis(50))
-            .timeout(Duration.ofMillis(timeoutInMillis))
+            .atMost(Duration.ofMillis(timeoutInMillis))
             .until(assertion::getAsBoolean);
     }
 

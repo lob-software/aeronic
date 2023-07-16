@@ -63,7 +63,7 @@ public class ClusterSystemTest
             .aeronDirectoryName(mediaDriver.aeronDirectoryName());
 
         aeron = Aeron.connect(aeronCtx);
-        aeronic = new AeronicWizard(aeron);
+        aeronic = AeronicWizard.launch(new AeronicWizard.Context().aeron(aeron));
 
         simpleEvents = new SimpleEventsImpl();
         sampleEvents = new SampleEventsImpl();
@@ -131,7 +131,6 @@ public class ClusterSystemTest
             .ingressChannel(INGRESS_CHANNEL));
 
         aeronic.registerClusterEgressSubscriber(SampleEvents.class, sampleEvents, INGRESS_CHANNEL);
-        aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
         assertEventuallyTrue(clusteredService::egressConnected);
 
@@ -167,7 +166,6 @@ public class ClusterSystemTest
 
         aeronic.registerClusterEgressSubscriber(SimpleEvents.class, simpleEvents, INGRESS_CHANNEL);
         aeronic.registerClusterEgressSubscriber(SampleEvents.class, sampleEvents, INGRESS_CHANNEL);
-        aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
         assertEventuallyTrue(clusteredService::egressConnected);
 
@@ -257,7 +255,6 @@ public class ClusterSystemTest
         aeronic.registerClusterEgressSubscriber(SimpleEvents.class, sub1, INGRESS_CHANNEL);
         aeronic.registerClusterEgressSubscriber(SimpleEvents.class, sub2, INGRESS_CHANNEL);
 
-        aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
         assertEventuallyTrue(clusteredService::egressConnected);
 
@@ -288,7 +285,6 @@ public class ClusterSystemTest
         aeronic.registerSubscriber(SimpleEvents.class, sub1, UDP_MULTICAST_CHANNEL, streamId);
         aeronic.registerSubscriber(SimpleEvents.class, sub2, UDP_MULTICAST_CHANNEL, streamId);
 
-        aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
         assertEventuallyTrue(clusteredService::egressConnected);
 
@@ -321,7 +317,6 @@ public class ClusterSystemTest
         aeronic.registerSubscriber(SimpleEvents.class, sub1, MDC_CAST_CHANNEL, streamId);
         aeronic.registerSubscriber(SimpleEvents.class, sub2, MDC_CAST_CHANNEL, streamId);
 
-        aeronic.start();
         aeronic.awaitUntilPubsAndSubsConnect();
         assertEventuallyTrue(clusteredService::egressConnected);
 
