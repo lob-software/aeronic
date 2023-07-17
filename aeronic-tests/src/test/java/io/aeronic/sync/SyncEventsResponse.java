@@ -1,6 +1,6 @@
 package io.aeronic.sync;
 
-import io.aeronic.Aeronic;
+import io.aeronic.gen.Aeronic;
 
 @Aeronic
 public interface SyncEventsResponse

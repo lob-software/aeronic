@@ -3,7 +3,7 @@ package io.aeronic.cluster;
 import io.aeron.Aeron;
 import io.aeron.cluster.service.ClientSession;
 import io.aeron.cluster.service.Cluster;
-import io.aeronic.AeronicWizard;
+import io.aeronic.Aeronic;
 import io.aeronic.net.AbstractSubscriberInvoker;
 import io.aeronic.net.NullSubscriberInvokerImpl;
 import io.aeronic.net.ToggledAeronicPublication;
@@ -37,7 +37,7 @@ public class AeronicClusteredServiceRegistry
     {
         final String publisherName = clazz.getName() + "__EgressPublisher";
         final ToggledAeronicPublication<T> publication = new ToggledAeronicPublication<>(() -> aeron.get().addPublication(egressChannel, streamId));
-        final T publisher = AeronicWizard.createPublisher(clazz, publication);
+        final T publisher = Aeronic.createPublisher(clazz, publication);
         publication.bindPublisher(publisher);
         toggledPublicationByName.put(publisherName, publication);
     }

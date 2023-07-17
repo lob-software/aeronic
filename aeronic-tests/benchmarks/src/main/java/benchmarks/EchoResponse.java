@@ -1,6 +1,6 @@
 package benchmarks;
 
-import io.aeronic.Aeronic;
+import io.aeronic.gen.Aeronic;
 
 @Aeronic
 interface EchoResponse

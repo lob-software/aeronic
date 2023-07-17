@@ -8,7 +8,7 @@ import io.aeron.archive.ArchiveThreadingMode;
 import io.aeron.archive.client.AeronArchive;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
-import io.aeronic.AeronicWizard;
+import io.aeronic.Aeronic;
 import io.aeronic.SampleEvents;
 import org.agrona.SystemUtil;
 import org.agrona.concurrent.BusySpinIdleStrategy;
@@ -26,7 +26,7 @@ public class AeronicPersistentTest
     private static final int STREAM_ID = 1033;
     private static final String CONTROL_ENDPOINT = "localhost:23265";
 
-    private AeronicWizard aeronic;
+    private Aeronic aeronic;
     private Aeron aeron;
     private MediaDriver mediaDriver;
     private Archive archive;
@@ -67,8 +67,8 @@ public class AeronicPersistentTest
             .controlRequestStreamId(archive.context().localControlStreamId())
             .controlResponseChannel(archive.context().controlChannel()));
 
-        aeronic = AeronicWizard.launch(
-            new AeronicWizard.Context()
+        aeronic = Aeronic.launch(
+            new Aeronic.Context()
                 .aeron(aeron)
                 .aeronArchive(aeronArchive)
                 .idleStrategy(NoOpIdleStrategy.INSTANCE)

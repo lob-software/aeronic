@@ -3,7 +3,7 @@ package benchmarks;
 import io.aeron.Aeron;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
-import io.aeronic.AeronicWizard;
+import io.aeronic.Aeronic;
 import one.profiler.AsyncProfiler;
 import one.profiler.Events;
 import org.HdrHistogram.Histogram;
@@ -22,7 +22,7 @@ public class IPCEchoBenchmark
 {
     private static final int RUNS = 10_000_000;
 
-    private AeronicWizard aeronic;
+    private Aeronic aeronic;
     private Echo echoProxy;
     private MediaDriver mediaDriver;
     private Aeron aeron;
@@ -48,8 +48,8 @@ public class IPCEchoBenchmark
 
         aeron = Aeron.connect(aeronCtx);
 
-        aeronic = AeronicWizard.launch(
-            new AeronicWizard.Context()
+        aeronic = Aeronic.launch(
+            new Aeronic.Context()
                 .aeron(aeron)
                 .offerFailureHandler(l -> LockSupport.parkNanos(1))
                 .idleStrategy(NoOpIdleStrategy.INSTANCE)

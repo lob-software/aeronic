@@ -28,6 +28,7 @@ public class CodeGenerationTest
             """
                 package io.aeronic;
                                    
+                import io.aeronic.gen.Aeronic;
                 import java.util.List;
                 import io.aeronic.codec.SimpleImpl;
                                                     
@@ -73,7 +74,7 @@ public class CodeGenerationTest
         assertEquals(SAMPLE_PUBLISHER, generatedPubSrc);
     }
 
-    @SupportedAnnotationTypes("io.aeronic.Aeronic")
+    @SupportedAnnotationTypes("io.aeronic.gen.Aeronic")
     @SupportedSourceVersion(SourceVersion.RELEASE_17)
     @AutoService(Processor.class)
     private static class TestAeronicAnnotationProcessor extends AbstractProcessor

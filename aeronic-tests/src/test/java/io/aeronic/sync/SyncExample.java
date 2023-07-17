@@ -4,7 +4,7 @@ import io.aeron.Aeron;
 import io.aeron.ChannelUriStringBuilder;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
-import io.aeronic.AeronicWizard;
+import io.aeronic.Aeronic;
 import org.agrona.concurrent.BusySpinIdleStrategy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +25,7 @@ public class SyncExample
         .endpoint("localhost:40457")
         .build();
 
-    private AeronicWizard aeronic;
+    private Aeronic aeronic;
     private Aeron aeron;
     private MediaDriver mediaDriver;
 
@@ -45,7 +45,7 @@ public class SyncExample
             .aeronDirectoryName(mediaDriver.aeronDirectoryName());
 
         aeron = Aeron.connect(aeronCtx);
-        aeronic = AeronicWizard.launch(new AeronicWizard.Context().aeron(aeron));
+        aeronic = Aeronic.launch(new Aeronic.Context().aeron(aeron));
     }
 
     @AfterEach

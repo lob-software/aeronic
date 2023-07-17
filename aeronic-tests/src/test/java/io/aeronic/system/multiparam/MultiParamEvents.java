@@ -1,7 +1,7 @@
 package io.aeronic.system.multiparam;
 
-import io.aeronic.Aeronic;
 import io.aeronic.MyEnum;
+import io.aeronic.gen.Aeronic;
 
 import java.util.List;
 

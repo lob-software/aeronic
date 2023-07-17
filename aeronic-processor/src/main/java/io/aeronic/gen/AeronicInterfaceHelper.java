@@ -1,7 +1,5 @@
 package io.aeronic.gen;
 
-import io.aeronic.Aeronic;
-
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;

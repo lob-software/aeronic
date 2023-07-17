@@ -2,7 +2,6 @@ package io.aeronic.gen;
 
 
 import com.google.auto.service.AutoService;
-import io.aeronic.Aeronic;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -15,7 +14,7 @@ import java.io.Writer;
 import java.util.List;
 import java.util.Set;
 
-@SupportedAnnotationTypes("io.aeronic.Aeronic")
+@SupportedAnnotationTypes("io.aeronic.gen.Aeronic")
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
 @AutoService(Processor.class)
 public class AeronicAnnotationProcessor extends AbstractProcessor
