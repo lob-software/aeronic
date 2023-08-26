@@ -18,6 +18,7 @@ import java.util.concurrent.locks.LockSupport;
 
 import static io.aeron.CommonContext.IPC_CHANNEL;
 
+// TODO: account for coordinated omission
 public class IPCEchoBenchmark
 {
     private static final int RUNS = 10_000_000;
