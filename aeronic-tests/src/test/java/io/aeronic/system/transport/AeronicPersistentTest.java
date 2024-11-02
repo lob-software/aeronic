@@ -79,7 +79,7 @@ public class AeronicPersistentTest
     @Test
     public void subscriberCanReplayMerge()
     {
-        final SampleEvents publisher = aeronic.createPersistentPublisher(SampleEvents.class, publicationChannel, STREAM_ID);
+        final SampleEvents publisher = aeronic.createRecordedPublisher(SampleEvents.class, publicationChannel, STREAM_ID);
         final SampleEventsImpl subscriberImpl = new SampleEventsImpl();
         aeronic.registerSubscriber(SampleEvents.class, subscriberImpl, publicationChannel, STREAM_ID);
 

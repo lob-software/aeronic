@@ -20,10 +20,16 @@ import org.agrona.concurrent.NoOpIdleStrategy;
 import org.agrona.concurrent.status.AtomicCounter;
 import org.agrona.concurrent.status.CountersReader;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Proxy;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Exchanger;
 import java.util.concurrent.locks.LockSupport;
+import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 
 import static io.aeron.Aeron.NULL_VALUE;
@@ -114,7 +120,38 @@ public class Aeronic implements AutoCloseable
         return createPublisher(clazz, publication);
     }
 
-    public <T> T createPersistentPublisher(final Class<T> clazz, final String channel, final int streamId)
+
+    @SuppressWarnings("unchecked")
+    public <T> T createTestPublisher(final Class<T> clazz)
+    {
+        return (T)Proxy.newProxyInstance(
+            clazz.getClassLoader(),
+            clazz.getInterfaces(),
+            (proxy, method, args) -> {
+                clazzToSubscriberMap.get(clazz).forEach(subscriberImpl -> {
+                    try
+                    {
+                        method.invoke(subscriberImpl, args);
+                    }
+                    catch (final Exception e)
+                    {
+                        throw new RuntimeException(e);
+                    }
+                });
+                return null;
+            }
+        );
+    }
+
+    private final HashMap<Class<?>, List<?>> clazzToSubscriberMap = new HashMap<>();
+
+    public <T> void registerTestSubscriber(final Class<T> simpleEventsClass, final T impl)
+    {
+        clazzToSubscriberMap.computeIfAbsent(simpleEventsClass, (List<T>) new ArrayList<>()).add(impl);
+    }
+
+
+    public <T> T createRecordedPublisher(final Class<T> clazz, final String channel, final int streamId)
     {
         final Publication rawPublication = aeron.addPublication(channel, streamId);
         final AeronicPublication publication = new SimplePublication(rawPublication, offerFailureHandler);
