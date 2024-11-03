@@ -6,13 +6,15 @@ import java.util.List;
 import static io.aeronic.gen.StringUtil.capitalize;
 import static io.aeronic.gen.TypeUtil.isPrimitive;
 
+@SuppressWarnings({"checkstyle:Indentation", "checkstyle:Regexp", "checkstyle:LineLength"})
 public class SubscriberInvokerGenerator
 {
     private final List<String> imports = new ArrayList<>();
 
     private void addImport(final String importStatement)
     {
-        if (!imports.contains(importStatement)) {
+        if (!imports.contains(importStatement))
+        {
             imports.add(importStatement);
         }
     }
@@ -41,7 +43,8 @@ public class SubscriberInvokerGenerator
                                                                                     {
                                                                             """);
 
-        for (final MethodInfo interfaceMethod : methods) {
+        for (final MethodInfo interfaceMethod : methods)
+        {
             writeMethodCase(handleMethodBuilder, interfaceMethod);
         }
 
@@ -64,10 +67,12 @@ public class SubscriberInvokerGenerator
                                                        case %s -> {
                                            """.formatted(interfaceMethod.getIndex()));
 
-        for (int i = 0; i < parameters.size(); i++) {
+        for (int i = 0; i < parameters.size(); i++)
+        {
             writeParameter(handleMethodBuilder, subscriberInvocation, parameters.get(i));
 
-            if (i < parameters.size() - 1) {
+            if (i < parameters.size() - 1)
+            {
                 subscriberInvocation.append(",\n");
             }
         }
@@ -87,11 +92,12 @@ public class SubscriberInvokerGenerator
             final StringBuilder handleMethodBuilder,
             final StringBuilder subscriberInvocation,
             final ParameterInfo parameter
-                               )
+    )
     {
         final String parameterName = parameter.getName();
         final String parameterType = parameter.getType();
-        if (parameter.isPrimitive()) {
+        if (parameter.isPrimitive())
+        {
             handleMethodBuilder.append("""
                                                                final %s %s = bufferDecoder.decode%s();
                                                """.formatted(parameterType, parameterName, capitalize(parameterType)));
@@ -99,13 +105,17 @@ public class SubscriberInvokerGenerator
             return;
         }
 
-        if (parameter.isArray()) {
+        if (parameter.isArray())
+        {
             final String arrayType = parameterType.substring(0, parameterType.length() - 2);
-            if (isPrimitive(arrayType)) {
+            if (isPrimitive(arrayType))
+            {
                 handleMethodBuilder.append("""
                                                                    final %s %s = bufferDecoder.decode%sArray();
                                                    """.formatted(parameterType, parameterName, capitalize(arrayType)));
-            } else {
+            }
+            else
+            {
                 final String className = TypeUtil.extractClassName(arrayType);
                 handleMethodBuilder.append("""
                                                                    final %s[] %s = bufferDecoder.decodeArray(%s::decode, %s[]::new);
@@ -116,7 +126,8 @@ public class SubscriberInvokerGenerator
             return;
         }
 
-        if (parameterType.equals(String.class.getName())) {
+        if (parameterType.equals(String.class.getName()))
+        {
             handleMethodBuilder.append("""
                                                                final String %s = bufferDecoder.decodeString();
                                                """.formatted(parameterName));
@@ -126,7 +137,8 @@ public class SubscriberInvokerGenerator
 
         final List<String> genericParameters = parameter.getGenericParameters();
 
-        if (!genericParameters.isEmpty()) {
+        if (!genericParameters.isEmpty())
+        {
             final String genericParameter = genericParameters.get(0);
             final String genericParameterClassName = TypeUtil.extractClassName(genericParameter);
             final String fullyQualifiedType = parameterType.split("<")[0];

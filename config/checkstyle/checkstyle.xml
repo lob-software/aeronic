@@ -47,15 +47,6 @@
                 value="^[ \t]*\*.*@.*$"/>
     </module>
 
-    <module name="RegexpHeader">
-        <property
-                name="header"
-                value="/*\n * Copyright \d{4}(-\d{4})? (Real Logic|Adaptive Financial Consulting) Limited."/>
-        <property
-                name="fileExtensions"
-                value="java"/>
-    </module>
-
     <module name="TreeWalker">
         <property
                 name="tabWidth"
@@ -66,14 +57,14 @@
 
         <module name="SuppressWarningsHolder"/>
 
-        <module name="JavadocVariable">
-            <property
-                    name="scope"
-                    value="public"/>
-        </module>
-        <module name="MissingJavadocType"/>
+<!--        <module name="JavadocVariable">-->
+<!--            <property-->
+<!--                    name="scope"-->
+<!--                    value="public"/>-->
+<!--        </module>-->
+<!--        <module name="MissingJavadocType"/>-->
         <!--        <module name="MissingJavadocMethod"/>-->
-        <module name="MissingJavadocPackage"/>
+<!--        <module name="MissingJavadocPackage"/>-->
 
         <module name="Indentation">
             <property

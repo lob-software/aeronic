@@ -31,7 +31,8 @@ public class ToggledAeronicPublication<T> implements AeronicPublication
     @Override
     public void close()
     {
-        if (publication != null) {
+        if (publication != null)
+        {
             publication.close();
         }
     }

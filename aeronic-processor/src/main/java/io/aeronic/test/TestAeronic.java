@@ -17,11 +17,12 @@ public class TestAeronic implements Aeronic
     public <T> T createPublisher(final Class<T> clazz, final String channel, final int streamId)
     {
         final AbstractSubscriberInvoker<?> subscriberInvoker = clazzToSubscriberMap.get(clazz);
-        if (subscriberInvoker == null) {
+        if (subscriberInvoker == null)
+        {
             throw new IllegalStateException(("Cannot create a publisher before registering a subscriber! " +
                     "Register %s subscriber first.").formatted(clazz.getName()));
         }
-        return (T) subscriberInvoker.getSubscriber();
+        return (T)subscriberInvoker.getSubscriber();
     }
 
     @Override

@@ -72,9 +72,11 @@ public class AeronicImpl implements AutoCloseable, Aeronic
     @SuppressWarnings("unchecked")
     public static <T> T createPublisher(final Class<T> clazz, final AeronicPublication publication)
     {
-        try {
+        try
+        {
             return (T) Class.forName(clazz.getName() + "Publisher").getConstructor(AeronicPublication.class).newInstance(publication);
-        } catch (final Exception e) {
+        } catch (final Exception e)
+        {
             throw new RuntimeException(e);
         }
     }
@@ -82,11 +84,13 @@ public class AeronicImpl implements AutoCloseable, Aeronic
     @SuppressWarnings("unchecked")
     public static <T> AbstractSubscriberInvoker<T> createSubscriberInvoker(final Class<T> clazz, final T subscriberImplementation)
     {
-        try {
+        try
+        {
             return (AbstractSubscriberInvoker<T>) Class.forName(clazz.getName() + "Invoker")
                     .getConstructor(clazz)
                     .newInstance(subscriberImplementation);
-        } catch (final Exception e) {
+        } catch (final Exception e)
+        {
             throw new RuntimeException(e);
         }
     }
@@ -95,12 +99,14 @@ public class AeronicImpl implements AutoCloseable, Aeronic
     public static <T> AbstractSubscriberInvoker<T> createSubscriberInvoker(final Class<T> clazz)
     {
         // allow for late binding of subscriber impl
-        try {
+        try
+        {
             return (AbstractSubscriberInvoker<T>) Class.forName(clazz.getName() + "Invoker")
                     .getConstructor()
                     .newInstance();
 
-        } catch (final Exception e) {
+        } catch (final Exception e)
+        {
             throw new RuntimeException(e);
         }
     }
@@ -129,7 +135,8 @@ public class AeronicImpl implements AutoCloseable, Aeronic
 
     public void awaitRecordingCounterId(final CountersReader counters, final int sessionId)
     {
-        while (NULL_VALUE == RecordingPos.findCounterIdBySession(counters, sessionId)) {
+        while (NULL_VALUE == RecordingPos.findCounterIdBySession(counters, sessionId))
+        {
             LockSupport.parkNanos(1000);
         }
     }
@@ -152,7 +159,7 @@ public class AeronicImpl implements AutoCloseable, Aeronic
                         .errorHandler(Throwable::printStackTrace)
                         .ingressChannel(ingressChannel)
                         .aeronDirectoryName(aeron.context().aeronDirectoryName())
-                                            );
+        );
     }
 
     @Override
@@ -189,7 +196,7 @@ public class AeronicImpl implements AutoCloseable, Aeronic
                 aeronClusterCtx
                         .credentialsSupplier(new AeronicCredentialsSupplier(subscriberName))
                         .egressListener((clusterSessionId, timestamp, buffer, offset, length, header) -> invoker.handle(buffer, offset))
-                                                              );
+        );
         dynamicCompositeAgent.tryAdd(new AeronClusterAgent(aeronCluster, subscriberName));
     }
 
@@ -198,7 +205,7 @@ public class AeronicImpl implements AutoCloseable, Aeronic
             final T subscriberImplementation,
             final String livePublicationAlias,
             final int streamId
-                                                )
+    )
     {
         final String subscriptionChannel = new ChannelUriStringBuilder()
                 .media(CommonContext.UDP_MEDIA)
@@ -249,11 +256,12 @@ public class AeronicImpl implements AutoCloseable, Aeronic
                         controlSessionId, correlationId, recordingId, startTimestamp, stopTimestamp, startPosition, stopPosition, initialTermId,
                         segmentFileLength, termBufferLength, mtuLength, sessionId, streamId, strippedChannel, originalChannel, sourceIdentity
                 ) -> {
-                    if (originalChannel.contains(liveChannelAlias)) {
+                    if (originalChannel.contains(liveChannelAlias))
+                    {
                         recordingIdRef.set(recordingId);
                     }
                 }
-                                   );
+        );
 
         return recordingIdRef.get();
     }
@@ -273,7 +281,8 @@ public class AeronicImpl implements AutoCloseable, Aeronic
     @Override
     public void close()
     {
-        if (agentRunner != null) {
+        if (agentRunner != null)
+        {
             agentRunner.close();
         }
         publications.forEach(AeronicPublication::close);

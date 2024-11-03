@@ -1,6 +1,6 @@
-//plugins {
-//    id("checkstyle")
-//}
+plugins {
+    id("checkstyle")
+}
 
 subprojects {
 //    apply(plugin = "checkstyle")
@@ -11,18 +11,12 @@ subprojects {
     tasks {
 //        withType<Checkstyle> {
 //            reports {
-//                html.required.set(
-//                    true
-//                )
-//                xml.required.set(
-//                    false
-//                )
+//                html.required.set(true)
+//                xml.required.set(false)
 //            }
 //        }
-//
-//        register(
-//            "checkstyle"
-//        ) {
+
+//        register("checkstyle") {
 //            dependsOn(
 //                "checkstyleMain",
 //                "checkstyleTest"
