@@ -5,8 +5,7 @@ import io.aeronic.codec.BufferEncoder;
 import io.aeronic.codec.DecodedBy;
 import io.aeronic.codec.Encodable;
 
-public class Composite implements Encodable
-{
+public class Composite implements Encodable {
     private final int anInt;
     private final long aLong;
     private final boolean aBoolean;
@@ -47,11 +46,11 @@ public class Composite implements Encodable
     public String toString()
     {
         return "Composite{" +
-            "anInt=" + anInt +
-            ", aLong=" + aLong +
-            ", aBoolean=" + aBoolean +
-            ", aByte=" + aByte +
-            ", aDouble=" + aDouble +
-            '}';
+                "anInt=" + anInt +
+                ", aLong=" + aLong +
+                ", aBoolean=" + aBoolean +
+                ", aByte=" + aByte +
+                ", aDouble=" + aDouble +
+                '}';
     }
 }

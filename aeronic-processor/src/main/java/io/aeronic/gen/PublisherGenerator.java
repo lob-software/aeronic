@@ -5,14 +5,12 @@ import java.util.List;
 
 import static io.aeronic.gen.TypeUtil.isPrimitive;
 
-public class PublisherGenerator
-{
+public class PublisherGenerator {
     private final List<String> imports = new ArrayList<>();
 
     private void addImport(final String importStatement)
     {
-        if (!imports.contains(importStatement))
-        {
+        if (!imports.contains(importStatement)) {
             imports.add(importStatement);
         }
     }
@@ -22,20 +20,19 @@ public class PublisherGenerator
         final String generatedMethods = generateMethods(methods);
 
         return new StringBuilder()
-            .append(generatePackageAndImports(packageName))
-            .append(generateClassDeclaration(interfaceName))
-            .append("\n").append("{").append("\n")
-            .append(generateConstructor(interfaceName))
-            .append(generatedMethods)
-            .append("}").append("\n")
-            .toString();
+                .append(generatePackageAndImports(packageName))
+                .append(generateClassDeclaration(interfaceName))
+                .append("\n").append("{").append("\n")
+                .append(generateConstructor(interfaceName))
+                .append(generatedMethods)
+                .append("}").append("\n")
+                .toString();
     }
 
     private String generateMethods(final List<MethodInfo> methods)
     {
         final StringBuilder methodsBuilder = new StringBuilder();
-        for (int i = 0; i < methods.size(); i++)
-        {
+        for (int i = 0; i < methods.size(); i++) {
             final MethodInfo interfaceMethod = methods.get(i);
             final String methodName = interfaceMethod.getName();
             final List<ParameterInfo> parameters = interfaceMethod.getParameters();
@@ -45,94 +42,84 @@ public class PublisherGenerator
 
             final StringBuilder methodBodyBuilder = new StringBuilder();
             methodBodyBuilder.append("""
-                        bufferEncoder.encode(%s);
-                """.formatted(interfaceMethod.getIndex()));
+                                                     bufferEncoder.encode(%s);
+                                             """.formatted(interfaceMethod.getIndex()));
 
-            for (int j = 0; j < parameters.size(); j++)
-            {
+            for (int j = 0; j < parameters.size(); j++) {
                 writeParameter(methodsBuilder, methodBodyBuilder, parameters.get(j));
 
-                if (j < parameters.size() - 1)
-                {
+                if (j < parameters.size() - 1) {
                     methodsBuilder.append(",\n");
                 }
             }
 
             methodBodyBuilder.append("""
-                        offer();
-                """);
+                                                     offer();
+                                             """);
 
             methodsBuilder.append("\n    )");
             methodsBuilder.append("""
-                    
-                    {
-                """);
+                                          
+                                              {
+                                          """);
 
-            if (i < methods.size() - 1)
-            {
+            if (i < methods.size() - 1) {
                 methodBodyBuilder.append("""
-                        }
-                        
-                    """);
+                                                     }
+                                                 
+                                                 """);
             }
 
             methodsBuilder.append(methodBodyBuilder);
         }
 
         methodsBuilder.append("""
-                }
-            """);
+                                          }
+                                      """);
 
         return methodsBuilder.toString();
     }
 
     private void writeParameter(
-        final StringBuilder methodsBuilder,
-        final StringBuilder methodBodyBuilder,
-        final ParameterInfo parameter
-    )
+            final StringBuilder methodsBuilder,
+            final StringBuilder methodBodyBuilder,
+            final ParameterInfo parameter
+                               )
     {
         final String parameterType = parameter.getType();
         final String parameterName = parameter.getName();
-        if (parameter.isPrimitive())
-        {
+        if (parameter.isPrimitive()) {
             methodsBuilder.append("        final %s %s".formatted(parameterType, parameterName));
             methodBodyBuilder.append("""
-                        bufferEncoder.encode(%s);
-                """.formatted(parameterName));
+                                                     bufferEncoder.encode(%s);
+                                             """.formatted(parameterName));
             return;
         }
 
-        if (parameter.isArray())
-        {
+        if (parameter.isArray()) {
             final String arrayType = parameterType.substring(0, parameterType.length() - 2);
-            if (isPrimitive(arrayType))
-            {
+            if (isPrimitive(arrayType)) {
                 methodsBuilder.append("        final %s %s".formatted(parameterType, parameterName));
-            }
-            else
-            {
+            } else {
                 final String className = TypeUtil.extractClassName(arrayType);
                 methodsBuilder.append("        final %s[] %s".formatted(className, parameterName));
             }
             methodBodyBuilder.append("""
-                        bufferEncoder.encode(%s);
-                """.formatted(parameterName));
+                                                     bufferEncoder.encode(%s);
+                                             """.formatted(parameterName));
             return;
         }
 
-        if (parameterType.equals(String.class.getName()))
-        {
+        if (parameterType.equals(String.class.getName())) {
             methodsBuilder.append("        final String %s".formatted(parameterName));
             methodBodyBuilder.append("""
-                        bufferEncoder.encode(%s);
-                """.formatted(parameterName));
+                                                     bufferEncoder.encode(%s);
+                                             """.formatted(parameterName));
             return;
         }
 
         final List<String> genericParameters = parameter.getGenericParameters();
-        if (!genericParameters.isEmpty())
-        {
+        if (!genericParameters.isEmpty()) {
             final String genericParameter = genericParameters.get(0);
             final String genericParameterClassName = TypeUtil.extractClassName(genericParameter);
             final String fullyQualifiedType = parameterType.split("<")[0];
@@ -140,8 +127,8 @@ public class PublisherGenerator
 
             methodsBuilder.append("        final %s<%s> %s".formatted(className, genericParameterClassName, parameterName));
             methodBodyBuilder.append("""
-                        bufferEncoder.encode(%s);
-                """.formatted(parameterName));
+                                                     bufferEncoder.encode(%s);
+                                             """.formatted(parameterName));
 
             addImport("import %s;".formatted(genericParameter));
             addImport("import %s;".formatted(fullyQualifiedType));
@@ -152,8 +139,8 @@ public class PublisherGenerator
         final String className = TypeUtil.extractClassName(parameterType);
         methodsBuilder.append("        final %s %s".formatted(className, parameterName));
         methodBodyBuilder.append("""
-                    %s.encode(bufferEncoder);
-            """.formatted(parameterName));
+                                                 %s.encode(bufferEncoder);
+                                         """.formatted(parameterName));
         addImport("import %s;".formatted(parameterType));
     }
 
@@ -161,12 +148,12 @@ public class PublisherGenerator
     {
         return """
                 
-                public %sPublisher(final AeronicPublication publication)
-                {
-                    super(publication);
-                }
+                    public %sPublisher(final AeronicPublication publication)
+                    {
+                        super(publication);
+                    }
                 
-            """.formatted(interfaceName);
+                """.formatted(interfaceName);
     }
 
     private String generateClassDeclaration(final String interfaceName)
@@ -178,14 +165,14 @@ public class PublisherGenerator
     {
         final String importsString = imports.stream().reduce("", (e, n) -> e + "\n" + n);
         return """
-            package %s;
-                    
-            import io.aeron.Publication;
-            import io.aeronic.net.AbstractPublisher;
-            import io.aeronic.net.AeronicPublication;
-            import org.agrona.BitUtil;%s
-
-                        
-            """.formatted(packageName, importsString);
+                package %s;
+                
+                import io.aeron.Publication;
+                import io.aeronic.net.AbstractPublisher;
+                import io.aeronic.net.AeronicPublication;
+                import org.agrona.BitUtil;%s
+                
+                
+                """.formatted(packageName, importsString);
     }
 }

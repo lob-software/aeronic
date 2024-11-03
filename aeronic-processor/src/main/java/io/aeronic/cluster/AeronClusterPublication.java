@@ -4,16 +4,15 @@ import io.aeron.cluster.client.AeronCluster;
 import io.aeronic.net.AeronicPublication;
 import org.agrona.DirectBuffer;
 
-public class AeronClusterPublication implements AeronicPublication
-{
+public class AeronClusterPublication implements AeronicPublication {
 
     private final AeronCluster aeronCluster;
 
     public AeronClusterPublication(final String publisherName, final AeronCluster.Context aeronClusterCtx)
     {
         this.aeronCluster = AeronCluster.connect(
-            aeronClusterCtx
-                .credentialsSupplier(new AeronicCredentialsSupplier(publisherName)));
+                aeronClusterCtx
+                        .credentialsSupplier(new AeronicCredentialsSupplier(publisherName)));
     }
 
     @Override
@@ -31,16 +30,14 @@ public class AeronClusterPublication implements AeronicPublication
     @Override
     public void close()
     {
-        if (!aeronCluster.isClosed())
-        {
+        if (!aeronCluster.isClosed()) {
             aeronCluster.close();
         }
     }
 
     public int pollCluster()
     {
-        if (isConnected())
-        {
+        if (isConnected()) {
             return aeronCluster.pollEgress();
         }
         return 0;

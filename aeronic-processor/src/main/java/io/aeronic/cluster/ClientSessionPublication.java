@@ -8,8 +8,7 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Set;
 
-public class ClientSessionPublication<T> implements AeronicPublication
-{
+public class ClientSessionPublication<T> implements AeronicPublication {
     private final String publisherName;
     private final Set<ClientSession> clientSessions = Collections.newSetFromMap(new IdentityHashMap<>());
     private T publisher;
@@ -36,8 +35,7 @@ public class ClientSessionPublication<T> implements AeronicPublication
     @Override
     public void close()
     {
-        if (isConnected())
-        {
+        if (isConnected()) {
             clientSessions.forEach(ClientSession::close);
         }
     }

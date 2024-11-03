@@ -16,8 +16,7 @@ import static io.aeronic.Assertions.assertEventually;
 import static io.aeronic.Assertions.assertReflectiveEquals;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class AeronicMultiParamTest
-{
+public class AeronicMultiParamTest {
 
     private static final String IPC = "aeron:ipc";
     private AeronicImpl aeronic;
@@ -28,16 +27,16 @@ public class AeronicMultiParamTest
     void setUp()
     {
         final MediaDriver.Context mediaDriverCtx = new MediaDriver.Context()
-            .dirDeleteOnStart(true)
-            .spiesSimulateConnection(true)
-            .threadingMode(ThreadingMode.SHARED)
-            .sharedIdleStrategy(new BusySpinIdleStrategy())
-            .dirDeleteOnShutdown(true);
+                .dirDeleteOnStart(true)
+                .spiesSimulateConnection(true)
+                .threadingMode(ThreadingMode.SHARED)
+                .sharedIdleStrategy(new BusySpinIdleStrategy())
+                .dirDeleteOnShutdown(true);
 
         mediaDriver = MediaDriver.launchEmbedded(mediaDriverCtx);
 
         final Aeron.Context aeronCtx = new Aeron.Context()
-            .aeronDirectoryName(mediaDriver.aeronDirectoryName());
+                .aeronDirectoryName(mediaDriver.aeronDirectoryName());
 
         aeron = Aeron.connect(aeronCtx);
         aeronic = AeronicImpl.launch(new AeronicImpl.Context().aeron(aeron));
@@ -63,50 +62,50 @@ public class AeronicMultiParamTest
         final int intValue = 123;
         final float floatValue = 1.21312f;
         final double doubleValue = .03412342;
-        final byte byteValue = (byte)56;
+        final byte byteValue = (byte) 56;
         final char charValue = 'a';
         final boolean booleanValue = true;
         final short shortValue = 123;
         final String stringValue = "stringValue";
         final Composite compositeValue = new Composite(12, Long.MAX_VALUE, true, Byte.MAX_VALUE, 123.123);
-        final long[] longs = { 1L, 2L, 3L, Long.MAX_VALUE, Long.MIN_VALUE };
-        final int[] ints = { 1, 2, 3 };
-        final double[] doubles = { 1., 2., 3. };
-        final float[] floats = { 1.f, 2.f, 3.f };
-        final short[] shorts = { 1, 2, 3 };
-        final byte[] bytes = { 0x1, 0x2, 0x5 };
-        final char[] chars = { '1', '2', '3' };
+        final long[] longs = {1L, 2L, 3L, Long.MAX_VALUE, Long.MIN_VALUE};
+        final int[] ints = {1, 2, 3};
+        final double[] doubles = {1., 2., 3.};
+        final float[] floats = {1.f, 2.f, 3.f};
+        final short[] shorts = {1, 2, 3};
+        final byte[] bytes = {0x1, 0x2, 0x5};
+        final char[] chars = {'1', '2', '3'};
         final Composite[] compositeArray = new Composite[]{
-            new Composite(1, 4L, false, Byte.MAX_VALUE, 123.11),
-            new Composite(1, 4L, false, Byte.MIN_VALUE, 123.11)
+                new Composite(1, 4L, false, Byte.MAX_VALUE, 123.11),
+                new Composite(1, 4L, false, Byte.MIN_VALUE, 123.11)
         };
         final List<Composite> compositeList = List.of(
-            new Composite(1, 4L, false, Byte.MAX_VALUE, 123.11),
-            new Composite(1, 4L, false, Byte.MIN_VALUE, 123.11)
-        );
+                new Composite(1, 4L, false, Byte.MAX_VALUE, 123.11),
+                new Composite(1, 4L, false, Byte.MIN_VALUE, 123.11)
+                                                     );
 
         publisher.onEvent(
-            longValue,
-            intValue,
-            floatValue,
-            doubleValue,
-            byteValue,
-            charValue,
-            booleanValue,
-            shortValue,
-            stringValue,
-            compositeValue,
-            longs,
-            ints,
-            doubles,
-            floats,
-            shorts,
-            bytes,
-            chars,
-            compositeArray,
-            MyEnum.ONE,
-            compositeList
-        );
+                longValue,
+                intValue,
+                floatValue,
+                doubleValue,
+                byteValue,
+                charValue,
+                booleanValue,
+                shortValue,
+                stringValue,
+                compositeValue,
+                longs,
+                ints,
+                doubles,
+                floats,
+                shorts,
+                bytes,
+                chars,
+                compositeArray,
+                MyEnum.ONE,
+                compositeList
+                         );
 
         assertEventually(() -> {
             assertEquals(shortValue, subscriberImpl.shortValue);
@@ -132,27 +131,27 @@ public class AeronicMultiParamTest
         });
 
         publisher.onEvent(
-            123L,
-            intValue,
-            floatValue,
-            doubleValue,
-            byteValue,
-            charValue,
-            false,
-            (short)(shortValue + 1),
-            stringValue,
-            compositeValue,
-            longs,
-            ints,
-            doubles,
-            floats,
-            shorts,
-            bytes,
-            chars,
-            compositeArray,
-            MyEnum.TWO,
-            List.of()
-        );
+                123L,
+                intValue,
+                floatValue,
+                doubleValue,
+                byteValue,
+                charValue,
+                false,
+                (short) (shortValue + 1),
+                stringValue,
+                compositeValue,
+                longs,
+                ints,
+                doubles,
+                floats,
+                shorts,
+                bytes,
+                chars,
+                compositeArray,
+                MyEnum.TWO,
+                List.of()
+                         );
 
         assertEventually(() -> {
             assertEquals(shortValue + 1, subscriberImpl.shortValue);
@@ -178,8 +177,7 @@ public class AeronicMultiParamTest
         });
     }
 
-    private static class MultiParamEventsImpl implements MultiParamEvents
-    {
+    private static class MultiParamEventsImpl implements MultiParamEvents {
         private volatile long longValue;
         private volatile int intValue;
         private volatile float floatValue;
@@ -203,27 +201,27 @@ public class AeronicMultiParamTest
 
         @Override
         public void onEvent(
-            final long longValue,
-            final int intValue,
-            final float floatValue,
-            final double doubleValue,
-            final byte byteValue,
-            final char charValue,
-            final boolean booleanValue,
-            final short shortValue,
-            final String stringValue,
-            final Composite compositeValue,
-            final long[] longs,
-            final int[] ints,
-            final double[] doubles,
-            final float[] floats,
-            final short[] shorts,
-            final byte[] bytes,
-            final char[] chars,
-            final Composite[] compositeArray,
-            final MyEnum myEnum,
-            final List<Composite> compositeList
-        )
+                final long longValue,
+                final int intValue,
+                final float floatValue,
+                final double doubleValue,
+                final byte byteValue,
+                final char charValue,
+                final boolean booleanValue,
+                final short shortValue,
+                final String stringValue,
+                final Composite compositeValue,
+                final long[] longs,
+                final int[] ints,
+                final double[] doubles,
+                final float[] floats,
+                final short[] shorts,
+                final byte[] bytes,
+                final char[] chars,
+                final Composite[] compositeArray,
+                final MyEnum myEnum,
+                final List<Composite> compositeList
+                           )
         {
             this.longValue = longValue;
             this.intValue = intValue;

@@ -16,50 +16,49 @@ import static io.aeronic.gen.Samples.SAMPLE_SUBSCRIBER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CodeGenerationTest
-{
+public class CodeGenerationTest {
 
     @Test
     public void shouldGenerateCode()
     {
         final TestAeronicAnnotationProcessor processor = new TestAeronicAnnotationProcessor();
         Reflect.compile(
-            "io.aeronic.TestEvents",
-            """
-                package io.aeronic;
-                                   
-                import io.aeronic.gen.Aeronic;
-                import java.util.List;
-                import io.aeronic.codec.SimpleImpl;
-                                                    
-                @Aeronic
-                public interface TestEvents
-                {
-                    void onEvent(
-                        long aLong,
-                        int intValue,
-                        float floatValue,
-                        double doubleValue,
-                        byte byteValue,
-                        char charValue,
-                        SimpleImpl simpleImpl,
-                        String stringValue,
-                        long[] longs,
-                        int[] ints,
-                        float[] floats,
-                        double[] doubles,
-                        byte[] bytes,
-                        char[] chars,
-                        SimpleImpl[] simples,
-                        MyEnum myEnum,
-                        List<SimpleImpl> simpleList
-                    );
-
-                    void onTimer(long timestamp);
-                } 
-                """,
-            new CompileOptions().processors(processor)
-        );
+                "io.aeronic.TestEvents",
+                """
+                        package io.aeronic;
+                        
+                        import io.aeronic.gen.Aeronic;
+                        import java.util.List;
+                        import io.aeronic.codec.SimpleImpl;
+                        
+                        @Aeronic
+                        public interface TestEvents
+                        {
+                            void onEvent(
+                                long aLong,
+                                int intValue,
+                                float floatValue,
+                                double doubleValue,
+                                byte byteValue,
+                                char charValue,
+                                SimpleImpl simpleImpl,
+                                String stringValue,
+                                long[] longs,
+                                int[] ints,
+                                float[] floats,
+                                double[] doubles,
+                                byte[] bytes,
+                                char[] chars,
+                                SimpleImpl[] simples,
+                                MyEnum myEnum,
+                                List<SimpleImpl> simpleList
+                            );
+                        
+                            void onTimer(long timestamp);
+                        } 
+                        """,
+                new CompileOptions().processors(processor)
+                       );
 
         final List<MethodInfo> methodInfoList = processor.aeronicInterfaceHelper.getMethodInfoFor("TestEvents");
         assertThat(methodInfoList).hasSize(2);
@@ -77,8 +76,7 @@ public class CodeGenerationTest
     @SupportedAnnotationTypes("io.aeronic.gen.Aeronic")
     @SupportedSourceVersion(SourceVersion.RELEASE_17)
     @AutoService(Processor.class)
-    private static class TestAeronicAnnotationProcessor extends AbstractProcessor
-    {
+    private static class TestAeronicAnnotationProcessor extends AbstractProcessor {
 
         public final AeronicInterfaceHelper aeronicInterfaceHelper = new AeronicInterfaceHelper();
 

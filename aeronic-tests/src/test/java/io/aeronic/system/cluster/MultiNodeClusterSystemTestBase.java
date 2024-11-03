@@ -15,8 +15,7 @@ import static io.aeronic.Assertions.assertEventuallyTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 
-public abstract class MultiNodeClusterSystemTestBase
-{
+public abstract class MultiNodeClusterSystemTestBase {
     private static final int STREAM_ID = 101;
 
     private AeronicImpl aeronic;
@@ -30,14 +29,14 @@ public abstract class MultiNodeClusterSystemTestBase
     void setUp()
     {
         mediaDriver = MediaDriver.launchEmbedded(new MediaDriver.Context()
-            .dirDeleteOnStart(true)
-            .dirDeleteOnShutdown(true)
-            .spiesSimulateConnection(true)
-            .threadingMode(ThreadingMode.SHARED)
-            .sharedIdleStrategy(new BusySpinIdleStrategy()));
+                                                         .dirDeleteOnStart(true)
+                                                         .dirDeleteOnShutdown(true)
+                                                         .spiesSimulateConnection(true)
+                                                         .threadingMode(ThreadingMode.SHARED)
+                                                         .sharedIdleStrategy(new BusySpinIdleStrategy()));
 
         final Aeron.Context aeronCtx = new Aeron.Context()
-            .aeronDirectoryName(mediaDriver.aeronDirectoryName());
+                .aeronDirectoryName(mediaDriver.aeronDirectoryName());
 
         aeron = Aeron.connect(aeronCtx);
         aeronic = AeronicImpl.launch(new AeronicImpl.Context().aeron(aeron));
@@ -50,9 +49,9 @@ public abstract class MultiNodeClusterSystemTestBase
     private AeronicClusteredServiceContainer newClusteredServiceContainer()
     {
         return new AeronicClusteredServiceContainer(
-            new AeronicClusteredServiceContainer.Configuration()
-                .clusteredService(new TestClusterNode.Service())
-                .registerToggledEgressPublisher(SimpleEvents.class, egressChannel(), STREAM_ID)
+                new AeronicClusteredServiceContainer.Configuration()
+                        .clusteredService(new TestClusterNode.Service())
+                        .registerToggledEgressPublisher(SimpleEvents.class, egressChannel(), STREAM_ID)
         );
     }
 
@@ -147,8 +146,7 @@ public abstract class MultiNodeClusterSystemTestBase
         assertEventuallyTrue(() -> sub1.value == 101L && sub2.value == 101L, 5000);
     }
 
-    public static class SimpleEventsImpl implements SimpleEvents
-    {
+    public static class SimpleEventsImpl implements SimpleEvents {
 
         private volatile long value;
 

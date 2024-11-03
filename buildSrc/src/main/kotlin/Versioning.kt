@@ -1,7 +1,6 @@
 const val VERSION = "0.0.18"
 
-object Versions
-{
+object Versions {
     const val aeron = "io.aeron:aeron-all:1.43.0"
     const val aeronic = "io.aeronic:aeronic:${VERSION}"
     const val assertJ = "org.assertj:assertj-core:3.23.1"

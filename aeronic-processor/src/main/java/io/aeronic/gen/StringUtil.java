@@ -1,7 +1,6 @@
 package io.aeronic.gen;
 
-public final class StringUtil
-{
+public final class StringUtil {
     private StringUtil()
     {
     }

@@ -13,8 +13,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BufferDecoderTest
-{
+public class BufferDecoderTest {
     private ExpandableDirectByteBuffer buffer;
     private BufferDecoder bufferDecoder;
 
@@ -118,12 +117,11 @@ public class BufferDecoderTest
     @Test
     public void shouldDecodeLongArray()
     {
-        final long[] longs = { 1L, 2L, 4L, 5L };
+        final long[] longs = {1L, 2L, 4L, 5L};
         buffer.putInt(0, longs.length);
 
         int idx = BitUtil.SIZE_OF_INT;
-        for (int i = 0; i < longs.length; i++)
-        {
+        for (int i = 0; i < longs.length; i++) {
             buffer.putLong(idx, longs[i]);
             idx += BitUtil.SIZE_OF_LONG;
         }
@@ -135,12 +133,11 @@ public class BufferDecoderTest
     @Test
     public void shouldDecodeIntArray()
     {
-        final int[] ints = { 1, 2, 4, 5 };
+        final int[] ints = {1, 2, 4, 5};
         buffer.putInt(0, ints.length);
 
         int idx = BitUtil.SIZE_OF_INT;
-        for (int i = 0; i < ints.length; i++)
-        {
+        for (int i = 0; i < ints.length; i++) {
             buffer.putInt(idx, ints[i]);
             idx += BitUtil.SIZE_OF_INT;
         }
@@ -152,12 +149,11 @@ public class BufferDecoderTest
     @Test
     public void shouldDecodeFloatArray()
     {
-        final float[] floats = { 1.f, 2.f, 4.f, 5.f };
+        final float[] floats = {1.f, 2.f, 4.f, 5.f};
         buffer.putInt(0, floats.length);
 
         int idx = BitUtil.SIZE_OF_INT;
-        for (int i = 0; i < floats.length; i++)
-        {
+        for (int i = 0; i < floats.length; i++) {
             buffer.putFloat(idx, floats[i]);
             idx += BitUtil.SIZE_OF_FLOAT;
         }
@@ -169,12 +165,11 @@ public class BufferDecoderTest
     @Test
     public void shouldDecodeDoubleArray()
     {
-        final double[] doubles = { 1., 2., 4., 5. };
+        final double[] doubles = {1., 2., 4., 5.};
         buffer.putInt(0, doubles.length);
 
         int idx = BitUtil.SIZE_OF_INT;
-        for (int i = 0; i < doubles.length; i++)
-        {
+        for (int i = 0; i < doubles.length; i++) {
             buffer.putDouble(idx, doubles[i]);
             idx += BitUtil.SIZE_OF_DOUBLE;
         }
@@ -186,12 +181,11 @@ public class BufferDecoderTest
     @Test
     public void shouldDecodeShortArray()
     {
-        final short[] shorts = { 1, 2, 4, 5 };
+        final short[] shorts = {1, 2, 4, 5};
         buffer.putInt(0, shorts.length);
 
         int idx = BitUtil.SIZE_OF_INT;
-        for (int i = 0; i < shorts.length; i++)
-        {
+        for (int i = 0; i < shorts.length; i++) {
             buffer.putShort(idx, shorts[i]);
             idx += BitUtil.SIZE_OF_SHORT;
         }
@@ -203,7 +197,7 @@ public class BufferDecoderTest
     @Test
     public void shouldDecodeByteArray()
     {
-        final byte[] bytes = { 0x1, 0x2, 0x3, 0x5 };
+        final byte[] bytes = {0x1, 0x2, 0x3, 0x5};
         buffer.putInt(0, bytes.length);
         buffer.putBytes(BitUtil.SIZE_OF_INT, bytes);
 
@@ -214,12 +208,11 @@ public class BufferDecoderTest
     @Test
     public void shouldDecodeCharArray()
     {
-        final char[] chars = { '1', '2', '4', '5' };
+        final char[] chars = {'1', '2', '4', '5'};
         buffer.putInt(0, chars.length);
 
         int idx = BitUtil.SIZE_OF_INT;
-        for (int i = 0; i < chars.length; i++)
-        {
+        for (int i = 0; i < chars.length; i++) {
             buffer.putChar(idx, chars[i]);
             idx += BitUtil.SIZE_OF_CHAR;
         }
@@ -268,8 +261,7 @@ public class BufferDecoderTest
         buffer.putInt(0, list.size());
 
         int idx = BitUtil.SIZE_OF_INT;
-        for (int i = 0; i < list.size(); i++)
-        {
+        for (int i = 0; i < list.size(); i++) {
             buffer.putLong(idx, list.get(i));
             idx += BitUtil.SIZE_OF_LONG;
         }

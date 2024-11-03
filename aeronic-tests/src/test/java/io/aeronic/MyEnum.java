@@ -11,8 +11,7 @@ import java.util.function.Function;
 
 import static java.util.stream.Collectors.toMap;
 
-public enum MyEnum implements Encodable
-{
+public enum MyEnum implements Encodable {
     ONE('a'), TWO('b'), THREE('c');
 
     private static final Map<Character, MyEnum> VALUES = Arrays.stream(values()).collect(toMap(e -> e.value, Function.identity()));

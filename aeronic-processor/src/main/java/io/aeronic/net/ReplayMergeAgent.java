@@ -6,12 +6,10 @@ import io.aeron.logbuffer.Header;
 import org.agrona.DirectBuffer;
 import org.agrona.concurrent.Agent;
 
-public class ReplayMergeAgent<T> implements Agent
-{
+public class ReplayMergeAgent<T> implements Agent {
     private final ReplayMerge replayMerge;
     private final AbstractSubscriberInvoker<T> invoker;
-    private final FragmentHandler fragmentHandler = new FragmentHandler()
-    {
+    private final FragmentHandler fragmentHandler = new FragmentHandler() {
         @Override
         public void onFragment(final DirectBuffer buffer, final int offset, final int length, final Header header)
         {

@@ -17,13 +17,12 @@ import java.util.function.LongSupplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SyncExample
-{
+public class SyncExample {
     private static final String CHANNEL = new ChannelUriStringBuilder()
-        .media("udp")
-        .reliable(true)
-        .endpoint("localhost:40457")
-        .build();
+            .media("udp")
+            .reliable(true)
+            .endpoint("localhost:40457")
+            .build();
 
     private AeronicImpl aeronic;
     private Aeron aeron;
@@ -33,16 +32,16 @@ public class SyncExample
     void setUp()
     {
         final MediaDriver.Context mediaDriverCtx = new MediaDriver.Context()
-            .dirDeleteOnStart(true)
-            .spiesSimulateConnection(true)
-            .threadingMode(ThreadingMode.SHARED)
-            .sharedIdleStrategy(new BusySpinIdleStrategy())
-            .dirDeleteOnShutdown(true);
+                .dirDeleteOnStart(true)
+                .spiesSimulateConnection(true)
+                .threadingMode(ThreadingMode.SHARED)
+                .sharedIdleStrategy(new BusySpinIdleStrategy())
+                .dirDeleteOnShutdown(true);
 
         mediaDriver = MediaDriver.launchEmbedded(mediaDriverCtx);
 
         final Aeron.Context aeronCtx = new Aeron.Context()
-            .aeronDirectoryName(mediaDriver.aeronDirectoryName());
+                .aeronDirectoryName(mediaDriver.aeronDirectoryName());
 
         aeron = Aeron.connect(aeronCtx);
         aeronic = AeronicImpl.launch(new AeronicImpl.Context().aeron(aeron));
@@ -76,8 +75,7 @@ public class SyncExample
         assertEquals(746, newValue);
     }
 
-    private static class SyncEventsImpl implements SyncEvents
-    {
+    private static class SyncEventsImpl implements SyncEvents {
 
         private final SyncEventsResponse responsePublisher;
         private long value = 0L;
@@ -96,8 +94,7 @@ public class SyncExample
         }
     }
 
-    private static class SyncEventsController implements SyncEventsResponse
-    {
+    private static class SyncEventsController implements SyncEventsResponse {
         final LongSupplier correlationIdSupplier = System::nanoTime;
         private final SyncEvents publisher;
         private final Map<Long, CompletableFuture<Long>> correlationIdToResponseMap = new ConcurrentHashMap<>();

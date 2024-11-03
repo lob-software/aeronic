@@ -21,8 +21,7 @@ import java.io.File;
 
 import static io.aeronic.Assertions.assertEventuallyTrue;
 
-public class AeronicPersistentTest
-{
+public class AeronicPersistentTest {
     private static final int STREAM_ID = 1033;
     private static final String CONTROL_ENDPOINT = "localhost:23265";
 
@@ -33,47 +32,47 @@ public class AeronicPersistentTest
     private AeronArchive aeronArchive;
 
     private final String publicationChannel = new ChannelUriStringBuilder()
-        .media(CommonContext.UDP_MEDIA)
-        .controlEndpoint(CONTROL_ENDPOINT)
-        .controlMode(CommonContext.MDC_CONTROL_MODE_DYNAMIC)
-        .alias("publication")
-        .build();
+            .media(CommonContext.UDP_MEDIA)
+            .controlEndpoint(CONTROL_ENDPOINT)
+            .controlMode(CommonContext.MDC_CONTROL_MODE_DYNAMIC)
+            .alias("publication")
+            .build();
 
     @BeforeEach
     void setUp()
     {
         mediaDriver = MediaDriver.launchEmbedded(new MediaDriver.Context()
-            .dirDeleteOnStart(true)
-            .spiesSimulateConnection(true)
-            .threadingMode(ThreadingMode.SHARED)
-            .sharedIdleStrategy(new BusySpinIdleStrategy())
-            .dirDeleteOnShutdown(true));
+                                                         .dirDeleteOnStart(true)
+                                                         .spiesSimulateConnection(true)
+                                                         .threadingMode(ThreadingMode.SHARED)
+                                                         .sharedIdleStrategy(new BusySpinIdleStrategy())
+                                                         .dirDeleteOnShutdown(true));
 
         archive = Archive.launch(new Archive.Context()
-            .archiveDir(new File(SystemUtil.tmpDirName(), "archive"))
-            .aeronDirectoryName(mediaDriver.context().aeronDirectoryName())
-            .errorHandler(Throwable::printStackTrace)
-            .deleteArchiveOnStart(true)
-            .threadingMode(ArchiveThreadingMode.SHARED)
-            .controlChannel("aeron:udp?endpoint=localhost:8010")
-            .replicationChannel("aeron:udp?endpoint=localhost:0"));
+                                         .archiveDir(new File(SystemUtil.tmpDirName(), "archive"))
+                                         .aeronDirectoryName(mediaDriver.context().aeronDirectoryName())
+                                         .errorHandler(Throwable::printStackTrace)
+                                         .deleteArchiveOnStart(true)
+                                         .threadingMode(ArchiveThreadingMode.SHARED)
+                                         .controlChannel("aeron:udp?endpoint=localhost:8010")
+                                         .replicationChannel("aeron:udp?endpoint=localhost:0"));
 
         aeron = Aeron.connect(new Aeron.Context().aeronDirectoryName(mediaDriver.aeronDirectoryName()));
 
         aeronArchive = AeronArchive.connect(new AeronArchive.Context()
-            .errorHandler(Throwable::printStackTrace)
-            .aeron(aeron)
-            .controlRequestChannel(archive.context().localControlChannel())
-            .controlRequestStreamId(archive.context().localControlStreamId())
-            .controlResponseChannel(archive.context().controlChannel()));
+                                                    .errorHandler(Throwable::printStackTrace)
+                                                    .aeron(aeron)
+                                                    .controlRequestChannel(archive.context().localControlChannel())
+                                                    .controlRequestStreamId(archive.context().localControlStreamId())
+                                                    .controlResponseChannel(archive.context().controlChannel()));
 
         aeronic = AeronicImpl.launch(
-            new AeronicImpl.Context()
-                .aeron(aeron)
-                .aeronArchive(aeronArchive)
-                .idleStrategy(NoOpIdleStrategy.INSTANCE)
-                .errorHandler(Throwable::printStackTrace)
-                .atomicCounter(null));
+                new AeronicImpl.Context()
+                        .aeron(aeron)
+                        .aeronArchive(aeronArchive)
+                        .idleStrategy(NoOpIdleStrategy.INSTANCE)
+                        .errorHandler(Throwable::printStackTrace)
+                        .atomicCounter(null));
     }
 
     @Test
@@ -99,8 +98,7 @@ public class AeronicPersistentTest
         assertEventuallyTrue(() -> persistentSampleEvents.count == 3 && persistentSampleEvents.value == 103L);
     }
 
-    private static class SampleEventsImpl implements SampleEvents
-    {
+    private static class SampleEventsImpl implements SampleEvents {
 
         private volatile long value;
         private int count;

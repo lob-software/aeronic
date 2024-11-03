@@ -2,7 +2,6 @@ package io.aeronic;
 
 import io.aeronic.test.TestAeronic;
 import org.agrona.collections.MutableLong;
-import org.agrona.concurrent.NoOpIdleStrategy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -14,12 +13,14 @@ public class TestAeronicTest {
     private TestAeronic aeronic;
 
     @BeforeEach
-    void setUp() {
+    void setUp()
+    {
         aeronic = new TestAeronic();
     }
 
     @Test
-    public void shouldBeAbleToPublishAndReceiveAMessage() {
+    public void shouldBeAbleToPublishAndReceiveAMessage()
+    {
         final TestSimpleEvents testSubscriber = new TestSimpleEvents();
 
         // TODO: remove abstraction leaks
@@ -32,14 +33,15 @@ public class TestAeronicTest {
     }
 
     @Test
-    void shouldThrowIfPublisherCreatedBeforeSubscriber() {
+    void shouldThrowIfPublisherCreatedBeforeSubscriber()
+    {
         final IllegalStateException exception = assertThrows(
                 IllegalStateException.class,
                 () -> aeronic.createPublisher(SimpleEvents.class, null, 0)
-        );
+                                                            );
 
         assertEquals("Cannot create a publisher before registering a subscriber! " +
-                "Register io.aeronic.SimpleEvents subscriber first.", exception.getMessage());
+                             "Register io.aeronic.SimpleEvents subscriber first.", exception.getMessage());
     }
 
     private static class TestSimpleEvents implements SimpleEvents {
@@ -47,7 +49,8 @@ public class TestAeronicTest {
         private final MutableLong value = new MutableLong();
 
         @Override
-        public void onEvent(final long value) {
+        public void onEvent(final long value)
+        {
             this.value.set(value);
         }
     }

@@ -2,7 +2,6 @@ package io.aeronic.codec;
 
 
 @FunctionalInterface
-public interface Decoder<T>
-{
+public interface Decoder<T> {
     T decode(BufferDecoder bufferDecoder);
 }

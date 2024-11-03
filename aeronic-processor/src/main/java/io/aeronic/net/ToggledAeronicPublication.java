@@ -5,8 +5,7 @@ import org.agrona.DirectBuffer;
 
 import java.util.function.Supplier;
 
-public class ToggledAeronicPublication<T> implements AeronicPublication
-{
+public class ToggledAeronicPublication<T> implements AeronicPublication {
     private final Supplier<Publication> publicationSupplier;
     private Publication publication;
     private T publisher;
@@ -31,8 +30,7 @@ public class ToggledAeronicPublication<T> implements AeronicPublication
     @Override
     public void close()
     {
-        if (publication != null)
-        {
+        if (publication != null) {
             publication.close();
         }
     }

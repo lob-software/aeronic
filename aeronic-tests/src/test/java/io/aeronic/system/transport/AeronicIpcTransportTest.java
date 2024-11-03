@@ -1,7 +1,6 @@
 package io.aeronic.system.transport;
 
-public class AeronicIpcTransportTest extends AeronicTransportTestBase
-{
+public class AeronicIpcTransportTest extends AeronicTransportTestBase {
 
     private static final String IPC = "aeron:ipc";
 

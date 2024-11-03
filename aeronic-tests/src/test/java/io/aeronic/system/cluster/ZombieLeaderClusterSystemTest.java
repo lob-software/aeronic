@@ -25,15 +25,14 @@ import java.util.concurrent.locks.LockSupport;
 import static io.aeronic.Assertions.assertEventuallyTrue;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
-public class ZombieLeaderClusterSystemTest
-{
+public class ZombieLeaderClusterSystemTest {
     private static final int STREAM_ID = 101;
     private static final String UDP_MULTICAST_CHANNEL = new ChannelUriStringBuilder()
-        .media("udp")
-        .reliable(true)
-        .endpoint("224.0.1.1:40457")
-        .networkInterface("localhost")
-        .build();
+            .media("udp")
+            .reliable(true)
+            .endpoint("224.0.1.1:40457")
+            .networkInterface("localhost")
+            .build();
 
     private AeronicImpl aeronic;
     private Aeron aeron;
@@ -44,14 +43,14 @@ public class ZombieLeaderClusterSystemTest
     void setUp()
     {
         mediaDriver = MediaDriver.launchEmbedded(new MediaDriver.Context()
-            .dirDeleteOnStart(true)
-            .dirDeleteOnShutdown(true)
-            .spiesSimulateConnection(true)
-            .threadingMode(ThreadingMode.SHARED)
-            .sharedIdleStrategy(new BusySpinIdleStrategy()));
+                                                         .dirDeleteOnStart(true)
+                                                         .dirDeleteOnShutdown(true)
+                                                         .spiesSimulateConnection(true)
+                                                         .threadingMode(ThreadingMode.SHARED)
+                                                         .sharedIdleStrategy(new BusySpinIdleStrategy()));
 
         final Aeron.Context aeronCtx = new Aeron.Context()
-            .aeronDirectoryName(mediaDriver.aeronDirectoryName());
+                .aeronDirectoryName(mediaDriver.aeronDirectoryName());
 
         aeron = Aeron.connect(aeronCtx);
         aeronic = AeronicImpl.launch(new AeronicImpl.Context().aeron(aeron));
@@ -64,9 +63,9 @@ public class ZombieLeaderClusterSystemTest
     private AeronicClusteredServiceContainer newClusteredServiceContainer()
     {
         return new AeronicClusteredServiceContainer(
-            new AeronicClusteredServiceContainer.Configuration()
-                .clusteredService(new TestClusterNode.Service())
-                .registerToggledEgressPublisher(SimpleEvents.class, UDP_MULTICAST_CHANNEL, STREAM_ID)
+                new AeronicClusteredServiceContainer.Configuration()
+                        .clusteredService(new TestClusterNode.Service())
+                        .registerToggledEgressPublisher(SimpleEvents.class, UDP_MULTICAST_CHANNEL, STREAM_ID)
         );
     }
 
@@ -109,8 +108,7 @@ public class ZombieLeaderClusterSystemTest
         assertEventuallyTrue(() -> sub1.value == 101L && sub2.value == 101L, 5000);
     }
 
-    public static class SimpleEventsImpl implements SimpleEvents
-    {
+    public static class SimpleEventsImpl implements SimpleEvents {
 
         private volatile long value;
 
@@ -124,46 +122,38 @@ public class ZombieLeaderClusterSystemTest
     @BeforeAll
     static void instrumentLeaderSleep()
     {
-        try
-        {
+        try {
             ByteBuddyAgent.install();
 
             final Class<?> consensusModuleAgentClazz = Class.forName("io.aeron.cluster.ConsensusModuleAgent");
 
             new ByteBuddy()
-                .redefine(consensusModuleAgentClazz)
-                .visit(Advice.to(ConsensusWorkIntercept.class).on(named("consensusWork")))
-                .make()
-                .load(consensusModuleAgentClazz.getClassLoader(), ClassReloadingStrategy.fromInstalledAgent())
-                .getLoaded();
-        }
-        catch (final Exception e)
-        {
+                    .redefine(consensusModuleAgentClazz)
+                    .visit(Advice.to(ConsensusWorkIntercept.class).on(named("consensusWork")))
+                    .make()
+                    .load(consensusModuleAgentClazz.getClassLoader(), ClassReloadingStrategy.fromInstalledAgent())
+                    .getLoaded();
+        } catch (final Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static class ConsensusWorkIntercept
-    {
+    public static class ConsensusWorkIntercept {
         public static volatile boolean shouldStall = false;
 
         @Advice.OnMethodEnter
         public static void consensusWork(final long nowNs, @Advice.This Object consensusModuleAgent)
         {
-            try
-            {
+            try {
                 final Field field = consensusModuleAgent.getClass().getDeclaredField("role");
                 field.setAccessible(true);
-                final Cluster.Role clusterRole = (Cluster.Role)field.get(consensusModuleAgent);
+                final Cluster.Role clusterRole = (Cluster.Role) field.get(consensusModuleAgent);
 
-                if (shouldStall && clusterRole == Cluster.Role.LEADER)
-                {
+                if (shouldStall && clusterRole == Cluster.Role.LEADER) {
                     shouldStall = false;
                     LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(5));
                 }
-            }
-            catch (final Exception e)
-            {
+            } catch (final Exception e) {
                 throw new RuntimeException(e);
             }
         }

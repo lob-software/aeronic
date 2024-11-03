@@ -18,8 +18,7 @@ import java.time.Duration;
 
 import static org.awaitility.Awaitility.await;
 
-public abstract class AeronicTransportTestBase
-{
+public abstract class AeronicTransportTestBase {
     private AeronicImpl aeronic;
     private Aeron aeron;
     private MediaDriver mediaDriver;
@@ -29,22 +28,22 @@ public abstract class AeronicTransportTestBase
     void setUp()
     {
         final MediaDriver.Context mediaDriverCtx = new MediaDriver.Context()
-            .dirDeleteOnStart(true)
-            .spiesSimulateConnection(true)
-            .threadingMode(ThreadingMode.SHARED)
-            .sharedIdleStrategy(new BusySpinIdleStrategy())
-            .dirDeleteOnShutdown(true);
+                .dirDeleteOnStart(true)
+                .spiesSimulateConnection(true)
+                .threadingMode(ThreadingMode.SHARED)
+                .sharedIdleStrategy(new BusySpinIdleStrategy())
+                .dirDeleteOnShutdown(true);
 
         mediaDriver = MediaDriver.launchEmbedded(mediaDriverCtx);
         aeronCtx = new Aeron.Context().aeronDirectoryName(mediaDriver.aeronDirectoryName());
         aeron = Aeron.connect(aeronCtx);
         aeronic = AeronicImpl.launch(
-            new AeronicImpl.Context()
-                .aeron(aeron)
-                .idleStrategy(NoOpIdleStrategy.INSTANCE)
-                .errorHandler(Throwable::printStackTrace)
-                .atomicCounter(null)
-                .offerFailureHandler(r -> setPublisherLimit(Long.MAX_VALUE)));
+                new AeronicImpl.Context()
+                        .aeron(aeron)
+                        .idleStrategy(NoOpIdleStrategy.INSTANCE)
+                        .errorHandler(Throwable::printStackTrace)
+                        .atomicCounter(null)
+                        .offerFailureHandler(r -> setPublisherLimit(Long.MAX_VALUE)));
     }
 
     @AfterEach
@@ -71,8 +70,8 @@ public abstract class AeronicTransportTestBase
         publisher.onEvent(321L);
 
         await()
-            .timeout(Duration.ofSeconds(1))
-            .until(() -> subscriberImpl.value == 321);
+                .timeout(Duration.ofSeconds(1))
+                .until(() -> subscriberImpl.value == 321);
     }
 
     @Test
@@ -88,8 +87,8 @@ public abstract class AeronicTransportTestBase
         publisher.onEvent(123L);
 
         await()
-            .timeout(Duration.ofSeconds(1))
-            .until(() -> subscriberImpl1.value == 123L && subscriberImpl2.value == 123L);
+                .timeout(Duration.ofSeconds(1))
+                .until(() -> subscriberImpl1.value == 123L && subscriberImpl2.value == 123L);
     }
 
     @Test
@@ -113,12 +112,12 @@ public abstract class AeronicTransportTestBase
         simpleEventsPublisher.onEvent(456L);
 
         await()
-            .timeout(Duration.ofSeconds(1))
-            .until(() -> sampleEventsSubscriber1.value == 123L && sampleEventsSubscriber2.value == 123L);
+                .timeout(Duration.ofSeconds(1))
+                .until(() -> sampleEventsSubscriber1.value == 123L && sampleEventsSubscriber2.value == 123L);
 
         await()
-            .timeout(Duration.ofSeconds(1))
-            .until(() -> simpleEventsSubscriber1.value == 456L && simpleEventsSubscriber2.value == 456L);
+                .timeout(Duration.ofSeconds(1))
+                .until(() -> simpleEventsSubscriber1.value == 456L && simpleEventsSubscriber2.value == 456L);
     }
 
     @Test
@@ -136,14 +135,14 @@ public abstract class AeronicTransportTestBase
         sampleEventsPublisher1.onEvent(123L);
 
         await()
-            .timeout(Duration.ofSeconds(1))
-            .until(() -> sampleEventsSubscriber1.value == 123L && sampleEventsSubscriber2.value == 123L);
+                .timeout(Duration.ofSeconds(1))
+                .until(() -> sampleEventsSubscriber1.value == 123L && sampleEventsSubscriber2.value == 123L);
 
         sampleEventsPublisher2.onEvent(456L);
 
         await()
-            .timeout(Duration.ofSeconds(1))
-            .until(() -> sampleEventsSubscriber1.value == 456L && sampleEventsSubscriber2.value == 456L);
+                .timeout(Duration.ofSeconds(1))
+                .until(() -> sampleEventsSubscriber1.value == 456L && sampleEventsSubscriber2.value == 456L);
     }
 
     @Test
@@ -156,16 +155,16 @@ public abstract class AeronicTransportTestBase
 
         publisher.onEvent(123L);
         await()
-            .timeout(Duration.ofSeconds(1))
-            .until(() -> subscriberImpl.value == 123L);
+                .timeout(Duration.ofSeconds(1))
+                .until(() -> subscriberImpl.value == 123L);
 
         // shrink position limit counter to simulate BACKPRESSURE
         setPublisherLimit(8);
         publisher.onEvent(321L);
 
         await()
-            .timeout(Duration.ofSeconds(1))
-            .until(() -> subscriberImpl.value == 321L);
+                .timeout(Duration.ofSeconds(1))
+                .until(() -> subscriberImpl.value == 321L);
     }
 
     private void setPublisherLimit(final long value)
@@ -173,16 +172,14 @@ public abstract class AeronicTransportTestBase
         final CountersManager countersManager = new CountersManager(aeronCtx.countersMetaDataBuffer(), aeronCtx.countersValuesBuffer());
 
         countersManager.forEach((l, i, s) ->
-        {
-            if (s.contains(PublisherLimit.NAME))
-            {
-                countersManager.setCounterValue(i, value);
-            }
-        });
+                                {
+                                    if (s.contains(PublisherLimit.NAME)) {
+                                        countersManager.setCounterValue(i, value);
+                                    }
+                                });
     }
 
-    private static class SampleEventsImpl implements SampleEvents
-    {
+    private static class SampleEventsImpl implements SampleEvents {
 
         private volatile long value;
 
@@ -193,8 +190,7 @@ public abstract class AeronicTransportTestBase
         }
     }
 
-    private static class SimpleEventsImpl implements SimpleEvents
-    {
+    private static class SimpleEventsImpl implements SimpleEvents {
 
         private volatile long value;
 

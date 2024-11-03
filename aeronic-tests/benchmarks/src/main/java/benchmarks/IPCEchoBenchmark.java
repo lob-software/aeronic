@@ -19,8 +19,7 @@ import java.util.concurrent.locks.LockSupport;
 import static io.aeron.CommonContext.IPC_CHANNEL;
 
 // TODO: account for coordinated omission
-public class IPCEchoBenchmark
-{
+public class IPCEchoBenchmark {
     private static final int RUNS = 10_000_000;
 
     private AeronicImpl aeronic;
@@ -32,30 +31,30 @@ public class IPCEchoBenchmark
     private void createAeronic()
     {
         final MediaDriver.Context mediaDriverCtx = new MediaDriver.Context()
-            .dirDeleteOnStart(true)
-            .dirDeleteOnShutdown(true)
-            .ipcPublicationTermWindowLength(1024 * 1024)
-            .threadingMode(ThreadingMode.DEDICATED)
-            .conductorIdleStrategy(NoOpIdleStrategy.INSTANCE)
-            .senderIdleStrategy(NoOpIdleStrategy.INSTANCE)
-            .receiverIdleStrategy(NoOpIdleStrategy.INSTANCE);
+                .dirDeleteOnStart(true)
+                .dirDeleteOnShutdown(true)
+                .ipcPublicationTermWindowLength(1024 * 1024)
+                .threadingMode(ThreadingMode.DEDICATED)
+                .conductorIdleStrategy(NoOpIdleStrategy.INSTANCE)
+                .senderIdleStrategy(NoOpIdleStrategy.INSTANCE)
+                .receiverIdleStrategy(NoOpIdleStrategy.INSTANCE);
 
         mediaDriver = MediaDriver.launchEmbedded(mediaDriverCtx);
 
         final Aeron.Context aeronCtx = new Aeron.Context()
-            .idleStrategy(NoOpIdleStrategy.INSTANCE)
-            .awaitingIdleStrategy(NoOpIdleStrategy.INSTANCE)
-            .aeronDirectoryName(mediaDriver.aeronDirectoryName());
+                .idleStrategy(NoOpIdleStrategy.INSTANCE)
+                .awaitingIdleStrategy(NoOpIdleStrategy.INSTANCE)
+                .aeronDirectoryName(mediaDriver.aeronDirectoryName());
 
         aeron = Aeron.connect(aeronCtx);
 
         aeronic = AeronicImpl.launch(
-            new AeronicImpl.Context()
-                .aeron(aeron)
-                .offerFailureHandler(l -> LockSupport.parkNanos(1))
-                .idleStrategy(NoOpIdleStrategy.INSTANCE)
-                .errorHandler(Throwable::printStackTrace)
-                .atomicCounter(null));
+                new AeronicImpl.Context()
+                        .aeron(aeron)
+                        .offerFailureHandler(l -> LockSupport.parkNanos(1))
+                        .idleStrategy(NoOpIdleStrategy.INSTANCE)
+                        .errorHandler(Throwable::printStackTrace)
+                        .atomicCounter(null));
     }
 
     private void setUp()
@@ -73,8 +72,7 @@ public class IPCEchoBenchmark
         aeronic.awaitUntilPubsAndSubsConnect();
     }
 
-    private static final class EchoResponseListener implements EchoResponse
-    {
+    private static final class EchoResponseListener implements EchoResponse {
         private final Histogram histogram = new Histogram(Long.MAX_VALUE, 5);
         private volatile boolean completed = false;
         private int responsesReceived = 0;
@@ -86,8 +84,7 @@ public class IPCEchoBenchmark
             final long receiveTime = System.nanoTime();
             histogram.recordValue(receiveTime - time);
 
-            if (++responsesReceived == RUNS)
-            {
+            if (++responsesReceived == RUNS) {
                 completed = true;
             }
         }
@@ -101,8 +98,7 @@ public class IPCEchoBenchmark
 
     private void run()
     {
-        for (int i = 0; i < RUNS; i++)
-        {
+        for (int i = 0; i < RUNS; i++) {
             final long sendTime = System.nanoTime();
             echoProxy.echo(sendTime, i);
         }
@@ -110,8 +106,7 @@ public class IPCEchoBenchmark
 
     private void awaitCompletion()
     {
-        while (!echoResponseListener.completed)
-        {
+        while (!echoResponseListener.completed) {
             LockSupport.parkNanos(100);
         }
     }
@@ -123,14 +118,11 @@ public class IPCEchoBenchmark
         System.out.println("Median (μs): " + TimeUnit.NANOSECONDS.toMicros(histogram.getValueAtPercentile(50)));
         System.out.println("Max (μs): " + TimeUnit.NANOSECONDS.toMicros(histogram.getMaxValue()));
 
-        try
-        {
+        try {
             histogram.outputPercentileDistribution(
-                new PrintStream(
-                    new FileOutputStream(System.getProperty("histogram-file-name", "histogram.hgrm"))), 1000.);
-        }
-        catch (final FileNotFoundException e)
-        {
+                    new PrintStream(
+                            new FileOutputStream(System.getProperty("histogram-file-name", "histogram.hgrm"))), 1000.);
+        } catch (final FileNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
@@ -157,8 +149,7 @@ public class IPCEchoBenchmark
 
         System.out.println("Warming up...");
 
-        for (int i = 0; i < 5; i++)
-        {
+        for (int i = 0; i < 5; i++) {
             // warm up
             benchmark.run();
             benchmark.awaitCompletion();

@@ -5,8 +5,7 @@ import org.agrona.DirectBuffer;
 
 import java.util.function.LongConsumer;
 
-public class SimplePublication implements AeronicPublication
-{
+public class SimplePublication implements AeronicPublication {
 
     private final Publication publication;
     private final LongConsumer offerFailureHandler;
@@ -32,8 +31,7 @@ public class SimplePublication implements AeronicPublication
     @Override
     public void close()
     {
-        if (publication.isConnected())
-        {
+        if (publication.isConnected()) {
             publication.close();
         }
     }

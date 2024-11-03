@@ -2,8 +2,7 @@ package io.aeronic.gen;
 
 import java.util.List;
 
-public class ParameterInfo
-{
+public class ParameterInfo {
     private final String name;
     private final String type;
     private final boolean isPrimitive;
@@ -48,11 +47,11 @@ public class ParameterInfo
     public String toString()
     {
         return "ParameterInfo{" +
-            "name='" + name + '\'' +
-            ", type='" + type + '\'' +
-            ", isPrimitive=" + isPrimitive +
-            ", isArray=" + isArray +
-            ", genericParameters=" + genericParameters +
-            '}';
+                "name='" + name + '\'' +
+                ", type='" + type + '\'' +
+                ", isPrimitive=" + isPrimitive +
+                ", isArray=" + isArray +
+                ", genericParameters=" + genericParameters +
+                '}';
     }
 }

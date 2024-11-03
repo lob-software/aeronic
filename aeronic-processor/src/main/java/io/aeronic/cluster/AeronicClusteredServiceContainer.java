@@ -13,8 +13,7 @@ import org.agrona.DirectBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class AeronicClusteredServiceContainer implements ClusteredService
-{
+public class AeronicClusteredServiceContainer implements ClusteredService {
     private final ClusteredService clusteredService;
     private final AeronicClusteredServiceRegistry registry;
     private final AtomicReference<Cluster> clusterRef;
@@ -69,13 +68,13 @@ public class AeronicClusteredServiceContainer implements ClusteredService
 
     @Override
     public void onSessionMessage(
-        final ClientSession session,
-        final long timestamp,
-        final DirectBuffer buffer,
-        final int offset,
-        final int length,
-        final Header header
-    )
+            final ClientSession session,
+            final long timestamp,
+            final DirectBuffer buffer,
+            final int offset,
+            final int length,
+            final Header header
+                                )
     {
         registry.onSessionMessage(session, buffer, offset);
         clusteredService.onSessionMessage(session, timestamp, buffer, offset, length, header);
@@ -109,26 +108,26 @@ public class AeronicClusteredServiceContainer implements ClusteredService
 
     @Override
     public void onNewLeadershipTermEvent(
-        final long leadershipTermId,
-        final long logPosition,
-        final long timestamp,
-        final long termBaseLogPosition,
-        final int leaderMemberId,
-        final int logSessionId,
-        final TimeUnit timeUnit,
-        final int appVersion
-    )
+            final long leadershipTermId,
+            final long logPosition,
+            final long timestamp,
+            final long termBaseLogPosition,
+            final int leaderMemberId,
+            final int logSessionId,
+            final TimeUnit timeUnit,
+            final int appVersion
+                                        )
     {
         clusteredService.onNewLeadershipTermEvent(
-            leadershipTermId,
-            logPosition,
-            timestamp,
-            termBaseLogPosition,
-            leaderMemberId,
-            logSessionId,
-            timeUnit,
-            appVersion
-        );
+                leadershipTermId,
+                logPosition,
+                timestamp,
+                termBaseLogPosition,
+                leaderMemberId,
+                logSessionId,
+                timeUnit,
+                appVersion
+                                                 );
     }
 
     public Cluster.Role getRole()
@@ -136,8 +135,7 @@ public class AeronicClusteredServiceContainer implements ClusteredService
         return role;
     }
 
-    public static class Configuration
-    {
+    public static class Configuration {
         private ClusteredService clusteredService;
         private final AeronicClusteredServiceRegistry registry = new AeronicClusteredServiceRegistry();
         private final AtomicReference<Cluster> clusterRef = new AtomicReference<>();

@@ -14,8 +14,7 @@ import java.util.function.BooleanSupplier;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-public class Assertions
-{
+public class Assertions {
     public static <T> void assertReflectiveEquals(final Object expected, final T actual)
     {
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
@@ -23,25 +22,24 @@ public class Assertions
 
     public static void assertCodec(final Object object)
     {
-        try
-        {
+        try {
             final Class<?> clazz = object.getClass();
 
             Arrays.stream(clazz.getInterfaces())
-                .filter(i -> i.equals(Encodable.class))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError(object + " does not implement Encodable interface"));
+                    .filter(i -> i.equals(Encodable.class))
+                    .findFirst()
+                    .orElseThrow(() -> new AssertionError(object + " does not implement Encodable interface"));
 
             final Method[] methods = clazz.getMethods();
             final Method encoderMethod = Arrays.stream(methods)
-                .filter(method -> method.getName().equals("encode"))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("This should never have happened..."));
+                    .filter(method -> method.getName().equals("encode"))
+                    .findFirst()
+                    .orElseThrow(() -> new AssertionError("This should never have happened..."));
 
             final Method decoderMethod = Arrays.stream(methods)
-                .filter(method -> method.getName().equals("decode"))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError(object + " does not properly define @Decoder method"));
+                    .filter(method -> method.getName().equals("decode"))
+                    .findFirst()
+                    .orElseThrow(() -> new AssertionError(object + " does not properly define @Decoder method"));
 
             final ExpandableDirectByteBuffer buffer = new ExpandableDirectByteBuffer();
             final BufferEncoder bufferEncoder = new BufferEncoder(buffer);
@@ -53,9 +51,7 @@ public class Assertions
             final Object decoded = decoderMethod.invoke(null, bufferDecoder);
 
             assertReflectiveEquals(object, decoded);
-        }
-        catch (final Exception e)
-        {
+        } catch (final Exception e) {
             throw new AssertionError(e);
         }
     }
@@ -63,9 +59,9 @@ public class Assertions
     public static void assertEventuallyTrue(final BooleanSupplier assertion, final long timeoutInMillis)
     {
         await()
-            .pollInterval(Duration.ofMillis(50))
-            .atMost(Duration.ofMillis(timeoutInMillis))
-            .until(assertion::getAsBoolean);
+                .pollInterval(Duration.ofMillis(50))
+                .atMost(Duration.ofMillis(timeoutInMillis))
+                .until(assertion::getAsBoolean);
     }
 
     public static void assertEventuallyTrue(final BooleanSupplier assertion)
@@ -76,8 +72,8 @@ public class Assertions
     public static void assertEventually(final ThrowingRunnable runnable)
     {
         await()
-            .pollInterval(Duration.ofMillis(50))
-            .atMost(Duration.ofSeconds(1))
-            .untilAsserted(runnable);
+                .pollInterval(Duration.ofMillis(50))
+                .atMost(Duration.ofSeconds(1))
+                .untilAsserted(runnable);
     }
 }
