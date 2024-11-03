@@ -174,7 +174,8 @@ public abstract class AeronicTransportTestBase
 
         countersManager.forEach((l, i, s) ->
                                 {
-                                    if (s.contains(PublisherLimit.NAME)) {
+                                    if (s.contains(PublisherLimit.NAME))
+                                    {
                                         countersManager.setCounterValue(i, value);
                                     }
                                 });

@@ -11,7 +11,8 @@ public class PublisherGenerator
 
     private void addImport(final String importStatement)
     {
-        if (!imports.contains(importStatement)) {
+        if (!imports.contains(importStatement))
+        {
             imports.add(importStatement);
         }
     }
@@ -33,7 +34,8 @@ public class PublisherGenerator
     private String generateMethods(final List<MethodInfo> methods)
     {
         final StringBuilder methodsBuilder = new StringBuilder();
-        for (int i = 0; i < methods.size(); i++) {
+        for (int i = 0; i < methods.size(); i++)
+        {
             final MethodInfo interfaceMethod = methods.get(i);
             final String methodName = interfaceMethod.getName();
             final List<ParameterInfo> parameters = interfaceMethod.getParameters();
@@ -46,10 +48,12 @@ public class PublisherGenerator
                                                      bufferEncoder.encode(%s);
                                              """.formatted(interfaceMethod.getIndex()));
 
-            for (int j = 0; j < parameters.size(); j++) {
+            for (int j = 0; j < parameters.size(); j++)
+            {
                 writeParameter(methodsBuilder, methodBodyBuilder, parameters.get(j));
 
-                if (j < parameters.size() - 1) {
+                if (j < parameters.size() - 1)
+                {
                     methodsBuilder.append(",\n");
                 }
             }
@@ -64,7 +68,8 @@ public class PublisherGenerator
                                               {
                                           """);
 
-            if (i < methods.size() - 1) {
+            if (i < methods.size() - 1)
+            {
                 methodBodyBuilder.append("""
                                                      }
                                                  
@@ -85,11 +90,12 @@ public class PublisherGenerator
             final StringBuilder methodsBuilder,
             final StringBuilder methodBodyBuilder,
             final ParameterInfo parameter
-                               )
+    )
     {
         final String parameterType = parameter.getType();
         final String parameterName = parameter.getName();
-        if (parameter.isPrimitive()) {
+        if (parameter.isPrimitive())
+        {
             methodsBuilder.append("        final %s %s".formatted(parameterType, parameterName));
             methodBodyBuilder.append("""
                                                      bufferEncoder.encode(%s);
@@ -97,11 +103,15 @@ public class PublisherGenerator
             return;
         }
 
-        if (parameter.isArray()) {
+        if (parameter.isArray())
+        {
             final String arrayType = parameterType.substring(0, parameterType.length() - 2);
-            if (isPrimitive(arrayType)) {
+            if (isPrimitive(arrayType))
+            {
                 methodsBuilder.append("        final %s %s".formatted(parameterType, parameterName));
-            } else {
+            }
+            else
+            {
                 final String className = TypeUtil.extractClassName(arrayType);
                 methodsBuilder.append("        final %s[] %s".formatted(className, parameterName));
             }
@@ -111,7 +121,8 @@ public class PublisherGenerator
             return;
         }
 
-        if (parameterType.equals(String.class.getName())) {
+        if (parameterType.equals(String.class.getName()))
+        {
             methodsBuilder.append("        final String %s".formatted(parameterName));
             methodBodyBuilder.append("""
                                                      bufferEncoder.encode(%s);
@@ -120,7 +131,8 @@ public class PublisherGenerator
         }
 
         final List<String> genericParameters = parameter.getGenericParameters();
-        if (!genericParameters.isEmpty()) {
+        if (!genericParameters.isEmpty())
+        {
             final String genericParameter = genericParameters.get(0);
             final String genericParameterClassName = TypeUtil.extractClassName(genericParameter);
             final String fullyQualifiedType = parameterType.split("<")[0];

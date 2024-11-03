@@ -32,7 +32,8 @@ public class SimplePublication implements AeronicPublication
     @Override
     public void close()
     {
-        if (publication.isConnected()) {
+        if (publication.isConnected())
+        {
             publication.close();
         }
     }

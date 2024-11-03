@@ -86,7 +86,8 @@ public class IPCEchoBenchmark
             final long receiveTime = System.nanoTime();
             histogram.recordValue(receiveTime - time);
 
-            if (++responsesReceived == RUNS) {
+            if (++responsesReceived == RUNS)
+            {
                 completed = true;
             }
         }
@@ -100,7 +101,8 @@ public class IPCEchoBenchmark
 
     private void run()
     {
-        for (int i = 0; i < RUNS; i++) {
+        for (int i = 0; i < RUNS; i++)
+        {
             final long sendTime = System.nanoTime();
             echoProxy.echo(sendTime, i);
         }
@@ -108,7 +110,8 @@ public class IPCEchoBenchmark
 
     private void awaitCompletion()
     {
-        while (!echoResponseListener.completed) {
+        while (!echoResponseListener.completed)
+        {
             LockSupport.parkNanos(100);
         }
     }
@@ -120,11 +123,13 @@ public class IPCEchoBenchmark
         System.out.println("Median (μs): " + TimeUnit.NANOSECONDS.toMicros(histogram.getValueAtPercentile(50)));
         System.out.println("Max (μs): " + TimeUnit.NANOSECONDS.toMicros(histogram.getMaxValue()));
 
-        try {
+        try
+        {
             histogram.outputPercentileDistribution(
                     new PrintStream(
                             new FileOutputStream(System.getProperty("histogram-file-name", "histogram.hgrm"))), 1000.);
-        } catch (final FileNotFoundException e) {
+        } catch (final FileNotFoundException e)
+        {
             throw new RuntimeException(e);
         }
     }
@@ -151,7 +156,8 @@ public class IPCEchoBenchmark
 
         System.out.println("Warming up...");
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 5; i++)
+        {
             // warm up
             benchmark.run();
             benchmark.awaitCompletion();

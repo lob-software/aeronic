@@ -36,7 +36,8 @@ public class ClientSessionPublication<T> implements AeronicPublication
     @Override
     public void close()
     {
-        if (isConnected()) {
+        if (isConnected())
+        {
             clientSessions.forEach(ClientSession::close);
         }
     }

@@ -33,7 +33,7 @@ public class AeronicClusteredServiceRegistry
             final Class<T> clazz,
             final String egressChannel,
             final int streamId
-                                                  )
+    )
     {
         final String publisherName = clazz.getName() + "__EgressPublisher";
         final ToggledAeronicPublication<T> publication = new ToggledAeronicPublication<>(() -> aeron.get().addPublication(egressChannel, streamId));
@@ -44,9 +44,12 @@ public class AeronicClusteredServiceRegistry
 
     public void onRoleChange(final Cluster.Role newRole)
     {
-        if (newRole == Cluster.Role.LEADER) {
+        if (newRole == Cluster.Role.LEADER)
+        {
             toggledPublicationByName.values().forEach(ToggledAeronicPublication::activate);
-        } else {
+        }
+        else
+        {
             toggledPublicationByName.values().forEach(ToggledAeronicPublication::deactivate);
         }
     }
@@ -54,9 +57,11 @@ public class AeronicClusteredServiceRegistry
     @SuppressWarnings("unchecked")
     public <T> T getPublisherFor(final Class<T> clazz)
     {
-        try {
+        try
+        {
             return (T) clientSessionPublicationByName.get(clazz.getName() + "__EgressPublisher").getPublisher();
-        } catch (final Exception e) {
+        } catch (final Exception e)
+        {
             throw new RuntimeException("Could not retrieve publisher for " + clazz);
         }
     }
@@ -64,9 +69,11 @@ public class AeronicClusteredServiceRegistry
     @SuppressWarnings("unchecked")
     public <T> T getToggledPublisherFor(final Class<T> clazz)
     {
-        try {
+        try
+        {
             return (T) toggledPublicationByName.get(clazz.getName() + "__EgressPublisher").getPublisher();
-        } catch (final Exception e) {
+        } catch (final Exception e)
+        {
             throw new RuntimeException("Could not retrieve publisher for " + clazz);
         }
     }
@@ -95,13 +102,16 @@ public class AeronicClusteredServiceRegistry
         final byte[] encodedPrincipal = session.encodedPrincipal();
         final String subscriberName = new String(encodedPrincipal);
 
-        if (encodedPrincipal.length != 0) {
+        if (encodedPrincipal.length != 0)
+        {
             final AbstractSubscriberInvoker<?> invoker = invokerByName.get(subscriberName);
-            if (invoker != null) {
+            if (invoker != null)
+            {
                 invokersBySessionId.put(session.id(), invoker);
             }
 
-            if (subscriberName.endsWith("__EgressSubscriber")) {
+            if (subscriberName.endsWith("__EgressSubscriber"))
+            {
                 clientSessionPublicationByName.get(subscriberName.split("__")[0] + "__EgressPublisher").bindClientSession(session);
             }
         }

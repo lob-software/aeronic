@@ -99,7 +99,7 @@ public class ClusterSystemTest
                         .errorHandler(Throwable::printStackTrace)
                         .ingressChannel(INGRESS_CHANNEL)
                         .aeronDirectoryName(aeron.context().aeronDirectoryName())
-                                                                                        );
+        );
 
         aeronic.awaitUntilPubsAndSubsConnect();
 

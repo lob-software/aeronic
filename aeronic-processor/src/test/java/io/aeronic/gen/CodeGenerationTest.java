@@ -59,7 +59,7 @@ public class CodeGenerationTest
                         } 
                         """,
                 new CompileOptions().processors(processor)
-                       );
+        );
 
         final List<MethodInfo> methodInfoList = processor.aeronicInterfaceHelper.getMethodInfoFor("TestEvents");
         assertThat(methodInfoList).hasSize(2);

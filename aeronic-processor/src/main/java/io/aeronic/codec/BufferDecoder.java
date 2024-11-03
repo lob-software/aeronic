@@ -95,7 +95,8 @@ public class BufferDecoder
     {
         final int length = decodeInt();
         final long[] longs = new long[length];
-        for (int i = 0; i < longs.length; i++) {
+        for (int i = 0; i < longs.length; i++)
+        {
             longs[i] = decodeLong();
         }
 
@@ -106,7 +107,8 @@ public class BufferDecoder
     {
         final int length = decodeInt();
         final int[] ints = new int[length];
-        for (int i = 0; i < ints.length; i++) {
+        for (int i = 0; i < ints.length; i++)
+        {
             ints[i] = decodeInt();
         }
 
@@ -117,7 +119,8 @@ public class BufferDecoder
     {
         final int length = decodeInt();
         final float[] floats = new float[length];
-        for (int i = 0; i < floats.length; i++) {
+        for (int i = 0; i < floats.length; i++)
+        {
             floats[i] = decodeFloat();
         }
 
@@ -128,7 +131,8 @@ public class BufferDecoder
     {
         final int length = decodeInt();
         final double[] doubles = new double[length];
-        for (int i = 0; i < doubles.length; i++) {
+        for (int i = 0; i < doubles.length; i++)
+        {
             doubles[i] = decodeDouble();
         }
 
@@ -139,7 +143,8 @@ public class BufferDecoder
     {
         final int length = decodeInt();
         final short[] shorts = new short[length];
-        for (int i = 0; i < shorts.length; i++) {
+        for (int i = 0; i < shorts.length; i++)
+        {
             shorts[i] = decodeShort();
         }
 
@@ -150,7 +155,8 @@ public class BufferDecoder
     {
         final int length = decodeInt();
         final byte[] bytes = new byte[length];
-        for (int i = 0; i < bytes.length; i++) {
+        for (int i = 0; i < bytes.length; i++)
+        {
             bytes[i] = decodeByte();
         }
 
@@ -161,7 +167,8 @@ public class BufferDecoder
     {
         final int length = decodeInt();
         final char[] chars = new char[length];
-        for (int i = 0; i < chars.length; i++) {
+        for (int i = 0; i < chars.length; i++)
+        {
             chars[i] = decodeChar();
         }
 
@@ -172,7 +179,8 @@ public class BufferDecoder
     {
         final int length = decodeInt();
         final T[] array = arrayCreator.apply(length);
-        for (int i = 0; i < length; i++) {
+        for (int i = 0; i < length; i++)
+        {
             array[i] = decoder.decode(this);
         }
         return array;
@@ -183,7 +191,8 @@ public class BufferDecoder
         final int length = decodeInt();
         final List<T> list = listCreator.get();
 
-        for (int i = 0; i < length; i++) {
+        for (int i = 0; i < length; i++)
+        {
             list.add(decoder.decode(this));
         }
 

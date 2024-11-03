@@ -12,7 +12,7 @@ public final class TypeUtil
             "float",
             "double",
             "long"
-                                                    );
+    );
 
     private TypeUtil()
     {

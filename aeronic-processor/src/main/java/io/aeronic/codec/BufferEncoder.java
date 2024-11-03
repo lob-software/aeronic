@@ -84,7 +84,8 @@ public class BufferEncoder
     public void encode(final long[] longs)
     {
         encode(longs.length);
-        for (int i = 0; i < longs.length; i++) {
+        for (int i = 0; i < longs.length; i++)
+        {
             encode(longs[i]);
         }
     }
@@ -92,7 +93,8 @@ public class BufferEncoder
     public void encode(final int[] ints)
     {
         encode(ints.length);
-        for (int i = 0; i < ints.length; i++) {
+        for (int i = 0; i < ints.length; i++)
+        {
             encode(ints[i]);
         }
     }
@@ -100,7 +102,8 @@ public class BufferEncoder
     public void encode(final float[] floats)
     {
         encode(floats.length);
-        for (int i = 0; i < floats.length; i++) {
+        for (int i = 0; i < floats.length; i++)
+        {
             encode(floats[i]);
         }
     }
@@ -108,7 +111,8 @@ public class BufferEncoder
     public void encode(final double[] doubles)
     {
         encode(doubles.length);
-        for (int i = 0; i < doubles.length; i++) {
+        for (int i = 0; i < doubles.length; i++)
+        {
             encode(doubles[i]);
         }
     }
@@ -116,7 +120,8 @@ public class BufferEncoder
     public void encode(final short[] shorts)
     {
         encode(shorts.length);
-        for (int i = 0; i < shorts.length; i++) {
+        for (int i = 0; i < shorts.length; i++)
+        {
             encode(shorts[i]);
         }
     }
@@ -124,7 +129,8 @@ public class BufferEncoder
     public void encode(final byte[] bytes)
     {
         encode(bytes.length);
-        for (int i = 0; i < bytes.length; i++) {
+        for (int i = 0; i < bytes.length; i++)
+        {
             encode(bytes[i]);
         }
     }
@@ -132,7 +138,8 @@ public class BufferEncoder
     public void encode(final char[] chars)
     {
         encode(chars.length);
-        for (int i = 0; i < chars.length; i++) {
+        for (int i = 0; i < chars.length; i++)
+        {
             encode(chars[i]);
         }
     }
@@ -140,7 +147,8 @@ public class BufferEncoder
     public <T extends Encodable> void encode(final T[] array)
     {
         encode(array.length);
-        for (int i = 0; i < array.length; i++) {
+        for (int i = 0; i < array.length; i++)
+        {
             array[i].encode(this);
         }
     }

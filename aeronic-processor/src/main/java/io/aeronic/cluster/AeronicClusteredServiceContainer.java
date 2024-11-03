@@ -75,7 +75,7 @@ public class AeronicClusteredServiceContainer implements ClusteredService
             final int offset,
             final int length,
             final Header header
-                                )
+    )
     {
         registry.onSessionMessage(session, buffer, offset);
         clusteredService.onSessionMessage(session, timestamp, buffer, offset, length, header);
@@ -117,7 +117,7 @@ public class AeronicClusteredServiceContainer implements ClusteredService
             final int logSessionId,
             final TimeUnit timeUnit,
             final int appVersion
-                                        )
+    )
     {
         clusteredService.onNewLeadershipTermEvent(
                 leadershipTermId,
@@ -128,7 +128,7 @@ public class AeronicClusteredServiceContainer implements ClusteredService
                 logSessionId,
                 timeUnit,
                 appVersion
-                                                 );
+        );
     }
 
     public Cluster.Role getRole()

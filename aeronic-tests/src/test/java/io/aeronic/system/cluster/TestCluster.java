@@ -22,7 +22,7 @@ public class TestCluster
             final int nodeIdx,
             final int nodeCount,
             final AeronicClusteredServiceContainer clusteredServiceContainer
-                            )
+    )
     {
         final TestClusterNode clusterNode = new TestClusterNode(
                 new TestClusterNode.Context()
@@ -53,7 +53,7 @@ public class TestCluster
                                 .filter(e -> e.getRole() == Cluster.Role.LEADER)
                                 .findFirst(),
                         Optional::isPresent
-                      );
+                );
 
         return leaderMaybe.orElseThrow();
     }
@@ -64,16 +64,18 @@ public class TestCluster
                 .timeout(Duration.ofMillis(millis))
                 .until(
                         () -> {
-                            for (int i = 0; i < clusteredServices.size(); i++) {
+                            for (int i = 0; i < clusteredServices.size(); i++)
+                            {
                                 final AeronicClusteredServiceContainer clusteredService = clusteredServices.get(i);
-                                if (i != skipNodeIdx && clusteredService.getRole() == Cluster.Role.LEADER) {
+                                if (i != skipNodeIdx && clusteredService.getRole() == Cluster.Role.LEADER)
+                                {
                                     return clusteredService;
                                 }
                             }
                             return null;
                         },
                         Objects::nonNull
-                      );
+                );
     }
 
     public void forEachNonLeaderNode(final Consumer<? super AeronicClusteredServiceContainer> consumer)

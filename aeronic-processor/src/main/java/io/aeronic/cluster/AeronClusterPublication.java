@@ -31,14 +31,16 @@ public class AeronClusterPublication implements AeronicPublication
     @Override
     public void close()
     {
-        if (!aeronCluster.isClosed()) {
+        if (!aeronCluster.isClosed())
+        {
             aeronCluster.close();
         }
     }
 
     public int pollCluster()
     {
-        if (isConnected()) {
+        if (isConnected())
+        {
             return aeronCluster.pollEgress();
         }
         return 0;

@@ -119,7 +119,8 @@ public class BufferEncoderTest
         final long[] encodedArray = new long[encodedLength];
 
         int idx = BitUtil.SIZE_OF_INT;
-        for (int i = 0; i < encodedLength; i++) {
+        for (int i = 0; i < encodedLength; i++)
+        {
             encodedArray[i] = buffer.getLong(idx);
             idx += BitUtil.SIZE_OF_LONG;
         }
@@ -136,7 +137,8 @@ public class BufferEncoderTest
         final int[] encodedArray = new int[encodedLength];
 
         int idx = BitUtil.SIZE_OF_INT;
-        for (int i = 0; i < encodedLength; i++) {
+        for (int i = 0; i < encodedLength; i++)
+        {
             encodedArray[i] = buffer.getInt(idx);
             idx += BitUtil.SIZE_OF_INT;
         }
@@ -153,7 +155,8 @@ public class BufferEncoderTest
         final float[] encodedArray = new float[encodedLength];
 
         int idx = BitUtil.SIZE_OF_INT;
-        for (int i = 0; i < encodedLength; i++) {
+        for (int i = 0; i < encodedLength; i++)
+        {
             encodedArray[i] = buffer.getFloat(idx);
             idx += BitUtil.SIZE_OF_FLOAT;
         }
@@ -170,7 +173,8 @@ public class BufferEncoderTest
         final double[] encodedArray = new double[encodedLength];
 
         int idx = BitUtil.SIZE_OF_INT;
-        for (int i = 0; i < encodedLength; i++) {
+        for (int i = 0; i < encodedLength; i++)
+        {
             encodedArray[i] = buffer.getDouble(idx);
             idx += BitUtil.SIZE_OF_DOUBLE;
         }
@@ -187,7 +191,8 @@ public class BufferEncoderTest
         final short[] encodedArray = new short[encodedLength];
 
         int idx = BitUtil.SIZE_OF_INT;
-        for (int i = 0; i < encodedLength; i++) {
+        for (int i = 0; i < encodedLength; i++)
+        {
             encodedArray[i] = buffer.getShort(idx);
             idx += BitUtil.SIZE_OF_SHORT;
         }
@@ -218,7 +223,8 @@ public class BufferEncoderTest
         final char[] encodedArray = new char[encodedLength];
 
         int idx = BitUtil.SIZE_OF_INT;
-        for (int i = 0; i < encodedLength; i++) {
+        for (int i = 0; i < encodedLength; i++)
+        {
             encodedArray[i] = buffer.getChar(idx);
             idx += BitUtil.SIZE_OF_CHAR;
         }
@@ -258,7 +264,8 @@ public class BufferEncoderTest
         final List<Long> encodedCollection = new ArrayList<>();
 
         int idx = BitUtil.SIZE_OF_INT;
-        for (int i = 0; i < encodedLength; i++) {
+        for (int i = 0; i < encodedLength; i++)
+        {
             encodedCollection.add(buffer.getLong(idx));
             idx += BitUtil.SIZE_OF_LONG;
         }

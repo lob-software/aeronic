@@ -122,7 +122,8 @@ public class BufferDecoderTest
         buffer.putInt(0, longs.length);
 
         int idx = BitUtil.SIZE_OF_INT;
-        for (int i = 0; i < longs.length; i++) {
+        for (int i = 0; i < longs.length; i++)
+        {
             buffer.putLong(idx, longs[i]);
             idx += BitUtil.SIZE_OF_LONG;
         }
@@ -138,7 +139,8 @@ public class BufferDecoderTest
         buffer.putInt(0, ints.length);
 
         int idx = BitUtil.SIZE_OF_INT;
-        for (int i = 0; i < ints.length; i++) {
+        for (int i = 0; i < ints.length; i++)
+        {
             buffer.putInt(idx, ints[i]);
             idx += BitUtil.SIZE_OF_INT;
         }
@@ -154,7 +156,8 @@ public class BufferDecoderTest
         buffer.putInt(0, floats.length);
 
         int idx = BitUtil.SIZE_OF_INT;
-        for (int i = 0; i < floats.length; i++) {
+        for (int i = 0; i < floats.length; i++)
+        {
             buffer.putFloat(idx, floats[i]);
             idx += BitUtil.SIZE_OF_FLOAT;
         }
@@ -170,7 +173,8 @@ public class BufferDecoderTest
         buffer.putInt(0, doubles.length);
 
         int idx = BitUtil.SIZE_OF_INT;
-        for (int i = 0; i < doubles.length; i++) {
+        for (int i = 0; i < doubles.length; i++)
+        {
             buffer.putDouble(idx, doubles[i]);
             idx += BitUtil.SIZE_OF_DOUBLE;
         }
@@ -186,7 +190,8 @@ public class BufferDecoderTest
         buffer.putInt(0, shorts.length);
 
         int idx = BitUtil.SIZE_OF_INT;
-        for (int i = 0; i < shorts.length; i++) {
+        for (int i = 0; i < shorts.length; i++)
+        {
             buffer.putShort(idx, shorts[i]);
             idx += BitUtil.SIZE_OF_SHORT;
         }
@@ -213,7 +218,8 @@ public class BufferDecoderTest
         buffer.putInt(0, chars.length);
 
         int idx = BitUtil.SIZE_OF_INT;
-        for (int i = 0; i < chars.length; i++) {
+        for (int i = 0; i < chars.length; i++)
+        {
             buffer.putChar(idx, chars[i]);
             idx += BitUtil.SIZE_OF_CHAR;
         }
@@ -262,7 +268,8 @@ public class BufferDecoderTest
         buffer.putInt(0, list.size());
 
         int idx = BitUtil.SIZE_OF_INT;
-        for (int i = 0; i < list.size(); i++) {
+        for (int i = 0; i < list.size(); i++)
+        {
             buffer.putLong(idx, list.get(i));
             idx += BitUtil.SIZE_OF_LONG;
         }

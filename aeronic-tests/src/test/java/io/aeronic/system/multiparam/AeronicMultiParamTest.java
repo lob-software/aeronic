@@ -83,7 +83,7 @@ public class AeronicMultiParamTest
         final List<Composite> compositeList = List.of(
                 new Composite(1, 4L, false, Byte.MAX_VALUE, 123.11),
                 new Composite(1, 4L, false, Byte.MIN_VALUE, 123.11)
-                                                     );
+        );
 
         publisher.onEvent(
                 longValue,
@@ -106,7 +106,7 @@ public class AeronicMultiParamTest
                 compositeArray,
                 MyEnum.ONE,
                 compositeList
-                         );
+        );
 
         assertEventually(() -> {
             assertEquals(shortValue, subscriberImpl.shortValue);
@@ -152,7 +152,7 @@ public class AeronicMultiParamTest
                 compositeArray,
                 MyEnum.TWO,
                 List.of()
-                         );
+        );
 
         assertEventually(() -> {
             assertEquals(shortValue + 1, subscriberImpl.shortValue);
@@ -223,7 +223,7 @@ public class AeronicMultiParamTest
                 final Composite[] compositeArray,
                 final MyEnum myEnum,
                 final List<Composite> compositeList
-                           )
+        )
         {
             this.longValue = longValue;
             this.intValue = intValue;

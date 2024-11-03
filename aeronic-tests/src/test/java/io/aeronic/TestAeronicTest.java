@@ -39,7 +39,7 @@ public class TestAeronicTest
         final IllegalStateException exception = assertThrows(
                 IllegalStateException.class,
                 () -> aeronic.createPublisher(SimpleEvents.class, null, 0)
-                                                            );
+        );
 
         assertEquals("Cannot create a publisher before registering a subscriber! " +
                              "Register io.aeronic.SimpleEvents subscriber first.", exception.getMessage());

@@ -8,7 +8,8 @@ public class ClusterUtil
     {
         final StringBuilder builder = new StringBuilder();
 
-        for (int i = 0; i < memberCount; i++) {
+        for (int i = 0; i < memberCount; i++)
+        {
             builder
                     .append(i).append(',')
                     .append(LOCALHOST).append(":2").append(clusterId).append("11").append(i).append(',')
@@ -32,7 +33,8 @@ public class ClusterUtil
     {
         final StringBuilder builder = new StringBuilder();
 
-        for (int i = 0; i < memberCount; i++) {
+        for (int i = 0; i < memberCount; i++)
+        {
             builder.append(i).append('=').append(LOCALHOST).append(":2").append(clusterId).append("11")
                     .append(i).append(',');
         }

@@ -29,5 +29,5 @@ public interface MultiParamEvents
             Composite[] compositeArray,
             MyEnum myEnum,
             List<Composite> compositeList
-                );
+    );
 }

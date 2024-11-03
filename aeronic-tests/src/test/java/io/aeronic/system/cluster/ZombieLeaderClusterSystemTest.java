@@ -124,7 +124,8 @@ public class ZombieLeaderClusterSystemTest
     @BeforeAll
     static void instrumentLeaderSleep()
     {
-        try {
+        try
+        {
             ByteBuddyAgent.install();
 
             final Class<?> consensusModuleAgentClazz = Class.forName("io.aeron.cluster.ConsensusModuleAgent");
@@ -135,7 +136,8 @@ public class ZombieLeaderClusterSystemTest
                     .make()
                     .load(consensusModuleAgentClazz.getClassLoader(), ClassReloadingStrategy.fromInstalledAgent())
                     .getLoaded();
-        } catch (final Exception e) {
+        } catch (final Exception e)
+        {
             throw new RuntimeException(e);
         }
     }
@@ -147,16 +149,19 @@ public class ZombieLeaderClusterSystemTest
         @Advice.OnMethodEnter
         public static void consensusWork(final long nowNs, @Advice.This Object consensusModuleAgent)
         {
-            try {
+            try
+            {
                 final Field field = consensusModuleAgent.getClass().getDeclaredField("role");
                 field.setAccessible(true);
                 final Cluster.Role clusterRole = (Cluster.Role) field.get(consensusModuleAgent);
 
-                if (shouldStall && clusterRole == Cluster.Role.LEADER) {
+                if (shouldStall && clusterRole == Cluster.Role.LEADER)
+                {
                     shouldStall = false;
                     LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(5));
                 }
-            } catch (final Exception e) {
+            } catch (final Exception e)
+            {
                 throw new RuntimeException(e);
             }
         }

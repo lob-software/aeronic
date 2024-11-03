@@ -100,7 +100,7 @@ public final class TestClusterNode implements AutoCloseable
             final int nodeCount,
             final ClusteredService clusteredService,
             final String ingressChannel
-                                                           )
+    )
     {
         return new TestClusterNode(
                 new Context()
@@ -192,7 +192,7 @@ public final class TestClusterNode implements AutoCloseable
                 mediaDriverContext,
                 archiveContext,
                 consensusModuleContext
-                                                          );
+        );
 
         container = ClusteredServiceContainer.launch(serviceContainerContext);
     }
@@ -227,7 +227,7 @@ public final class TestClusterNode implements AutoCloseable
                 final int offset,
                 final int length,
                 final Header header
-                                    )
+        )
         {
             messageCount++;
             System.out.println(cluster.role() + " onSessionMessage " + session.id() + " count=" + messageCount);
@@ -267,7 +267,7 @@ public final class TestClusterNode implements AutoCloseable
                 final int logSessionId,
                 final TimeUnit timeUnit,
                 final int appVersion
-                                            )
+        )
         {
             System.out.println("Node ID: " + cluster.memberId() + " onNewLeadershipTermEvent. I am: " + cluster.role() + " Log position: " + logPosition);
         }
@@ -280,7 +280,7 @@ public final class TestClusterNode implements AutoCloseable
                 container,
                 clusteredMediaDriver.archive(),
                 clusteredMediaDriver
-                            );
+        );
     }
 
     public void deleteDirs()
@@ -307,7 +307,8 @@ public final class TestClusterNode implements AutoCloseable
         public void onConnectedSession(final SessionProxy sessionProxy, final long nowMs)
         {
             final String credentialsToEcho = credentials.get(sessionProxy.sessionId());
-            if (null != credentialsToEcho) {
+            if (null != credentialsToEcho)
+            {
                 sessionProxy.authenticate(credentialsToEcho.getBytes());
             }
         }
@@ -315,7 +316,8 @@ public final class TestClusterNode implements AutoCloseable
         public void onChallengedSession(final SessionProxy sessionProxy, final long nowMs)
         {
             final String credentialsToEcho = credentials.get(sessionProxy.sessionId());
-            if (null != credentialsToEcho) {
+            if (null != credentialsToEcho)
+            {
                 sessionProxy.authenticate(credentialsToEcho.getBytes());
             }
         }

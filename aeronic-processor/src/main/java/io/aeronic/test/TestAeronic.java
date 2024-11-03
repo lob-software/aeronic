@@ -22,7 +22,7 @@ public class TestAeronic implements Aeronic
             throw new IllegalStateException(("Cannot create a publisher before registering a subscriber! " +
                     "Register %s subscriber first.").formatted(clazz.getName()));
         }
-        return (T)subscriberInvoker.getSubscriber();
+        return (T) subscriberInvoker.getSubscriber();
     }
 
     @Override

@@ -23,7 +23,8 @@ public class Assertions
 
     public static void assertCodec(final Object object)
     {
-        try {
+        try
+        {
             final Class<?> clazz = object.getClass();
 
             Arrays.stream(clazz.getInterfaces())
@@ -52,7 +53,8 @@ public class Assertions
             final Object decoded = decoderMethod.invoke(null, bufferDecoder);
 
             assertReflectiveEquals(object, decoded);
-        } catch (final Exception e) {
+        } catch (final Exception e)
+        {
             throw new AssertionError(e);
         }
     }
