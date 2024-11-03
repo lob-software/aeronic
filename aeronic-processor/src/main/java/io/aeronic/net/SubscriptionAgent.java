@@ -35,6 +35,8 @@ public class SubscriptionAgent<T> implements Agent
     @Override
     public String roleName()
     {
-        return invoker.getSubscriber().getClass().getSimpleName();
+        return invoker.getSubscriber()
+            .getClass()
+            .getSimpleName();
     }
 }

@@ -5,7 +5,7 @@ import io.aeron.ChannelUriStringBuilder;
 import io.aeron.cluster.client.AeronCluster;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
-import io.aeronic.Aeronic;
+import io.aeronic.AeronicImpl;
 import io.aeronic.SampleEvents;
 import io.aeronic.SimpleEvents;
 import io.aeronic.cluster.AeronicClusteredServiceContainer;
@@ -41,7 +41,7 @@ public class ClusterSystemTest
         .networkInterface("localhost")
         .build();
 
-    private Aeronic aeronic;
+    private AeronicImpl aeronic;
     private Aeron aeron;
     private MediaDriver mediaDriver;
     private TestClusterNode clusterNode;
@@ -63,7 +63,7 @@ public class ClusterSystemTest
             .aeronDirectoryName(mediaDriver.aeronDirectoryName());
 
         aeron = Aeron.connect(aeronCtx);
-        aeronic = Aeronic.launch(new Aeronic.Context().aeron(aeron));
+        aeronic = AeronicImpl.launch(new AeronicImpl.Context().aeron(aeron));
 
         simpleEvents = new SimpleEventsImpl();
         sampleEvents = new SampleEventsImpl();
@@ -98,7 +98,8 @@ public class ClusterSystemTest
             new AeronCluster.Context()
                 .errorHandler(Throwable::printStackTrace)
                 .ingressChannel(INGRESS_CHANNEL)
-                .aeronDirectoryName(aeron.context().aeronDirectoryName())
+                .aeronDirectoryName(aeron.context()
+                    .aeronDirectoryName())
         );
 
         aeronic.awaitUntilPubsAndSubsConnect();
@@ -119,14 +120,17 @@ public class ClusterSystemTest
             .registerEgressPublisher(SimpleEvents.class)
             .registerEgressPublisher(SampleEvents.class);
 
-        final SimpleEvents simpleEventsPublisher = configuration.registry().getPublisherFor(SimpleEvents.class);
-        final SampleEvents sampleEventsPublisher = configuration.registry().getPublisherFor(SampleEvents.class);
+        final SimpleEvents simpleEventsPublisher = configuration.registry()
+            .getPublisherFor(SimpleEvents.class);
+        final SampleEvents sampleEventsPublisher = configuration.registry()
+            .getPublisherFor(SampleEvents.class);
 
         clusteredService = new AeronicClusteredServiceContainer(configuration);
         clusterNode = startNodeOnIngressChannel(0, 1, clusteredService, INGRESS_CHANNEL);
 
         aeronic.registerClusterEgressSubscriber(SimpleEvents.class, simpleEvents, new AeronCluster.Context()
-            .aeronDirectoryName(aeron.context().aeronDirectoryName())
+            .aeronDirectoryName(aeron.context()
+                .aeronDirectoryName())
             .errorHandler(Throwable::printStackTrace)
             .ingressChannel(INGRESS_CHANNEL));
 
@@ -198,7 +202,8 @@ public class ClusterSystemTest
         final AeronCluster anotherClient = AeronCluster.connect(
             new AeronCluster.Context()
                 .ingressChannel(INGRESS_CHANNEL)
-                .aeronDirectoryName(aeron.context().aeronDirectoryName())
+                .aeronDirectoryName(aeron.context()
+                    .aeronDirectoryName())
                 .errorHandler(Throwable::printStackTrace));
 
         final ExpandableArrayBuffer buffer = new ExpandableArrayBuffer();

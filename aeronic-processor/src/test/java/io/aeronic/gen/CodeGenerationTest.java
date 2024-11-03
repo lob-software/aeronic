@@ -27,11 +27,11 @@ public class CodeGenerationTest
             "io.aeronic.TestEvents",
             """
                 package io.aeronic;
-                                   
+                
                 import io.aeronic.gen.Aeronic;
                 import java.util.List;
                 import io.aeronic.codec.SimpleImpl;
-                                                    
+                
                 @Aeronic
                 public interface TestEvents
                 {
@@ -54,7 +54,7 @@ public class CodeGenerationTest
                         MyEnum myEnum,
                         List<SimpleImpl> simpleList
                     );
-
+                
                     void onTimer(long timestamp);
                 } 
                 """,

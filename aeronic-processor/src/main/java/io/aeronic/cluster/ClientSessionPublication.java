@@ -22,7 +22,8 @@ public class ClientSessionPublication<T> implements AeronicPublication
     @Override
     public boolean isConnected()
     {
-        return !clientSessions.isEmpty() && clientSessions.stream().noneMatch(ClientSession::isClosing);
+        return !clientSessions.isEmpty() && clientSessions.stream()
+            .noneMatch(ClientSession::isClosing);
     }
 
     @Override

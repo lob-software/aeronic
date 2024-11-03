@@ -15,7 +15,8 @@ public enum MyEnum implements Encodable
 {
     ONE('a'), TWO('b'), THREE('c');
 
-    private static final Map<Character, MyEnum> VALUES = Arrays.stream(values()).collect(toMap(e -> e.value, Function.identity()));
+    private static final Map<Character, MyEnum> VALUES = Arrays.stream(values())
+        .collect(toMap(e -> e.value, Function.identity()));
     private final char value;
 
     MyEnum(final char value)

@@ -11,12 +11,32 @@ public class ClusterUtil
         for (int i = 0; i < memberCount; i++)
         {
             builder
-                .append(i).append(',')
-                .append(LOCALHOST).append(":2").append(clusterId).append("11").append(i).append(',')
-                .append(LOCALHOST).append(":2").append(clusterId).append("22").append(i).append(',')
-                .append(LOCALHOST).append(":2").append(clusterId).append("33").append(i).append(',')
-                .append(LOCALHOST).append(":0,")
-                .append(LOCALHOST).append(":801").append(i).append('|');
+                .append(i)
+                .append(',')
+                .append(LOCALHOST)
+                .append(":2")
+                .append(clusterId)
+                .append("11")
+                .append(i)
+                .append(',')
+                .append(LOCALHOST)
+                .append(":2")
+                .append(clusterId)
+                .append("22")
+                .append(i)
+                .append(',')
+                .append(LOCALHOST)
+                .append(":2")
+                .append(clusterId)
+                .append("33")
+                .append(i)
+                .append(',')
+                .append(LOCALHOST)
+                .append(":0,")
+                .append(LOCALHOST)
+                .append(":801")
+                .append(i)
+                .append('|');
         }
 
         builder.setLength(builder.length() - 1);
@@ -35,8 +55,14 @@ public class ClusterUtil
 
         for (int i = 0; i < memberCount; i++)
         {
-            builder.append(i).append('=').append(LOCALHOST).append(":2").append(clusterId).append("11")
-                .append(i).append(',');
+            builder.append(i)
+                .append('=')
+                .append(LOCALHOST)
+                .append(":2")
+                .append(clusterId)
+                .append("11")
+                .append(i)
+                .append(',');
         }
 
         builder.setLength(builder.length() - 1);

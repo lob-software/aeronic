@@ -3,7 +3,7 @@ package io.aeronic.cluster;
 import io.aeron.Aeron;
 import io.aeron.cluster.service.ClientSession;
 import io.aeron.cluster.service.Cluster;
-import io.aeronic.Aeronic;
+import io.aeronic.AeronicImpl;
 import io.aeronic.net.AbstractSubscriberInvoker;
 import io.aeronic.net.NullSubscriberInvokerImpl;
 import io.aeronic.net.ToggledAeronicPublication;
@@ -36,8 +36,9 @@ public class AeronicClusteredServiceRegistry
     )
     {
         final String publisherName = clazz.getName() + "__EgressPublisher";
-        final ToggledAeronicPublication<T> publication = new ToggledAeronicPublication<>(() -> aeron.get().addPublication(egressChannel, streamId));
-        final T publisher = Aeronic.createPublisher(clazz, publication);
+        final ToggledAeronicPublication<T> publication = new ToggledAeronicPublication<>(() -> aeron.get()
+            .addPublication(egressChannel, streamId));
+        final T publisher = AeronicImpl.createPublisher(clazz, publication);
         publication.bindPublisher(publisher);
         toggledPublicationByName.put(publisherName, publication);
     }
@@ -46,11 +47,13 @@ public class AeronicClusteredServiceRegistry
     {
         if (newRole == Cluster.Role.LEADER)
         {
-            toggledPublicationByName.values().forEach(ToggledAeronicPublication::activate);
+            toggledPublicationByName.values()
+                .forEach(ToggledAeronicPublication::activate);
         }
         else
         {
-            toggledPublicationByName.values().forEach(ToggledAeronicPublication::deactivate);
+            toggledPublicationByName.values()
+                .forEach(ToggledAeronicPublication::deactivate);
         }
     }
 
@@ -59,9 +62,11 @@ public class AeronicClusteredServiceRegistry
     {
         try
         {
-            return (T)clientSessionPublicationByName.get(clazz.getName() + "__EgressPublisher").getPublisher();
+            return (T)clientSessionPublicationByName.get(clazz.getName() + "__EgressPublisher")
+                .getPublisher();
         }
-        catch (final Exception e)
+        catch (final
+        Exception e)
         {
             throw new RuntimeException("Could not retrieve publisher for " + clazz);
         }
@@ -72,9 +77,11 @@ public class AeronicClusteredServiceRegistry
     {
         try
         {
-            return (T)toggledPublicationByName.get(clazz.getName() + "__EgressPublisher").getPublisher();
+            return (T)toggledPublicationByName.get(clazz.getName() + "__EgressPublisher")
+                .getPublisher();
         }
-        catch (final Exception e)
+        catch (final
+        Exception e)
         {
             throw new RuntimeException("Could not retrieve publisher for " + clazz);
         }
@@ -82,21 +89,29 @@ public class AeronicClusteredServiceRegistry
 
     public void registerIngressSubscriberInvoker(final AbstractSubscriberInvoker<?> subscriberInvoker)
     {
-        Arrays.stream(subscriberInvoker.getSubscriber().getClass().getInterfaces())
+        Arrays.stream(subscriberInvoker.getSubscriber()
+                .getClass()
+                .getInterfaces())
             .map(Class::getCanonicalName)
             .forEach(subscriberInterface -> invokerByName.put(subscriberInterface + "__IngressPublisher", subscriberInvoker));
     }
 
     public boolean egressConnected()
     {
-        return clientSessionPublicationByName.values().stream().allMatch(ClientSessionPublication::isConnected)
-            && toggledPublicationByName.values().stream().allMatch(ToggledAeronicPublication::isConnected);
+        return clientSessionPublicationByName.values()
+            .stream()
+            .allMatch(ClientSessionPublication::isConnected)
+            && toggledPublicationByName.values()
+            .stream()
+            .allMatch(ToggledAeronicPublication::isConnected);
     }
 
     public void close()
     {
-        clientSessionPublicationByName.values().forEach(ClientSessionPublication::close);
-        toggledPublicationByName.values().forEach(ToggledAeronicPublication::close);
+        clientSessionPublicationByName.values()
+            .forEach(ClientSessionPublication::close);
+        toggledPublicationByName.values()
+            .forEach(ToggledAeronicPublication::close);
     }
 
     public void onSessionOpen(final ClientSession session)
@@ -114,13 +129,15 @@ public class AeronicClusteredServiceRegistry
 
             if (subscriberName.endsWith("__EgressSubscriber"))
             {
-                clientSessionPublicationByName.get(subscriberName.split("__")[0] + "__EgressPublisher").bindClientSession(session);
+                clientSessionPublicationByName.get(subscriberName.split("__")[0] + "__EgressPublisher")
+                    .bindClientSession(session);
             }
         }
     }
 
     public void onSessionMessage(final ClientSession session, final DirectBuffer buffer, final int offset)
     {
-        invokersBySessionId.getOrDefault(session.id(), NullSubscriberInvokerImpl.INSTANCE).handle(buffer, offset);
+        invokersBySessionId.getOrDefault(session.id(), NullSubscriberInvokerImpl.INSTANCE)
+            .handle(buffer, offset);
     }
 }

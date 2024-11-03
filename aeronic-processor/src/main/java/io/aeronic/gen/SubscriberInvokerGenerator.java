@@ -25,10 +25,13 @@ public class SubscriberInvokerGenerator
         return new StringBuilder()
             .append(generatePackageAndImports(packageName, interfaceName))
             .append(generateClassDeclaration(interfaceName))
-            .append("\n").append("{").append("\n")
-            .append(generateConstructor(interfaceName))
+            .append("\n")
+            .append("{")
+            .append("\n")
+            .append(generateConstructors(interfaceName))
             .append(handleMethod)
-            .append("}").append("\n")
+            .append("}")
+            .append("\n")
             .toString();
     }
 
@@ -110,15 +113,15 @@ public class SubscriberInvokerGenerator
             if (isPrimitive(arrayType))
             {
                 handleMethodBuilder.append("""
-                                final %s %s = bufferDecoder.decode%sArray();
-                """.formatted(parameterType, parameterName, capitalize(arrayType)));
+                                    final %s %s = bufferDecoder.decode%sArray();
+                    """.formatted(parameterType, parameterName, capitalize(arrayType)));
             }
             else
             {
                 final String className = TypeUtil.extractClassName(arrayType);
                 handleMethodBuilder.append("""
-                                final %s[] %s = bufferDecoder.decodeArray(%s::decode, %s[]::new);
-                """.formatted(className, parameterName, className, className));
+                                    final %s[] %s = bufferDecoder.decodeArray(%s::decode, %s[]::new);
+                    """.formatted(className, parameterName, className, className));
             }
 
             subscriberInvocation.append("                    %s".formatted(parameterName));
@@ -162,16 +165,16 @@ public class SubscriberInvokerGenerator
         addImport("import %s;".formatted(parameterType));
     }
 
-    private String generateConstructor(final String interfaceName)
+    private String generateConstructors(final String interfaceName)
     {
         return """
-                
+            
                 public %sInvoker(final %s subscriber)
                 {
                     super(subscriber);
                 }
-                        
-            """.formatted(interfaceName, interfaceName);
+            
+            """.formatted(interfaceName, interfaceName, interfaceName);
     }
 
     private String generateClassDeclaration(final String interfaceName)
@@ -181,10 +184,11 @@ public class SubscriberInvokerGenerator
 
     private String generatePackageAndImports(final String packageName, final String interfaceName)
     {
-        final String importsString = imports.stream().reduce("", (e, n) -> e + "\n" + n);
+        final String importsString = imports.stream()
+            .reduce("", (e, n) -> e + "\n" + n);
         return """
             package %s;
-                    
+            
             import %s.%s;
             import io.aeron.Subscription;
             import io.aeronic.net.AbstractSubscriberInvoker;
@@ -192,7 +196,7 @@ public class SubscriberInvokerGenerator
             import org.agrona.BitUtil;
             import org.agrona.DirectBuffer;%s
             
-                    
+            
             """.formatted(packageName, packageName, interfaceName, importsString);
     }
 }

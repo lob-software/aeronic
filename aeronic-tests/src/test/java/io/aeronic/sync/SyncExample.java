@@ -4,7 +4,7 @@ import io.aeron.Aeron;
 import io.aeron.ChannelUriStringBuilder;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
-import io.aeronic.Aeronic;
+import io.aeronic.AeronicImpl;
 import org.agrona.concurrent.BusySpinIdleStrategy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +25,7 @@ public class SyncExample
         .endpoint("localhost:40457")
         .build();
 
-    private Aeronic aeronic;
+    private AeronicImpl aeronic;
     private Aeron aeron;
     private MediaDriver mediaDriver;
 
@@ -45,7 +45,7 @@ public class SyncExample
             .aeronDirectoryName(mediaDriver.aeronDirectoryName());
 
         aeron = Aeron.connect(aeronCtx);
-        aeronic = Aeronic.launch(new Aeronic.Context().aeron(aeron));
+        aeronic = AeronicImpl.launch(new AeronicImpl.Context().aeron(aeron));
     }
 
     @AfterEach
@@ -69,10 +69,12 @@ public class SyncExample
         aeronic.awaitUntilPubsAndSubsConnect();
 
         final long expectedValue = 645;
-        final long actualValue = syncEventsController.addAndGet(expectedValue).join();
+        final long actualValue = syncEventsController.addAndGet(expectedValue)
+            .join();
         assertEquals(expectedValue, actualValue);
 
-        final long newValue = syncEventsController.addAndGet(101).join();
+        final long newValue = syncEventsController.addAndGet(101)
+            .join();
         assertEquals(746, newValue);
     }
 
@@ -113,7 +115,8 @@ public class SyncExample
             // 3. receive the response and update local data structure
             // NOTE: there is a potential for memory leak if response channel does not send the response back
             // a timeout can be set so that upon expiry, correlationId is removed from the map
-            correlationIdToResponseMap.remove(correlationId).complete(value);
+            correlationIdToResponseMap.remove(correlationId)
+                .complete(value);
         }
 
         public CompletableFuture<Long> addAndGet(final long value)

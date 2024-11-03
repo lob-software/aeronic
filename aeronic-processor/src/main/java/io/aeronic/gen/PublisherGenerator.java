@@ -24,10 +24,13 @@ public class PublisherGenerator
         return new StringBuilder()
             .append(generatePackageAndImports(packageName))
             .append(generateClassDeclaration(interfaceName))
-            .append("\n").append("{").append("\n")
+            .append("\n")
+            .append("{")
+            .append("\n")
             .append(generateConstructor(interfaceName))
             .append(generatedMethods)
-            .append("}").append("\n")
+            .append("}")
+            .append("\n")
             .toString();
     }
 
@@ -64,7 +67,7 @@ public class PublisherGenerator
 
             methodsBuilder.append("\n    )");
             methodsBuilder.append("""
-                    
+                
                     {
                 """);
 
@@ -72,7 +75,7 @@ public class PublisherGenerator
             {
                 methodBodyBuilder.append("""
                         }
-                        
+                    
                     """);
             }
 
@@ -160,12 +163,12 @@ public class PublisherGenerator
     private String generateConstructor(final String interfaceName)
     {
         return """
-                
+            
                 public %sPublisher(final AeronicPublication publication)
                 {
                     super(publication);
                 }
-                
+            
             """.formatted(interfaceName);
     }
 
@@ -176,16 +179,17 @@ public class PublisherGenerator
 
     private String generatePackageAndImports(final String packageName)
     {
-        final String importsString = imports.stream().reduce("", (e, n) -> e + "\n" + n);
+        final String importsString = imports.stream()
+            .reduce("", (e, n) -> e + "\n" + n);
         return """
             package %s;
-                    
+            
             import io.aeron.Publication;
             import io.aeronic.net.AbstractPublisher;
             import io.aeronic.net.AeronicPublication;
             import org.agrona.BitUtil;%s
-
-                        
+            
+            
             """.formatted(packageName, importsString);
     }
 }

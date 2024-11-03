@@ -18,7 +18,8 @@ public class Assertions
 {
     public static <T> void assertReflectiveEquals(final Object expected, final T actual)
     {
-        assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+        assertThat(actual).usingRecursiveComparison()
+            .isEqualTo(expected);
     }
 
     public static void assertCodec(final Object object)
@@ -34,12 +35,14 @@ public class Assertions
 
             final Method[] methods = clazz.getMethods();
             final Method encoderMethod = Arrays.stream(methods)
-                .filter(method -> method.getName().equals("encode"))
+                .filter(method -> method.getName()
+                    .equals("encode"))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("This should never have happened..."));
 
             final Method decoderMethod = Arrays.stream(methods)
-                .filter(method -> method.getName().equals("decode"))
+                .filter(method -> method.getName()
+                    .equals("decode"))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError(object + " does not properly define @Decoder method"));
 
@@ -54,7 +57,8 @@ public class Assertions
 
             assertReflectiveEquals(object, decoded);
         }
-        catch (final Exception e)
+        catch (final
+        Exception e)
         {
             throw new AssertionError(e);
         }

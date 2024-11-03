@@ -7,7 +7,7 @@ import io.aeron.cluster.service.ClientSession;
 import io.aeron.cluster.service.Cluster;
 import io.aeron.cluster.service.ClusteredService;
 import io.aeron.logbuffer.Header;
-import io.aeronic.Aeronic;
+import io.aeronic.AeronicImpl;
 import org.agrona.DirectBuffer;
 
 import java.util.concurrent.TimeUnit;
@@ -155,13 +155,13 @@ public class AeronicClusteredServiceContainer implements ClusteredService
 
         public <T> Configuration registerIngressSubscriber(final Class<T> clazz, final T subscriberImplementation)
         {
-            registry.registerIngressSubscriberInvoker(Aeronic.createSubscriberInvoker(clazz, subscriberImplementation));
+            registry.registerIngressSubscriberInvoker(AeronicImpl.createSubscriberInvoker(clazz, subscriberImplementation));
             return this;
         }
 
         public <T> Configuration registerEgressPublisher(final Class<T> clazz)
         {
-            registry.registerEgressPublisher(Aeronic.createClusterEgressPublisher(clazz));
+            registry.registerEgressPublisher(AeronicImpl.createClusterEgressPublisher(clazz));
             return this;
         }
 
@@ -175,7 +175,8 @@ public class AeronicClusteredServiceContainer implements ClusteredService
          */
         public <T> Configuration registerToggledEgressPublisher(final Class<T> clazz, final String egressChannel, final int streamId)
         {
-            registry.registerToggledEgressPublisher(() -> clusterRef.get().aeron(), clazz, egressChannel, streamId);
+            registry.registerToggledEgressPublisher(() -> clusterRef.get()
+                .aeron(), clazz, egressChannel, streamId);
             return this;
         }
     }

@@ -8,7 +8,7 @@ import io.aeron.archive.ArchiveThreadingMode;
 import io.aeron.archive.client.AeronArchive;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
-import io.aeronic.Aeronic;
+import io.aeronic.AeronicImpl;
 import io.aeronic.SampleEvents;
 import org.agrona.SystemUtil;
 import org.agrona.concurrent.BusySpinIdleStrategy;
@@ -26,7 +26,7 @@ public class AeronicPersistentTest
     private static final int STREAM_ID = 1033;
     private static final String CONTROL_ENDPOINT = "localhost:23265";
 
-    private Aeronic aeronic;
+    private AeronicImpl aeronic;
     private Aeron aeron;
     private MediaDriver mediaDriver;
     private Archive archive;
@@ -51,7 +51,8 @@ public class AeronicPersistentTest
 
         archive = Archive.launch(new Archive.Context()
             .archiveDir(new File(SystemUtil.tmpDirName(), "archive"))
-            .aeronDirectoryName(mediaDriver.context().aeronDirectoryName())
+            .aeronDirectoryName(mediaDriver.context()
+                .aeronDirectoryName())
             .errorHandler(Throwable::printStackTrace)
             .deleteArchiveOnStart(true)
             .threadingMode(ArchiveThreadingMode.SHARED)
@@ -63,12 +64,15 @@ public class AeronicPersistentTest
         aeronArchive = AeronArchive.connect(new AeronArchive.Context()
             .errorHandler(Throwable::printStackTrace)
             .aeron(aeron)
-            .controlRequestChannel(archive.context().localControlChannel())
-            .controlRequestStreamId(archive.context().localControlStreamId())
-            .controlResponseChannel(archive.context().controlChannel()));
+            .controlRequestChannel(archive.context()
+                .localControlChannel())
+            .controlRequestStreamId(archive.context()
+                .localControlStreamId())
+            .controlResponseChannel(archive.context()
+                .controlChannel()));
 
-        aeronic = Aeronic.launch(
-            new Aeronic.Context()
+        aeronic = AeronicImpl.launch(
+            new AeronicImpl.Context()
                 .aeron(aeron)
                 .aeronArchive(aeronArchive)
                 .idleStrategy(NoOpIdleStrategy.INSTANCE)

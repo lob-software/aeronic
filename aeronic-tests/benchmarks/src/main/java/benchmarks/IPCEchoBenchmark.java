@@ -3,7 +3,7 @@ package benchmarks;
 import io.aeron.Aeron;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
-import io.aeronic.Aeronic;
+import io.aeronic.AeronicImpl;
 import one.profiler.AsyncProfiler;
 import one.profiler.Events;
 import org.HdrHistogram.Histogram;
@@ -23,7 +23,7 @@ public class IPCEchoBenchmark
 {
     private static final int RUNS = 10_000_000;
 
-    private Aeronic aeronic;
+    private AeronicImpl aeronic;
     private Echo echoProxy;
     private MediaDriver mediaDriver;
     private Aeron aeron;
@@ -49,8 +49,8 @@ public class IPCEchoBenchmark
 
         aeron = Aeron.connect(aeronCtx);
 
-        aeronic = Aeronic.launch(
-            new Aeronic.Context()
+        aeronic = AeronicImpl.launch(
+            new AeronicImpl.Context()
                 .aeron(aeron)
                 .offerFailureHandler(l -> LockSupport.parkNanos(1))
                 .idleStrategy(NoOpIdleStrategy.INSTANCE)
@@ -129,7 +129,8 @@ public class IPCEchoBenchmark
                 new PrintStream(
                     new FileOutputStream(System.getProperty("histogram-file-name", "histogram.hgrm"))), 1000.);
         }
-        catch (final FileNotFoundException e)
+        catch (final
+        FileNotFoundException e)
         {
             throw new RuntimeException(e);
         }

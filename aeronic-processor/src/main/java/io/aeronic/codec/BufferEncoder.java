@@ -56,7 +56,7 @@ public class BufferEncoder
 
     public void encode(final boolean booleanValue)
     {
-        buffer.putByte(currentOffset, (byte) (booleanValue ? 1 : 0));
+        buffer.putByte(currentOffset, (byte)(booleanValue ? 1 : 0));
         currentOffset += BitUtil.SIZE_OF_BYTE;
     }
 

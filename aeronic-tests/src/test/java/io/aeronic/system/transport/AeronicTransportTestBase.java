@@ -4,7 +4,7 @@ import io.aeron.Aeron;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
 import io.aeron.driver.status.PublisherLimit;
-import io.aeronic.Aeronic;
+import io.aeronic.AeronicImpl;
 import io.aeronic.SampleEvents;
 import io.aeronic.SimpleEvents;
 import org.agrona.concurrent.BusySpinIdleStrategy;
@@ -20,7 +20,7 @@ import static org.awaitility.Awaitility.await;
 
 public abstract class AeronicTransportTestBase
 {
-    private Aeronic aeronic;
+    private AeronicImpl aeronic;
     private Aeron aeron;
     private MediaDriver mediaDriver;
     private Aeron.Context aeronCtx;
@@ -38,8 +38,8 @@ public abstract class AeronicTransportTestBase
         mediaDriver = MediaDriver.launchEmbedded(mediaDriverCtx);
         aeronCtx = new Aeron.Context().aeronDirectoryName(mediaDriver.aeronDirectoryName());
         aeron = Aeron.connect(aeronCtx);
-        aeronic = Aeronic.launch(
-            new Aeronic.Context()
+        aeronic = AeronicImpl.launch(
+            new AeronicImpl.Context()
                 .aeron(aeron)
                 .idleStrategy(NoOpIdleStrategy.INSTANCE)
                 .errorHandler(Throwable::printStackTrace)
