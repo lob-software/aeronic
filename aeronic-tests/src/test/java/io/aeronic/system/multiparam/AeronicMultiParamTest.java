@@ -3,7 +3,7 @@ package io.aeronic.system.multiparam;
 import io.aeron.Aeron;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
-import io.aeronic.Aeronic;
+import io.aeronic.AeronicImpl;
 import io.aeronic.MyEnum;
 import org.agrona.concurrent.BusySpinIdleStrategy;
 import org.junit.jupiter.api.AfterEach;
@@ -20,7 +20,7 @@ public class AeronicMultiParamTest
 {
 
     private static final String IPC = "aeron:ipc";
-    private Aeronic aeronic;
+    private AeronicImpl aeronic;
     private Aeron aeron;
     private MediaDriver mediaDriver;
 
@@ -40,7 +40,7 @@ public class AeronicMultiParamTest
             .aeronDirectoryName(mediaDriver.aeronDirectoryName());
 
         aeron = Aeron.connect(aeronCtx);
-        aeronic = Aeronic.launch(new Aeronic.Context().aeron(aeron));
+        aeronic = AeronicImpl.launch(new AeronicImpl.Context().aeron(aeron));
     }
 
     @AfterEach

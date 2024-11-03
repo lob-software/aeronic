@@ -23,4 +23,5 @@ dependencies {
 
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
+    maxParallelForks = 1
 }

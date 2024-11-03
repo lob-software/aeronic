@@ -26,7 +26,7 @@ public class SubscriberInvokerGenerator
             .append(generatePackageAndImports(packageName, interfaceName))
             .append(generateClassDeclaration(interfaceName))
             .append("\n").append("{").append("\n")
-            .append(generateConstructor(interfaceName))
+            .append(generateConstructors(interfaceName))
             .append(handleMethod)
             .append("}").append("\n")
             .toString();
@@ -162,16 +162,16 @@ public class SubscriberInvokerGenerator
         addImport("import %s;".formatted(parameterType));
     }
 
-    private String generateConstructor(final String interfaceName)
+    private String generateConstructors(final String interfaceName)
     {
         return """
-                
+
                 public %sInvoker(final %s subscriber)
                 {
                     super(subscriber);
                 }
                         
-            """.formatted(interfaceName, interfaceName);
+            """.formatted(interfaceName, interfaceName, interfaceName);
     }
 
     private String generateClassDeclaration(final String interfaceName)

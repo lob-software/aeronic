@@ -5,12 +5,16 @@ import org.agrona.DirectBuffer;
 
 public abstract class AbstractSubscriberInvoker<T>
 {
-    protected final T subscriber;
+    protected T subscriber;
     protected final BufferDecoder bufferDecoder = new BufferDecoder();
 
     public AbstractSubscriberInvoker(final T subscriber)
     {
         this.subscriber = subscriber;
+    }
+
+    public AbstractSubscriberInvoker()
+    {
     }
 
     public T getSubscriber()

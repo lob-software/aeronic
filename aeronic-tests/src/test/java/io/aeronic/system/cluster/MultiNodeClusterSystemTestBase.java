@@ -3,7 +3,7 @@ package io.aeronic.system.cluster;
 import io.aeron.Aeron;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
-import io.aeronic.Aeronic;
+import io.aeronic.AeronicImpl;
 import io.aeronic.SimpleEvents;
 import io.aeronic.cluster.AeronicClusteredServiceContainer;
 import org.agrona.concurrent.BusySpinIdleStrategy;
@@ -19,7 +19,7 @@ public abstract class MultiNodeClusterSystemTestBase
 {
     private static final int STREAM_ID = 101;
 
-    private Aeronic aeronic;
+    private AeronicImpl aeronic;
     private Aeron aeron;
     private MediaDriver mediaDriver;
     private final TestCluster testCluster = new TestCluster();
@@ -40,7 +40,7 @@ public abstract class MultiNodeClusterSystemTestBase
             .aeronDirectoryName(mediaDriver.aeronDirectoryName());
 
         aeron = Aeron.connect(aeronCtx);
-        aeronic = Aeronic.launch(new Aeronic.Context().aeron(aeron));
+        aeronic = AeronicImpl.launch(new AeronicImpl.Context().aeron(aeron));
 
         testCluster.registerNode(0, 3, newClusteredServiceContainer());
         testCluster.registerNode(1, 3, newClusteredServiceContainer());

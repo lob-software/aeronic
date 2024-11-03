@@ -5,7 +5,7 @@ import io.aeron.ChannelUriStringBuilder;
 import io.aeron.cluster.client.AeronCluster;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
-import io.aeronic.Aeronic;
+import io.aeronic.AeronicImpl;
 import io.aeronic.SampleEvents;
 import io.aeronic.SimpleEvents;
 import io.aeronic.cluster.AeronicClusteredServiceContainer;
@@ -41,7 +41,7 @@ public class ClusterSystemTest
         .networkInterface("localhost")
         .build();
 
-    private Aeronic aeronic;
+    private AeronicImpl aeronic;
     private Aeron aeron;
     private MediaDriver mediaDriver;
     private TestClusterNode clusterNode;
@@ -63,7 +63,7 @@ public class ClusterSystemTest
             .aeronDirectoryName(mediaDriver.aeronDirectoryName());
 
         aeron = Aeron.connect(aeronCtx);
-        aeronic = Aeronic.launch(new Aeronic.Context().aeron(aeron));
+        aeronic = AeronicImpl.launch(new AeronicImpl.Context().aeron(aeron));
 
         simpleEvents = new SimpleEventsImpl();
         sampleEvents = new SampleEventsImpl();

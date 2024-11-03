@@ -5,7 +5,7 @@ import io.aeron.ChannelUriStringBuilder;
 import io.aeron.cluster.service.Cluster;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.ThreadingMode;
-import io.aeronic.Aeronic;
+import io.aeronic.AeronicImpl;
 import io.aeronic.SimpleEvents;
 import io.aeronic.cluster.AeronicClusteredServiceContainer;
 import net.bytebuddy.ByteBuddy;
@@ -35,7 +35,7 @@ public class ZombieLeaderClusterSystemTest
         .networkInterface("localhost")
         .build();
 
-    private Aeronic aeronic;
+    private AeronicImpl aeronic;
     private Aeron aeron;
     private MediaDriver mediaDriver;
     private final TestCluster testCluster = new TestCluster();
@@ -54,7 +54,7 @@ public class ZombieLeaderClusterSystemTest
             .aeronDirectoryName(mediaDriver.aeronDirectoryName());
 
         aeron = Aeron.connect(aeronCtx);
-        aeronic = Aeronic.launch(new Aeronic.Context().aeron(aeron));
+        aeronic = AeronicImpl.launch(new AeronicImpl.Context().aeron(aeron));
 
         testCluster.registerNode(0, 3, newClusteredServiceContainer());
         testCluster.registerNode(1, 3, newClusteredServiceContainer());
