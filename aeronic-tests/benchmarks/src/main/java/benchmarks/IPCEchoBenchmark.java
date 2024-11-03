@@ -129,8 +129,7 @@ public class IPCEchoBenchmark
                 new PrintStream(
                     new FileOutputStream(System.getProperty("histogram-file-name", "histogram.hgrm"))), 1000.);
         }
-        catch (final
-        FileNotFoundException e)
+        catch (final FileNotFoundException e)
         {
             throw new RuntimeException(e);
         }

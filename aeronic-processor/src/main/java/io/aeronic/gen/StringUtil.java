@@ -8,7 +8,6 @@ public final class StringUtil
 
     public static String capitalize(final String str)
     {
-        return str.substring(0, 1)
-            .toUpperCase() + str.substring(1);
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 }

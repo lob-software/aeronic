@@ -5,7 +5,7 @@ public class Samples
     public static final String SAMPLE_SUBSCRIBER =
         """
             package io.aeronic;
-            
+                    
             import io.aeronic.TestEvents;
             import io.aeron.Subscription;
             import io.aeronic.net.AbstractSubscriberInvoker;
@@ -16,16 +16,16 @@ public class Samples
             import io.aeronic.MyEnum;
             import java.util.List;
             import java.util.ArrayList;
-            
-            
+                        
+                    
             public class TestEventsInvoker extends AbstractSubscriberInvoker<TestEvents>
             {
-            
+               
                 public TestEventsInvoker(final TestEvents subscriber)
                 {
                     super(subscriber);
                 }
-            
+                    
                 public void handle(final BufferDecoder bufferDecoder, final int offset)
                 {
                     final int msgType = bufferDecoder.decodeInt();
@@ -84,7 +84,7 @@ public class Samples
     public static final String SAMPLE_PUBLISHER =
         """
             package io.aeronic;
-            
+                    
             import io.aeron.Publication;
             import io.aeronic.net.AbstractPublisher;
             import io.aeronic.net.AeronicPublication;
@@ -93,15 +93,15 @@ public class Samples
             import io.aeronic.MyEnum;
             import java.util.List;
             
-            
+                    
             public class TestEventsPublisher extends AbstractPublisher implements TestEvents
             {
-            
+                    
                 public TestEventsPublisher(final AeronicPublication publication)
                 {
                     super(publication);
                 }
-            
+                    
                 @Override
                 public void onEvent(
                     final long aLong,
@@ -143,7 +143,7 @@ public class Samples
                     bufferEncoder.encode(simpleList);
                     offer();
                 }
-            
+                
                 @Override
                 public void onTimer(
                     final long timestamp

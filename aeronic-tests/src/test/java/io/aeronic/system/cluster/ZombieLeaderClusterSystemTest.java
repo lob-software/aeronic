@@ -132,14 +132,12 @@ public class ZombieLeaderClusterSystemTest
 
             new ByteBuddy()
                 .redefine(consensusModuleAgentClazz)
-                .visit(Advice.to(ConsensusWorkIntercept.class)
-                    .on(named("consensusWork")))
+                .visit(Advice.to(ConsensusWorkIntercept.class).on(named("consensusWork")))
                 .make()
                 .load(consensusModuleAgentClazz.getClassLoader(), ClassReloadingStrategy.fromInstalledAgent())
                 .getLoaded();
         }
-        catch (final
-        Exception e)
+        catch (final Exception e)
         {
             throw new RuntimeException(e);
         }
@@ -154,8 +152,7 @@ public class ZombieLeaderClusterSystemTest
         {
             try
             {
-                final Field field = consensusModuleAgent.getClass()
-                    .getDeclaredField("role");
+                final Field field = consensusModuleAgent.getClass().getDeclaredField("role");
                 field.setAccessible(true);
                 final Cluster.Role clusterRole = (Cluster.Role)field.get(consensusModuleAgent);
 
@@ -165,8 +162,7 @@ public class ZombieLeaderClusterSystemTest
                     LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(5));
                 }
             }
-            catch (final
-            Exception e)
+            catch (final Exception e)
             {
                 throw new RuntimeException(e);
             }

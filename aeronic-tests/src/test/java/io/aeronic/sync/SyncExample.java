@@ -69,12 +69,10 @@ public class SyncExample
         aeronic.awaitUntilPubsAndSubsConnect();
 
         final long expectedValue = 645;
-        final long actualValue = syncEventsController.addAndGet(expectedValue)
-            .join();
+        final long actualValue = syncEventsController.addAndGet(expectedValue).join();
         assertEquals(expectedValue, actualValue);
 
-        final long newValue = syncEventsController.addAndGet(101)
-            .join();
+        final long newValue = syncEventsController.addAndGet(101).join();
         assertEquals(746, newValue);
     }
 
@@ -115,8 +113,7 @@ public class SyncExample
             // 3. receive the response and update local data structure
             // NOTE: there is a potential for memory leak if response channel does not send the response back
             // a timeout can be set so that upon expiry, correlationId is removed from the map
-            correlationIdToResponseMap.remove(correlationId)
-                .complete(value);
+            correlationIdToResponseMap.remove(correlationId).complete(value);
         }
 
         public CompletableFuture<Long> addAndGet(final long value)

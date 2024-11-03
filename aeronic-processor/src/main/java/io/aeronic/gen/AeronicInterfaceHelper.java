@@ -21,8 +21,7 @@ public class AeronicInterfaceHelper
 
         for (final Element aeronicElement : aeronicElements)
         {
-            final String elementName = aeronicElement.getSimpleName()
-                .toString();
+            final String elementName = aeronicElement.getSimpleName().toString();
             final List<? extends Element> enclosedElements = aeronicElement.getEnclosedElements();
 
             int methodIndex = 0;
@@ -35,18 +34,14 @@ public class AeronicInterfaceHelper
                 final List<ParameterInfo> parameters = new ArrayList<>();
                 for (final VariableElement param : params)
                 {
-                    final List<String> genericParameters = param.asType()
-                        .accept(genericParametersExtractor, null);
+                    final List<String> genericParameters = param.asType().accept(genericParametersExtractor, null);
 
-                    final TypeKind typeKind = param.asType()
-                        .getKind();
+                    final TypeKind typeKind = param.asType().getKind();
                     final boolean isPrimitive = typeKind.isPrimitive();
                     final boolean isArray = typeKind == TypeKind.ARRAY;
                     final ParameterInfo parameter = new ParameterInfo(
-                        param.getSimpleName()
-                            .toString(),
-                        param.asType()
-                            .toString(),
+                        param.getSimpleName().toString(),
+                        param.asType().toString(),
                         isPrimitive,
                         isArray,
                         genericParameters
@@ -55,8 +50,7 @@ public class AeronicInterfaceHelper
                     parameters.add(parameter);
                 }
 
-                final MethodInfo method = new MethodInfo(methodIndex++, methodElement.getSimpleName()
-                    .toString(), parameters);
+                final MethodInfo method = new MethodInfo(methodIndex++, methodElement.getSimpleName().toString(), parameters);
                 methods.add(method);
             }
 
@@ -72,17 +66,13 @@ public class AeronicInterfaceHelper
     private static final class GenericParametersExtractor extends SimpleTypeVisitor14<List<String>, Void>
     {
 
-        GenericParametersExtractor()
-        {
+        GenericParametersExtractor() {
         }
 
         @Override
         public List<String> visitDeclared(final DeclaredType type, final Void unused)
         {
-            return type.getTypeArguments()
-                .stream()
-                .map(TypeMirror::toString)
-                .toList();
+            return type.getTypeArguments().stream().map(TypeMirror::toString).toList();
         }
     }
 }

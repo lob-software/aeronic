@@ -19,8 +19,7 @@ public class AeronClusterPublication implements AeronicPublication
     @Override
     public boolean isConnected()
     {
-        return aeronCluster.ingressPublication()
-            .isConnected();
+        return aeronCluster.ingressPublication().isConnected();
     }
 
     @Override

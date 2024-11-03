@@ -51,8 +51,7 @@ public class AeronicPersistentTest
 
         archive = Archive.launch(new Archive.Context()
             .archiveDir(new File(SystemUtil.tmpDirName(), "archive"))
-            .aeronDirectoryName(mediaDriver.context()
-                .aeronDirectoryName())
+            .aeronDirectoryName(mediaDriver.context().aeronDirectoryName())
             .errorHandler(Throwable::printStackTrace)
             .deleteArchiveOnStart(true)
             .threadingMode(ArchiveThreadingMode.SHARED)
@@ -64,12 +63,9 @@ public class AeronicPersistentTest
         aeronArchive = AeronArchive.connect(new AeronArchive.Context()
             .errorHandler(Throwable::printStackTrace)
             .aeron(aeron)
-            .controlRequestChannel(archive.context()
-                .localControlChannel())
-            .controlRequestStreamId(archive.context()
-                .localControlStreamId())
-            .controlResponseChannel(archive.context()
-                .controlChannel()));
+            .controlRequestChannel(archive.context().localControlChannel())
+            .controlRequestStreamId(archive.context().localControlStreamId())
+            .controlResponseChannel(archive.context().controlChannel()));
 
         aeronic = AeronicImpl.launch(
             new AeronicImpl.Context()

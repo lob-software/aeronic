@@ -175,8 +175,7 @@ public class AeronicClusteredServiceContainer implements ClusteredService
          */
         public <T> Configuration registerToggledEgressPublisher(final Class<T> clazz, final String egressChannel, final int streamId)
         {
-            registry.registerToggledEgressPublisher(() -> clusterRef.get()
-                .aeron(), clazz, egressChannel, streamId);
+            registry.registerToggledEgressPublisher(() -> clusterRef.get().aeron(), clazz, egressChannel, streamId);
             return this;
         }
     }

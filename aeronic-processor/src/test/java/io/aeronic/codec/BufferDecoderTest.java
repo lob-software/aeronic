@@ -254,10 +254,8 @@ public class BufferDecoderTest
     public void shouldDecodeBigDecimal()
     {
         final BigDecimal bigDecimal = BigDecimal.ONE;
-        buffer.putInt(0, bigDecimal.toString()
-            .length());
-        buffer.putBytes(BitUtil.SIZE_OF_INT, bigDecimal.toString()
-            .getBytes());
+        buffer.putInt(0, bigDecimal.toString().length());
+        buffer.putBytes(BitUtil.SIZE_OF_INT, bigDecimal.toString().getBytes());
         bufferDecoder.wrap(buffer, 0);
 
         assertEquals(bigDecimal, bufferDecoder.decodeBigDecimal());
