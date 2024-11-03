@@ -7,7 +7,8 @@ import java.math.BigInteger;
 
 import static io.aeronic.Assertions.assertCodec;
 
-public class ObjectCodecTest {
+public class ObjectCodecTest
+{
     @Test
     public void shouldEncodeAndDecodeAnObject()
     {

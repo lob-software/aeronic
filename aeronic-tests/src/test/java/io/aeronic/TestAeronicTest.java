@@ -8,7 +8,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class TestAeronicTest {
+public class TestAeronicTest
+{
 
     private TestAeronic aeronic;
 
@@ -44,7 +45,8 @@ public class TestAeronicTest {
                              "Register io.aeronic.SimpleEvents subscriber first.", exception.getMessage());
     }
 
-    private static class TestSimpleEvents implements SimpleEvents {
+    private static class TestSimpleEvents implements SimpleEvents
+    {
 
         private final MutableLong value = new MutableLong();
 

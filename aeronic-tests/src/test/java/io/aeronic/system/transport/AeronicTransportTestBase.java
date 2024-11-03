@@ -18,7 +18,8 @@ import java.time.Duration;
 
 import static org.awaitility.Awaitility.await;
 
-public abstract class AeronicTransportTestBase {
+public abstract class AeronicTransportTestBase
+{
     private AeronicImpl aeronic;
     private Aeron aeron;
     private MediaDriver mediaDriver;
@@ -179,7 +180,8 @@ public abstract class AeronicTransportTestBase {
                                 });
     }
 
-    private static class SampleEventsImpl implements SampleEvents {
+    private static class SampleEventsImpl implements SampleEvents
+    {
 
         private volatile long value;
 
@@ -190,7 +192,8 @@ public abstract class AeronicTransportTestBase {
         }
     }
 
-    private static class SimpleEventsImpl implements SimpleEvents {
+    private static class SimpleEventsImpl implements SimpleEvents
+    {
 
         private volatile long value;
 

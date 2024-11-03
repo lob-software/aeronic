@@ -2,7 +2,8 @@ package io.aeronic.system.cluster;
 
 import io.aeron.ChannelUriStringBuilder;
 
-public class MdcCastMultiNodeClusterSystemTest extends MultiNodeClusterSystemTestBase {
+public class MdcCastMultiNodeClusterSystemTest extends MultiNodeClusterSystemTestBase
+{
     private static final String MDC_CAST_CHANNEL = new ChannelUriStringBuilder()
             .media("udp")
             .reliable(true)

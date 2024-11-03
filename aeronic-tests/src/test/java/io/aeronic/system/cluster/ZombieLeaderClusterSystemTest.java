@@ -25,7 +25,8 @@ import java.util.concurrent.locks.LockSupport;
 import static io.aeronic.Assertions.assertEventuallyTrue;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
-public class ZombieLeaderClusterSystemTest {
+public class ZombieLeaderClusterSystemTest
+{
     private static final int STREAM_ID = 101;
     private static final String UDP_MULTICAST_CHANNEL = new ChannelUriStringBuilder()
             .media("udp")
@@ -108,7 +109,8 @@ public class ZombieLeaderClusterSystemTest {
         assertEventuallyTrue(() -> sub1.value == 101L && sub2.value == 101L, 5000);
     }
 
-    public static class SimpleEventsImpl implements SimpleEvents {
+    public static class SimpleEventsImpl implements SimpleEvents
+    {
 
         private volatile long value;
 
@@ -138,7 +140,8 @@ public class ZombieLeaderClusterSystemTest {
         }
     }
 
-    public static class ConsensusWorkIntercept {
+    public static class ConsensusWorkIntercept
+    {
         public static volatile boolean shouldStall = false;
 
         @Advice.OnMethodEnter

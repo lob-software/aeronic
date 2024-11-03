@@ -10,7 +10,8 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleTypeVisitor14;
 import java.util.*;
 
-public class AeronicInterfaceHelper {
+public class AeronicInterfaceHelper
+{
     private final Map<String, List<MethodInfo>> methodInfoByElementName = new HashMap<>();
     private final GenericParametersExtractor genericParametersExtractor = new GenericParametersExtractor();
 
@@ -59,7 +60,8 @@ public class AeronicInterfaceHelper {
         return methodInfoByElementName.get(elementName);
     }
 
-    private static final class GenericParametersExtractor extends SimpleTypeVisitor14<List<String>, Void> {
+    private static final class GenericParametersExtractor extends SimpleTypeVisitor14<List<String>, Void>
+    {
 
         GenericParametersExtractor()
         {

@@ -6,7 +6,8 @@ import io.aeronic.gen.Aeronic;
 import java.util.List;
 
 @Aeronic
-public interface MultiParamEvents {
+public interface MultiParamEvents
+{
     void onEvent(
             long longValue,
             int intValue,

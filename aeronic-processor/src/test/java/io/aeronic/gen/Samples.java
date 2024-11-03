@@ -1,6 +1,7 @@
 package io.aeronic.gen;
 
-public class Samples {
+public class Samples
+{
     public static final String SAMPLE_SUBSCRIBER =
             """
                     package io.aeronic;

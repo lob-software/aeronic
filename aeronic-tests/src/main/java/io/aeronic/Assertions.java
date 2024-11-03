@@ -14,7 +14,8 @@ import java.util.function.BooleanSupplier;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-public class Assertions {
+public class Assertions
+{
     public static <T> void assertReflectiveEquals(final Object expected, final T actual)
     {
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);

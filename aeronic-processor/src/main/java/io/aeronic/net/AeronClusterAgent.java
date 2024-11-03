@@ -3,7 +3,8 @@ package io.aeronic.net;
 import io.aeron.cluster.client.AeronCluster;
 import org.agrona.concurrent.Agent;
 
-public class AeronClusterAgent implements Agent {
+public class AeronClusterAgent implements Agent
+{
     private final AeronCluster aeronCluster;
     private final String subscriberName;
 

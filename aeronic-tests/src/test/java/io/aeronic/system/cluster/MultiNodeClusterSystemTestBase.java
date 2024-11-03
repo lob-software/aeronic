@@ -15,7 +15,8 @@ import static io.aeronic.Assertions.assertEventuallyTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 
-public abstract class MultiNodeClusterSystemTestBase {
+public abstract class MultiNodeClusterSystemTestBase
+{
     private static final int STREAM_ID = 101;
 
     private AeronicImpl aeronic;
@@ -146,7 +147,8 @@ public abstract class MultiNodeClusterSystemTestBase {
         assertEventuallyTrue(() -> sub1.value == 101L && sub2.value == 101L, 5000);
     }
 
-    public static class SimpleEventsImpl implements SimpleEvents {
+    public static class SimpleEventsImpl implements SimpleEvents
+    {
 
         private volatile long value;
 

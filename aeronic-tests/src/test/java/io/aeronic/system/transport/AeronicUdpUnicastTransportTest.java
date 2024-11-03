@@ -2,7 +2,8 @@ package io.aeronic.system.transport;
 
 import io.aeron.ChannelUriStringBuilder;
 
-public class AeronicUdpUnicastTransportTest extends AeronicTransportTestBase {
+public class AeronicUdpUnicastTransportTest extends AeronicTransportTestBase
+{
 
     private static final String UNICAST_CHANNEL = new ChannelUriStringBuilder()
             .media("udp")

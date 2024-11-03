@@ -13,7 +13,8 @@ import org.agrona.DirectBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class AeronicClusteredServiceContainer implements ClusteredService {
+public class AeronicClusteredServiceContainer implements ClusteredService
+{
     private final ClusteredService clusteredService;
     private final AeronicClusteredServiceRegistry registry;
     private final AtomicReference<Cluster> clusterRef;
@@ -135,7 +136,8 @@ public class AeronicClusteredServiceContainer implements ClusteredService {
         return role;
     }
 
-    public static class Configuration {
+    public static class Configuration
+    {
         private ClusteredService clusteredService;
         private final AeronicClusteredServiceRegistry registry = new AeronicClusteredServiceRegistry();
         private final AtomicReference<Cluster> clusterRef = new AtomicReference<>();

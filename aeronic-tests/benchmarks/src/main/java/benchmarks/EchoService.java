@@ -1,6 +1,7 @@
 package benchmarks;
 
-public class EchoService implements Echo {
+public class EchoService implements Echo
+{
     private final EchoResponse echoResponseProxy;
 
     public EchoService(final EchoResponse echoResponseProxy)

@@ -13,7 +13,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class BufferEncoderTest {
+public class BufferEncoderTest
+{
     private ExpandableDirectByteBuffer buffer;
     private BufferEncoder bufferEncoder;
 

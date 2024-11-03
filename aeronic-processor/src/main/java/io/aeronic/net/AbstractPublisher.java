@@ -4,7 +4,8 @@ import io.aeronic.codec.BufferEncoder;
 import org.agrona.ExpandableDirectByteBuffer;
 import org.agrona.MutableDirectBuffer;
 
-public abstract class AbstractPublisher {
+public abstract class AbstractPublisher
+{
     private final AeronicPublication publication;
     private final MutableDirectBuffer buffer;
     protected final BufferEncoder bufferEncoder;

@@ -2,7 +2,8 @@ package io.aeronic.gen;
 
 import java.util.List;
 
-public class MethodInfo {
+public class MethodInfo
+{
     private final int index;
     private final String name;
     private final List<ParameterInfo> parameters;

@@ -18,7 +18,8 @@ import org.junit.jupiter.api.Test;
 import static io.aeronic.Assertions.assertEventuallyTrue;
 import static io.aeronic.system.cluster.TestClusterNode.startNodeOnIngressChannel;
 
-public class ClusterSystemTest {
+public class ClusterSystemTest
+{
     private static final String INGRESS_CHANNEL = new ChannelUriStringBuilder()
             .media("udp")
             .reliable(true)
@@ -328,7 +329,8 @@ public class ClusterSystemTest {
         assertEventuallyTrue(() -> sub1.value == 201L && sub2.value == 201L);
     }
 
-    public static class SimpleEventsImpl implements SimpleEvents {
+    public static class SimpleEventsImpl implements SimpleEvents
+    {
         private volatile long value;
 
         @Override
@@ -338,7 +340,8 @@ public class ClusterSystemTest {
         }
     }
 
-    public static class SampleEventsImpl implements SampleEvents {
+    public static class SampleEventsImpl implements SampleEvents
+    {
 
         private volatile long value;
 

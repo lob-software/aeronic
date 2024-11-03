@@ -17,7 +17,8 @@ import java.util.function.LongSupplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SyncExample {
+public class SyncExample
+{
     private static final String CHANNEL = new ChannelUriStringBuilder()
             .media("udp")
             .reliable(true)
@@ -75,7 +76,8 @@ public class SyncExample {
         assertEquals(746, newValue);
     }
 
-    private static class SyncEventsImpl implements SyncEvents {
+    private static class SyncEventsImpl implements SyncEvents
+    {
 
         private final SyncEventsResponse responsePublisher;
         private long value = 0L;
@@ -94,7 +96,8 @@ public class SyncExample {
         }
     }
 
-    private static class SyncEventsController implements SyncEventsResponse {
+    private static class SyncEventsController implements SyncEventsResponse
+    {
         final LongSupplier correlationIdSupplier = System::nanoTime;
         private final SyncEvents publisher;
         private final Map<Long, CompletableFuture<Long>> correlationIdToResponseMap = new ConcurrentHashMap<>();

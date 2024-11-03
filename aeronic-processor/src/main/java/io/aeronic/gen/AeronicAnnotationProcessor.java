@@ -17,7 +17,8 @@ import java.util.Set;
 @SupportedAnnotationTypes("io.aeronic.gen.Aeronic")
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
 @AutoService(Processor.class)
-public class AeronicAnnotationProcessor extends AbstractProcessor {
+public class AeronicAnnotationProcessor extends AbstractProcessor
+{
     private final SubscriberInvokerGenerator subscriberInvokerGenerator = new SubscriberInvokerGenerator();
     private final PublisherGenerator publisherGenerator = new PublisherGenerator();
     private final AeronicInterfaceHelper aeronicInterfaceHelper = new AeronicInterfaceHelper();

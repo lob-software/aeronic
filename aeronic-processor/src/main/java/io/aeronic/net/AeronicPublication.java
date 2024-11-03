@@ -2,7 +2,8 @@ package io.aeronic.net;
 
 import org.agrona.DirectBuffer;
 
-public interface AeronicPublication {
+public interface AeronicPublication
+{
     boolean isConnected();
 
     long offer(DirectBuffer buffer);

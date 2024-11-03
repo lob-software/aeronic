@@ -3,7 +3,8 @@ package io.aeronic.net;
 import io.aeronic.codec.BufferDecoder;
 import org.agrona.DirectBuffer;
 
-public abstract class AbstractSubscriberInvoker<T> {
+public abstract class AbstractSubscriberInvoker<T>
+{
     protected T subscriber;
     protected final BufferDecoder bufferDecoder = new BufferDecoder();
 

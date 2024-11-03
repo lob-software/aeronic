@@ -2,7 +2,8 @@ package io.aeronic.gen;
 
 import java.util.List;
 
-public class ParameterInfo {
+public class ParameterInfo
+{
     private final String name;
     private final String type;
     private final boolean isPrimitive;

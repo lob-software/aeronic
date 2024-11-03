@@ -13,7 +13,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BufferDecoderTest {
+public class BufferDecoderTest
+{
     private ExpandableDirectByteBuffer buffer;
     private BufferDecoder bufferDecoder;
 

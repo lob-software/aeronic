@@ -7,7 +7,8 @@ import java.util.HashMap;
 
 import static io.aeronic.AeronicImpl.createSubscriberInvoker;
 
-public class TestAeronic implements Aeronic {
+public class TestAeronic implements Aeronic
+{
 
     private final HashMap<Class<?>, AbstractSubscriberInvoker<?>> clazzToSubscriberMap = new HashMap<>();
 

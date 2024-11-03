@@ -19,7 +19,8 @@ import java.util.concurrent.locks.LockSupport;
 import static io.aeron.CommonContext.IPC_CHANNEL;
 
 // TODO: account for coordinated omission
-public class IPCEchoBenchmark {
+public class IPCEchoBenchmark
+{
     private static final int RUNS = 10_000_000;
 
     private AeronicImpl aeronic;
@@ -72,7 +73,8 @@ public class IPCEchoBenchmark {
         aeronic.awaitUntilPubsAndSubsConnect();
     }
 
-    private static final class EchoResponseListener implements EchoResponse {
+    private static final class EchoResponseListener implements EchoResponse
+    {
         private final Histogram histogram = new Histogram(Long.MAX_VALUE, 5);
         private volatile boolean completed = false;
         private int responsesReceived = 0;

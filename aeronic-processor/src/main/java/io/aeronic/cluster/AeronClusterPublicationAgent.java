@@ -2,7 +2,8 @@ package io.aeronic.cluster;
 
 import org.agrona.concurrent.Agent;
 
-public class AeronClusterPublicationAgent implements Agent {
+public class AeronClusterPublicationAgent implements Agent
+{
     private final AeronClusterPublication publication;
     private final String publisherName;
 

@@ -36,7 +36,8 @@ import static io.aeronic.system.cluster.ClusterUtil.archiveControlRequestChannel
 import static io.aeronic.system.cluster.ClusterUtil.clusterMembers;
 
 
-public final class TestClusterNode implements AutoCloseable {
+public final class TestClusterNode implements AutoCloseable
+{
     private static final long CATALOG_CAPACITY = 128 * 1024;
     private static final String ARCHIVE_LOCAL_CONTROL_CHANNEL = "aeron:ipc";
     private static final long STARTUP_CANVASS_TIMEOUT_NS = TimeUnit.SECONDS.toNanos(5);
@@ -55,7 +56,8 @@ public final class TestClusterNode implements AutoCloseable {
     private final String clusterDirectoryName;
     private final File clusterDir;
 
-    public static class Context {
+    public static class Context
+    {
         private int nodeId;
         private int nodeCount;
         private String ingressChannel;
@@ -195,7 +197,8 @@ public final class TestClusterNode implements AutoCloseable {
         container = ClusteredServiceContainer.launch(serviceContainerContext);
     }
 
-    static class Service implements ClusteredService {
+    static class Service implements ClusteredService
+    {
         protected Cluster cluster;
         protected IdleStrategy idleStrategy;
         private int messageCount = 0;
@@ -287,7 +290,8 @@ public final class TestClusterNode implements AutoCloseable {
         IoUtil.delete(new File(clusterDirectoryName), true);
     }
 
-    private static class SimpleAuthenticator implements Authenticator {
+    private static class SimpleAuthenticator implements Authenticator
+    {
         private final Map<Long, String> credentials = new HashMap<>();
 
         public void onConnectRequest(final long sessionId, final byte[] encodedCredentials, final long nowMs)

@@ -2,7 +2,8 @@ package io.aeronic.system.transport;
 
 import io.aeron.ChannelUriStringBuilder;
 
-public class AeronicMdcTransportTest extends AeronicTransportTestBase {
+public class AeronicMdcTransportTest extends AeronicTransportTestBase
+{
     @Override
     public String getPublicationChannel()
     {

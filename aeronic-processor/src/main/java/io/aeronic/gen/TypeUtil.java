@@ -2,7 +2,8 @@ package io.aeronic.gen;
 
 import java.util.List;
 
-public final class TypeUtil {
+public final class TypeUtil
+{
     private static List<String> PRIMITIVES = List.of(
             "char",
             "byte",

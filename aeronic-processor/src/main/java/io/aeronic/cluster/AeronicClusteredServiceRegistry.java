@@ -15,7 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class AeronicClusteredServiceRegistry {
+public class AeronicClusteredServiceRegistry
+{
     private final Map<Long, AbstractSubscriberInvoker<?>> invokersBySessionId = new Long2ObjectHashMap<>();
     private final Map<String, AbstractSubscriberInvoker<?>> invokerByName = new HashMap<>();
 

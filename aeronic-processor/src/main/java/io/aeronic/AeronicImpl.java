@@ -29,7 +29,8 @@ import java.util.function.LongConsumer;
 import static io.aeron.Aeron.NULL_VALUE;
 import static org.awaitility.Awaitility.await;
 
-public class AeronicImpl implements AutoCloseable, Aeronic {
+public class AeronicImpl implements AutoCloseable, Aeronic
+{
     private final Aeron aeron;
     private final AeronArchive aeronArchive;
     private final IdleStrategy idleStrategy;
@@ -59,49 +60,48 @@ public class AeronicImpl implements AutoCloseable, Aeronic {
         return aeronic;
     }
 
-    public static class Context {
-        private Aeron aeron;
-        private AeronArchive aeronArchive;
-        private IdleStrategy idleStrategy = NoOpIdleStrategy.INSTANCE;
-        private ErrorHandler errorHandler = Throwable::printStackTrace;
-        private AtomicCounter atomicCounter;
-        private LongConsumer offerFailureHandler = f -> {
-        };
+    public static <T> ClientSessionPublication<T> createClusterEgressPublisher(final Class<T> clazz)
+    {
+        final String publisherName = clazz.getName() + "__EgressPublisher";
+        final ClientSessionPublication<T> publication = new ClientSessionPublication<>(publisherName);
+        final T publisher = createPublisher(clazz, publication);
+        publication.bindPublisher(publisher);
+        return publication;
+    }
 
-        public Context aeron(final Aeron aeron)
-        {
-            this.aeron = aeron;
-            return this;
+    @SuppressWarnings("unchecked")
+    public static <T> T createPublisher(final Class<T> clazz, final AeronicPublication publication)
+    {
+        try {
+            return (T) Class.forName(clazz.getName() + "Publisher").getConstructor(AeronicPublication.class).newInstance(publication);
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
         }
+    }
 
-        public Context aeronArchive(final AeronArchive aeronArchive)
-        {
-            this.aeronArchive = aeronArchive;
-            return this;
+    @SuppressWarnings("unchecked")
+    public static <T> AbstractSubscriberInvoker<T> createSubscriberInvoker(final Class<T> clazz, final T subscriberImplementation)
+    {
+        try {
+            return (AbstractSubscriberInvoker<T>) Class.forName(clazz.getName() + "Invoker")
+                    .getConstructor(clazz)
+                    .newInstance(subscriberImplementation);
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
         }
+    }
 
-        public Context idleStrategy(final IdleStrategy idleStrategy)
-        {
-            this.idleStrategy = idleStrategy;
-            return this;
-        }
+    @SuppressWarnings("unchecked")
+    public static <T> AbstractSubscriberInvoker<T> createSubscriberInvoker(final Class<T> clazz)
+    {
+        // allow for late binding of subscriber impl
+        try {
+            return (AbstractSubscriberInvoker<T>) Class.forName(clazz.getName() + "Invoker")
+                    .getConstructor()
+                    .newInstance();
 
-        public Context errorHandler(final ErrorHandler errorHandler)
-        {
-            this.errorHandler = errorHandler;
-            return this;
-        }
-
-        public Context atomicCounter(final AtomicCounter atomicCounter)
-        {
-            this.atomicCounter = atomicCounter;
-            return this;
-        }
-
-        public Context offerFailureHandler(final LongConsumer offerFailureHandler)
-        {
-            this.offerFailureHandler = offerFailureHandler;
-            return this;
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -153,25 +153,6 @@ public class AeronicImpl implements AutoCloseable, Aeronic {
                         .ingressChannel(ingressChannel)
                         .aeronDirectoryName(aeron.context().aeronDirectoryName())
                                             );
-    }
-
-    public static <T> ClientSessionPublication<T> createClusterEgressPublisher(final Class<T> clazz)
-    {
-        final String publisherName = clazz.getName() + "__EgressPublisher";
-        final ClientSessionPublication<T> publication = new ClientSessionPublication<>(publisherName);
-        final T publisher = createPublisher(clazz, publication);
-        publication.bindPublisher(publisher);
-        return publication;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> T createPublisher(final Class<T> clazz, final AeronicPublication publication)
-    {
-        try {
-            return (T) Class.forName(clazz.getName() + "Publisher").getConstructor(AeronicPublication.class).newInstance(publication);
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
@@ -277,32 +258,6 @@ public class AeronicImpl implements AutoCloseable, Aeronic {
         return recordingIdRef.get();
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> AbstractSubscriberInvoker<T> createSubscriberInvoker(final Class<T> clazz, final T subscriberImplementation)
-    {
-        try {
-            return (AbstractSubscriberInvoker<T>) Class.forName(clazz.getName() + "Invoker")
-                    .getConstructor(clazz)
-                    .newInstance(subscriberImplementation);
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> AbstractSubscriberInvoker<T> createSubscriberInvoker(final Class<T> clazz)
-    {
-        // allow for late binding of subscriber impl
-        try {
-            return (AbstractSubscriberInvoker<T>) Class.forName(clazz.getName() + "Invoker")
-                    .getConstructor()
-                    .newInstance();
-
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private void start()
     {
         agentRunner = new AgentRunner(
@@ -339,5 +294,51 @@ public class AeronicImpl implements AutoCloseable, Aeronic {
                     aeron.context().idleStrategy().idle();
                     return allConnected;
                 });
+    }
+
+    public static class Context
+    {
+        private Aeron aeron;
+        private AeronArchive aeronArchive;
+        private IdleStrategy idleStrategy = NoOpIdleStrategy.INSTANCE;
+        private ErrorHandler errorHandler = Throwable::printStackTrace;
+        private AtomicCounter atomicCounter;
+        private LongConsumer offerFailureHandler = f -> {};
+
+        public Context aeron(final Aeron aeron)
+        {
+            this.aeron = aeron;
+            return this;
+        }
+
+        public Context aeronArchive(final AeronArchive aeronArchive)
+        {
+            this.aeronArchive = aeronArchive;
+            return this;
+        }
+
+        public Context idleStrategy(final IdleStrategy idleStrategy)
+        {
+            this.idleStrategy = idleStrategy;
+            return this;
+        }
+
+        public Context errorHandler(final ErrorHandler errorHandler)
+        {
+            this.errorHandler = errorHandler;
+            return this;
+        }
+
+        public Context atomicCounter(final AtomicCounter atomicCounter)
+        {
+            this.atomicCounter = atomicCounter;
+            return this;
+        }
+
+        public Context offerFailureHandler(final LongConsumer offerFailureHandler)
+        {
+            this.offerFailureHandler = offerFailureHandler;
+            return this;
+        }
     }
 }

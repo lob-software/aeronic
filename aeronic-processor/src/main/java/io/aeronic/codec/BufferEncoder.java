@@ -8,7 +8,8 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 
-public class BufferEncoder {
+public class BufferEncoder
+{
     private final MutableDirectBuffer buffer;
     private int currentOffset = 0;
 

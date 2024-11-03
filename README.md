@@ -27,7 +27,8 @@ subscriptions and publications. Use `@Aeronic` to make the compiler generate sub
 ```java
 
 @Aeronic
-public interface TradeEvents {
+public interface TradeEvents
+{
     void onTrade(long price);
 }
 ```
@@ -35,7 +36,8 @@ public interface TradeEvents {
 A subscriber, containing business logic can then be defined by implementing the interface:
 
 ```java
-public class TradeEventsImpl implements TradeEvents {
+public class TradeEventsImpl implements TradeEvents
+{
 
     private long lastPrice;
 
@@ -57,18 +59,12 @@ The two will communicate via a given Aeron channel / stream ID:
 
 ```java
 final Aeron aeron = Aeron.connect(aeronCtx);
-final AeronicWizard aeronic = new AeronicWizard(aeron);
+final AeronicImpl aeronic = new AeronicImpl(aeron);
 
 final TradeEvents eventsPublisher = aeronic.createPublisher(TradeEvents.class, "aeron:ipc", 10);
 final TradeEventsImpl subscriberImpl = new TradeEventsImpl();
-aeronic.
+aeronic.registerSubscriber(TradeEvents.class, subscriberImpl, "aeron:ipc", 10);
 
-registerSubscriber(TradeEvents .class, subscriberImpl, "aeron:ipc",10);
-
-publisher.
-
-onTrade(123L);
-subscriberImpl.
-
-getLastPrice(); // 123L
+publisher.onTrade(123L);
+subscriberImpl.getLastPrice(); // 123L
 ```

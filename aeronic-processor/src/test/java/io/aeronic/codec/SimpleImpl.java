@@ -3,7 +3,8 @@ package io.aeronic.codec;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-public class SimpleImpl implements Encodable {
+public class SimpleImpl implements Encodable
+{
     private final int anInt;
     private final byte aByte;
     private final long aLong;

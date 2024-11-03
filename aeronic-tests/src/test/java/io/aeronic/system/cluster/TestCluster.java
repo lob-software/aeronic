@@ -13,7 +13,8 @@ import java.util.function.Consumer;
 import static io.aeronic.system.cluster.TestClusterNode.INGRESS_CHANNEL;
 import static org.awaitility.Awaitility.await;
 
-public class TestCluster {
+public class TestCluster
+{
     private final List<AeronicClusteredServiceContainer> clusteredServices = new ArrayList<>();
     private final List<TestClusterNode> clusterNodes = new ArrayList<>();
 

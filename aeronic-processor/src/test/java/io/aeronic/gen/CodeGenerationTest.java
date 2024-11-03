@@ -16,7 +16,8 @@ import static io.aeronic.gen.Samples.SAMPLE_SUBSCRIBER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CodeGenerationTest {
+public class CodeGenerationTest
+{
 
     @Test
     public void shouldGenerateCode()
@@ -76,7 +77,8 @@ public class CodeGenerationTest {
     @SupportedAnnotationTypes("io.aeronic.gen.Aeronic")
     @SupportedSourceVersion(SourceVersion.RELEASE_17)
     @AutoService(Processor.class)
-    private static class TestAeronicAnnotationProcessor extends AbstractProcessor {
+    private static class TestAeronicAnnotationProcessor extends AbstractProcessor
+    {
 
         public final AeronicInterfaceHelper aeronicInterfaceHelper = new AeronicInterfaceHelper();
 

@@ -21,7 +21,8 @@ import java.io.File;
 
 import static io.aeronic.Assertions.assertEventuallyTrue;
 
-public class AeronicPersistentTest {
+public class AeronicPersistentTest
+{
     private static final int STREAM_ID = 1033;
     private static final String CONTROL_ENDPOINT = "localhost:23265";
 
@@ -98,7 +99,8 @@ public class AeronicPersistentTest {
         assertEventuallyTrue(() -> persistentSampleEvents.count == 3 && persistentSampleEvents.value == 103L);
     }
 
-    private static class SampleEventsImpl implements SampleEvents {
+    private static class SampleEventsImpl implements SampleEvents
+    {
 
         private volatile long value;
         private int count;

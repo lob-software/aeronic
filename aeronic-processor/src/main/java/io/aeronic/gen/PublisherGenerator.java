@@ -5,7 +5,8 @@ import java.util.List;
 
 import static io.aeronic.gen.TypeUtil.isPrimitive;
 
-public class PublisherGenerator {
+public class PublisherGenerator
+{
     private final List<String> imports = new ArrayList<>();
 
     private void addImport(final String importStatement)

@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
-public class BufferDecoder {
+public class BufferDecoder
+{
     private DirectBuffer buffer;
     private int currentOffset = 0;
 

@@ -2,7 +2,8 @@ package io.aeronic.system.cluster;
 
 import static io.aeronic.system.cluster.TestClusterNode.LOCALHOST;
 
-public class ClusterUtil {
+public class ClusterUtil
+{
     public static String clusterMembers(final int clusterId, final int memberCount)
     {
         final StringBuilder builder = new StringBuilder();

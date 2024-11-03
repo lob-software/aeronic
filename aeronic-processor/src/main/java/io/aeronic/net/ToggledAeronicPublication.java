@@ -5,7 +5,8 @@ import org.agrona.DirectBuffer;
 
 import java.util.function.Supplier;
 
-public class ToggledAeronicPublication<T> implements AeronicPublication {
+public class ToggledAeronicPublication<T> implements AeronicPublication
+{
     private final Supplier<Publication> publicationSupplier;
     private Publication publication;
     private T publisher;

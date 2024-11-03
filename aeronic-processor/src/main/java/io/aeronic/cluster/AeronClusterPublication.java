@@ -4,7 +4,8 @@ import io.aeron.cluster.client.AeronCluster;
 import io.aeronic.net.AeronicPublication;
 import org.agrona.DirectBuffer;
 
-public class AeronClusterPublication implements AeronicPublication {
+public class AeronClusterPublication implements AeronicPublication
+{
 
     private final AeronCluster aeronCluster;
 

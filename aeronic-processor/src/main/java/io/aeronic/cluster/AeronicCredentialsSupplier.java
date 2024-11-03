@@ -3,7 +3,8 @@ package io.aeronic.cluster;
 import io.aeron.security.CredentialsSupplier;
 import org.agrona.collections.ArrayUtil;
 
-public class AeronicCredentialsSupplier implements CredentialsSupplier {
+public class AeronicCredentialsSupplier implements CredentialsSupplier
+{
     private final String name;
 
     public AeronicCredentialsSupplier(final String name)

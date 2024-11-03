@@ -16,7 +16,8 @@ import static io.aeronic.Assertions.assertEventually;
 import static io.aeronic.Assertions.assertReflectiveEquals;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class AeronicMultiParamTest {
+public class AeronicMultiParamTest
+{
 
     private static final String IPC = "aeron:ipc";
     private AeronicImpl aeronic;
@@ -177,7 +178,8 @@ public class AeronicMultiParamTest {
         });
     }
 
-    private static class MultiParamEventsImpl implements MultiParamEvents {
+    private static class MultiParamEventsImpl implements MultiParamEvents
+    {
         private volatile long longValue;
         private volatile int intValue;
         private volatile float floatValue;

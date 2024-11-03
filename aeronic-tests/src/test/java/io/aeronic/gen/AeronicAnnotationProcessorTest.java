@@ -2,7 +2,8 @@ package io.aeronic.gen;
 
 import org.junit.jupiter.api.Test;
 
-public class AeronicAnnotationProcessorTest {
+public class AeronicAnnotationProcessorTest
+{
 
     @Test
     public void shouldGenerateSubscriber() throws Exception
